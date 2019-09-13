@@ -10,7 +10,7 @@ An OpenGL C++ game engine specifically for 3D First Person Shooter games. I am d
 
 Essentially, Mad Pit will combine the best of both worlds, a franctic speedrunning challenge in a singular atmosphere.  
 
-## Development Screenshots
+## Developement Screenshots
 
 ![Pic1](Screenshots/P1.png)
 ![Pic2](Screenshots/P2.png)
