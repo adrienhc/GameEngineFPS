@@ -1,6 +1,13 @@
 EXEC = main
 OBJECTS = main.o
-FILES = main.cpp shader.cpp camera.cpp glad.c asset.cpp material.cpp texture.cpp  geometry.cpp light.cpp scenegraph.cpp renderer.cpp scene.cpp room.cpp player.cpp collision.cpp cluster.cpp                                              
+
+FILES = main.cpp  GLAD/glad.c                                                 
+FILES += rendering/shader.cpp rendering/camera.cpp rendering/renderer.cpp rendering/light.cpp
+FILES += material_system/asset.cpp material_system/material.cpp material_system/texture.cpp 
+FILES += scene/scene.cpp scene/room.cpp
+FILES += geometry/geometry.cpp     geometry/cluster.cpp
+FILES += player/player.cpp utils/collision.cpp
+
 # The flags to use for compilation                                    
 FLAGS = -L/usr/local/lib -lglfw3 -lrt -lm -ldl -lXrandr -lXinerama -lXxf86vm -lXext -lXcursor -lXrender -lXfixes -lX11 -lpthread -lxcb -lXau -lXdmcp -lGLU -lGL -lglut     
 FLAGS += -g #FOR DEBUG
@@ -13,4 +20,4 @@ all: $(OBJECTS)
 	$(CC) -o $(EXEC) $(FILES) $(FLAGS)
 
 clean:
-	rm *.o  
+	rm *.o  main

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include "material.h"
-#include "geometry.h"
+#include "../geometry/geometry.h"
 
 class Asset //Geometry type, Material, Color/Texture
 {

@@ -2,17 +2,24 @@
 #define ROOM_H
 
 #include <iostream>
-#include "scenegraph.h"
-#include "asset.h"
-#include "light.h"
-#include "collision.h"
-#include "camera.h"
-#include "cluster.h"
-#include "renderer.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <string>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+#include "../geometry/cluster.h"
+
+#include "../scene/scenegraph.h"
+
+#include "../material_system/asset.h"
+
+#include "../utils/collision.h"
+
+#include "../rendering/light.h"
+#include "../rendering/camera.h"
+#include "../rendering/renderer.h"
+
 
 class Renderer;
 

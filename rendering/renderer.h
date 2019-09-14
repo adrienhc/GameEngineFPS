@@ -2,19 +2,24 @@
 #define RENDER
 
 #include <iostream>
-#include "geometry.h"
-#include "asset.h"
-#include "light.h"
-#include "scenegraph.h"
-#include "camera.h"
-#include "shader.h"
-#include "room.h"
+#include <stack>
+#include <vector>
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include <stack>
-#include <vector>
+#include "light.h"
+#include "camera.h"
+#include "shader.h"
+
+#include "../material_system/asset.h"
+
+#include "../geometry/geometry.h"
+
+#include "../scene/scenegraph.h"
+#include "../scene/room.h"
+
 
 class Room;
 
@@ -34,9 +39,9 @@ private:
 	cTriangle Triangle;
 	cSquare Square;
 	
-	Shader myShader =  Shader("./shaders/shader.vs", "./shaders/shader.fs");
-	Shader instancedShader = Shader("./shaders/instancedShader.vs", "./shaders/instancedShader.fs");
-    Shader lightShader = Shader("./shaders/lightShader.vs", "./shaders/lightShader.fs");
+	Shader myShader =  Shader("shaders/shader.vs", "shaders/shader.fs"); //PATH FROM MAIN
+	Shader instancedShader = Shader("shaders/instancedShader.vs", "shaders/instancedShader.fs");
+    Shader lightShader = Shader("shaders/lightShader.vs", "shaders/lightShader.fs");
 };
 
 #endif //RENDER

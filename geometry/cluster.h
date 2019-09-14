@@ -8,8 +8,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "scenegraph.h"
-#include "asset.h"
+#include "../scene/scenegraph.h"
+#include "../material_system/asset.h"
 
 struct BB
 {

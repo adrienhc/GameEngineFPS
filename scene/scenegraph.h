@@ -3,16 +3,19 @@
 
 #include <iostream>
 #include <list>
-#include "asset.h"
-#include "geometry.h"
-#include "light.h"
+#include <cmath>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cmath>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
+#include "../material_system/asset.h"
+#include "../geometry/geometry.h"
+#include "../rendering/light.h"
+
+
 
 
 enum eType {eRoot, eTranslate, eRotate, eScale, eAsset, ePointLight};

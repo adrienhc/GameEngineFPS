@@ -11,22 +11,24 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "stb_image.h"
+#include "loader/stb_image.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "shader.h"
-#include "camera.h"
-#include "geometry.h"
-#include "asset.h"
-#include "light.h"
-#include "renderer.h"
-#include "scenegraph.h"
-#include "room.h"
-#include "cluster.h"
-//#include "scene.h"
+#include "rendering/shader.h"
+#include "rendering/camera.h"
+#include "rendering/renderer.h"
+#include "rendering/light.h"
+
+#include "material_system/asset.h"
+
+#include "geometry/geometry.h"
+#include "geometry/cluster.h"
+
+#include "scene/scenegraph.h"
+#include "scene/room.h"
 
 
 //Window
