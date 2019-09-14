@@ -1,4 +1,4 @@
-# FPS GAME ENGINE (Under Developement)
+# FPS GAME ENGINE (Under Developement -- Linux)  
 
 An OpenGL C++ game engine specifically for 3D First Person Shooter games. I am developing it alongside a game called **Mad Pit**  
 
@@ -18,5 +18,4 @@ Essentially, Mad Pit will combine the best of both worlds, a franctic speedrunni
 
 ## External Tools
 
-I am using [GLM](https://glm.g-truc.net/0.9.9/index.html) to handle vector, matrices, and their mathematical operations.
-I am using [Assimp](http://www.assimp.org/) as a 3D asset loader.
+I am using [GLM](https://glm.g-truc.net/0.9.9/index.html) to handle vector, matrices, and their mathematical operations, [Assimp](http://www.assimp.org/) as a 3D asset loader, and [stb](https://github.com/nothings/stb) as an image importer.
