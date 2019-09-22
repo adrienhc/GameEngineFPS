@@ -15,7 +15,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "../loader/stb_image.h"
+#include "../lib/stb_image.h"
 
 #include "mesh.h"
 #include "../rendering/shader.h"
