@@ -10,6 +10,14 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 	UpdateCameraVectors();
 }
 
+
+void Camera::SetView(float near, float far, float ratio)
+{
+	NearPlane = near;
+	FarPlane = far;
+	ViewRatio = ratio;
+}
+
 glm::mat4 Camera::GetViewMatrix()
 {
 	return glm::lookAt(Position, Position + Front, Up); 

@@ -132,13 +132,13 @@ void Shader::setMat3(const std::string &name, glm::mat3 value) const
 }
 
 
-void Shader::setCamera(Camera* camera, float ratio)
+void Shader::setCamera(Camera* camera)
 {
 	use();
 	setVec3("cameraPos", camera->Position);
 	glm::mat4 view = camera->GetViewMatrix();  
     setMat4("viewing", view);
-    glm::mat4 proj = glm::perspective(glm::radians(camera->Zoom), ratio, 0.1f, 100.0f);
+    glm::mat4 proj = glm::perspective(glm::radians(camera->Zoom), camera->ViewRatio, camera->NearPlane, camera->FarPlane);
     setMat4("projection", proj);
 }
 
@@ -155,6 +155,7 @@ void Shader::setPointLight(PointLight* light, int index) //of object in shader! 
 {
 	use();
 	std::string str_index = std::to_string(index);
+	//std::cout << "Light " << str_index << " at pos " << light->position.x << " " << light->position.y << " " << light->position.z << std::endl;
 	//set Light Properties
 	setVec3("pointLight[" + str_index + "].position", light->position);
     setVec3("pointLight[" + str_index + "].ambient", light->ambient);

@@ -13,10 +13,6 @@
 
 #include "loader/stb_image.h"
 
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
 #include "rendering/shader.h"
 #include "rendering/camera.h"
 #include "rendering/renderer.h"
@@ -26,14 +22,15 @@
 
 #include "geometry/geometry.h"
 #include "geometry/cluster.h"
+#include "geometry/model.h"
 
 #include "scene/scenegraph.h"
 #include "scene/room.h"
 
 
 //Window
-const unsigned int WINDOW_WIDTH = 1920;//800;
-const unsigned int WINDOW_HEIGHT = 1080;//600;
+const unsigned int WINDOW_WIDTH = 800;//1920;//800;
+const unsigned int WINDOW_HEIGHT = 600;//1080;//600;
 
 //Framebuffer and Input 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);

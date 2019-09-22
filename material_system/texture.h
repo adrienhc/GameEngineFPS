@@ -8,7 +8,7 @@
 #include <stdlib.h>
 
 
-class Texture
+class Texture //Load a texture from an image myself!
 {
 public:
 		Texture(std::string path);

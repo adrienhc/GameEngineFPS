@@ -33,11 +33,18 @@ public:
 		Asset* floor, Asset* wall, Asset* door, Asset* beam, Asset* ceiling, Asset* crate, PointLight* ptLght);
 	void makeRoom(Renderer renderer);	
 	bool cameraCollide(Camera &camera);
+	void getLights(Renderer renderer);
+
+	static bool collideOn()
+	{
+		return !active;
+	}
 
 
 private:
 	//SCENE GRAPH
 	nNode* Root = NULL;
+	nNode* Lights = NULL; //Return Lights in World Space (!= than Room Space)
 
 	//COLLISION ACTIVATION
 	static bool active; //only one for all rooms!

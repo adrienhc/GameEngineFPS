@@ -26,7 +26,7 @@ public:
 	void setMat4(const std::string &name, glm::mat4 value) const;
 	void setMat3(const std::string &name, glm::mat3 value) const;
 
-	void setCamera(Camera* camera, float ratio);
+	void setCamera(Camera* camera);
 	void setMaterial(Material* material); //WHAT DO I NEED TO SET MATERIAL/TEXTURE
 	void setPointLight(PointLight* light, int index);
 

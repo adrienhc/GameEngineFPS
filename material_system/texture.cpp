@@ -12,7 +12,6 @@ Texture::Texture(std::string path)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); //Zoom Out, using Mipmap
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //Zoom In, DO NOT USE MIPMAP!
 
-	stbi_set_flip_vertically_on_load(true); //set true if image loads upside down
 	const char* c_path = path.c_str();
     data = stbi_load(c_path, &width, &height, &nrChannels, 0);
 
@@ -24,7 +23,7 @@ Texture::Texture(std::string path)
     }
     else
     {
-        std::cout << "Failed to load box texture" << std::endl;
+        std::cout << "Material_System: Failed to load texture" << std::endl;
     }
 
     stbi_image_free(data);

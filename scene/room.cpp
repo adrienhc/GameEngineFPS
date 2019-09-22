@@ -42,13 +42,18 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
 {
     //NON INSTANTIATED
     Root = new nNode();
+    Lights = new nNode();
 
     //LIGHTS
     nNode* Ref = Root;
+    nNode* RefLights = Lights;
+
     for(int i = 0; i < pointLightPos.size(); i++)
     {
         Ref = Root->AddChildrenRecursive(new nTranslate(glm::vec3(offset.x - 0.5f + pointLightPos[i].x, offset.y - 0.1f + pointLightPos[i].y, offset.z - 0.5f + pointLightPos[i].z)));
+        RefLights = Lights->AddChildrenRecursive(new nTranslate(glm::vec3(offset.x - 0.5f + pointLightPos[i].x, offset.y - 0.1f + pointLightPos[i].y, offset.z - 0.5f + pointLightPos[i].z)));
         Ref->AddChildren(new nPointLight(pointLight, i));
+        RefLights->AddChildren(new nPointLight(pointLight, i));
     }
 
     //INSTANTIATE
@@ -813,3 +818,12 @@ bool Room::cameraCollide(Camera &camera)
     return ret; 
     
 } 
+
+
+void Room::getLights(Renderer renderer)
+{
+    if(self_collision) //If I am the room that collides with player, player is inside room
+        renderer.SetLights(this);
+    //else
+    //    std::cout << "FUCK OFF" << std::endl;
+}

@@ -3,7 +3,6 @@
 int main()
 {
 
-    std::cout << "RUN MAIN RUN" << std::endl;
     //GLFW WINDOW SETUP
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //for OpenGL 3.3
@@ -13,10 +12,11 @@ int main()
     if(!CapFPS)
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
 
-    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
-                                                                                        //glfwGetPrimaryMonitor()   --for fullscreen app automatically
+   
+    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
+                                                                                    //glfwGetPrimaryMonitor()   --for fullscreen app automatically
 
-    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
+    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {
@@ -126,6 +126,9 @@ int main()
     //RENDERER
     Renderer renderer = Renderer();
 
+    char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
+    Model crytek(path);
+
     //ROOMS
     Room Lobby = Room(lobby.length, lobby.width, lobby.height, lobby.offset, lobby.DoorN, lobby.DoorS, lobby.DoorE, lobby.DoorW, lobby.lightPos, lobby.vertical, lobby.horizontal,
         &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
@@ -136,15 +139,15 @@ int main()
     Lobby2.makeRoom(renderer);
 
     //SCENE
-    nNode* Root = new nNode(); 
-    Root->AddChildren(new nAsset(&REF, eObject));
+    //nNode* Root = new nNode(); 
+    //Root->AddChildren(new nAsset(&REF, eObject));
 
     // CAMERA
-    camera = Camera(glm::vec3(5.0f, 5.0f, 5.0f));
+    camera = Camera(glm::vec3(5.0f, 5.0f, 3.0f));
     lastX = WINDOW_WIDTH / 2.0f;
     lastY = WINDOW_HEIGHT / 2.0f;
     float ratio = (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT;
-
+    camera.SetView(0.01f, 50.0f, ratio);
 
     //RENDER LOOP
     while(!glfwWindowShouldClose(window))
@@ -156,7 +159,7 @@ int main()
         if(DisplayFPS)
             std::cout << "F.P.S = " << 1.0f/deltaTime << std::endl;
         lastFrame = current_frame;
-    
+
         //Input Processing
         process_input(window);
 
@@ -171,10 +174,15 @@ int main()
         Lobby.cameraCollide(camera);
         Lobby2.cameraCollide(camera);
 
-        renderer.RenderGraph(Root, &camera, ratio);
-        renderer.RenderRoom(&Lobby, &camera, ratio);
-        renderer.RenderRoom(&Lobby2, &camera, ratio);
+       // renderer.RenderGraph(Root, &camera);
+        renderer.RenderRoom(&Lobby, &camera);
+        renderer.RenderRoom(&Lobby2, &camera);
+        //renderer.RenderModel(&Agun, &camera, glfwGetTime());
 
+        Lobby.getLights(renderer);
+        Lobby2.getLights(renderer);
+
+        renderer.RenderModel(&crytek, &camera);
         //Swap Buffers, Poll IO events
         if(CapFPS)
             glfwSwapBuffers(window);
@@ -204,7 +212,12 @@ void process_input(GLFWwindow* window)
     if(glfwGetKey(window, GLFW_KEY_ENTER) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true); 
         
-
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    {
+            Renderer::ads = true;    
+    }
+    else
+        Renderer::ads = false;
 
     if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         polygon = !polygon; 
@@ -213,7 +226,8 @@ void process_input(GLFWwindow* window)
         blend += 0.05f;
     if(glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS && blend > 0.0f)
         blend -= 0.05f;*/
-    if (Gravity)
+
+    if (Room::collideOn() && Gravity)
         camera.Gravity(deltaTime);
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
