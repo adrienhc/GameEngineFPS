@@ -5,7 +5,7 @@ FILES = main.cpp  GLAD/glad.c
 FILES += rendering/shader.cpp rendering/camera.cpp rendering/renderer.cpp rendering/light.cpp
 FILES += material_system/asset.cpp material_system/material.cpp material_system/texture.cpp 
 FILES += scene/scene.cpp scene/room.cpp
-FILES += geometry/geometry.cpp geometry/cluster.cpp geometry/model.cpp geometry/mesh.cpp
+FILES += geometry/geometry.cpp geometry/cluster.cpp geometry/model.cpp geometry/mesh.cpp geometry/weapon.cpp
 FILES += player/player.cpp utils/collision.cpp
 
 # The flags to use for compilation                                    

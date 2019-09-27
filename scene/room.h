@@ -31,6 +31,7 @@ friend class Renderer; // Let Renderer access private data, no accessor needed
 public:
 	Room(int length, int width, int height, glm::vec3 ofst, std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, std::vector<glm::vec3> ptLghtPs, std::vector<asset> vertical, std::vector<asset> horizontal,
 		Asset* floor, Asset* wall, Asset* door, Asset* beam, Asset* ceiling, Asset* crate, PointLight* ptLght);
+	~Room();
 	void makeRoom(Renderer renderer);	
 	bool cameraCollide(Camera &camera);
 	void getLights(Renderer renderer);

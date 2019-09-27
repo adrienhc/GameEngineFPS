@@ -19,6 +19,7 @@
 
 #include "../geometry/geometry.h"
 #include "../geometry/model.h"
+#include "../geometry/weapon.h"
 
 #include "../scene/scenegraph.h"
 #include "../scene/room.h"
@@ -32,11 +33,9 @@ public:
 	Renderer();
 	void RenderGraph(nNode* Root, Camera* camera);
 	void RenderRoom(Room* room, Camera* cam);
-	void RenderModel(Model* model, Camera* cam);
+	void RenderWeapon(Weapon* weapon, Camera* cam);
 	void Instance(nNode* Root, eType type, Asset* Instanced, std::vector<glm::mat4> &m_transforms, std::vector<glm::mat3> &n_transforms);
 	void SetLights(Room* room);
-
-	static bool ads;
 	
 private:
 	void Traverse(nNode* Root, eType type);

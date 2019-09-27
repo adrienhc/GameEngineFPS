@@ -32,6 +32,11 @@ Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  
     pointLight = ptLght;
 }
 
+Room::~Room()
+{
+    delete Root;
+    delete Lights;
+}
 
 glm::vec3 Room::adjustAssetPos(glm::vec3 Pos)
 {
@@ -824,6 +829,4 @@ void Room::getLights(Renderer renderer)
 {
     if(self_collision) //If I am the room that collides with player, player is inside room
         renderer.SetLights(this);
-    //else
-    //    std::cout << "FUCK OFF" << std::endl;
 }

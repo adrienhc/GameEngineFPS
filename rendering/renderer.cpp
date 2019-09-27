@@ -1,7 +1,5 @@
 #include "renderer.h"
 
-bool Renderer::ads = false;
-
 Renderer::Renderer()
 {
     //MatrixStack.push(glm::mat4(1.0f));
@@ -35,33 +33,33 @@ void Renderer::SetLights(Room* room)
 	Traverse(room->Lights, eRoot); //"this" pointer from room, do not check for NULL as will say it is 
 }
 
-void Renderer::RenderModel(Model* model, Camera* cam)
+void Renderer::RenderWeapon(Weapon* weapon, Camera* cam)
 {
 
 	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
 
-	if(ads)
-		cam->Zoom = 35.0f;
-	else
-		cam->Zoom = 75.0f;
-
+	glm::vec4 weapon_offsets = weapon->GetOffset(); 
+	cam->Zoom = weapon_offsets.w;
 	modelShader.setCamera(cam); //zoom camera when ADS
 
-
 	glm::mat4 modeltr = glm::mat4(1.0f);
-
 	modeltr = glm::translate(modeltr, cam->Position);
 	
-	float front_offset = 0.3f;
-	float right_offset = 0.2f;
-	float down_offset = 0.2f;
-
+	float front_offset = weapon_offsets.x; 
+	float right_offset = weapon_offsets.y;
+	float down_offset = weapon_offsets.z;
+	
+	//float front_offset = 0.3f;
+	//float right_offset = 0.2f;
+	//float down_offset = 0.2f;
+	/*
 	if(ads)
 	{
 		front_offset = 0.1f;
 		right_offset = -0.002f;
 		down_offset = 0.135f;
 	}
+	*/
 
 	glm::vec3 offset_weapon = cam->Front * front_offset + cam->Right * right_offset + cam->Up * -down_offset; 
 	modeltr = glm::translate(modeltr, offset_weapon);
@@ -72,7 +70,7 @@ void Renderer::RenderModel(Model* model, Camera* cam)
 	glm::vec3 weapon_axis = glm::normalize(point_to - center_weapon); 
 
 	/////////    SMG    ///////////// 
-	modeltr = glm::scale(modeltr, glm::vec3(0.1f, 0.1f, 0.1f));
+	modeltr = glm::scale(modeltr, weapon->scaling);
 
 	//ALIGN FRONT - POINT TO CAM FRONT DIR 
 	glm::vec3 front_loaded = glm::vec3(0.0f, 0.0f, 1.0f); //Dir Vector of loaded weapom -- same for all 
@@ -92,7 +90,7 @@ void Renderer::RenderModel(Model* model, Camera* cam)
 	modeltr = glm::rotate(modeltr, vert_angle, rot_axis);//glm::vec3(right_weapon.x, 0.0f, right_weapon.z)); //Align weapon vertically 
 
 	modelShader.setTransform(modeltr);
-	model->Draw(modelShader);
+	weapon->GetModel()->Draw(modelShader);
 }
 
 

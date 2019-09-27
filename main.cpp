@@ -60,7 +60,7 @@ int main()
     Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.8f, 0.8f, 0.8f), false, "./textures/concretebw.jpg");
     Asset door = Asset(eSquare, "door", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/doorbw.jpg");
 
-    struct Lobby  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
+    struct sRoom1  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
     {
         int length = 20;
         int width = 20;
@@ -92,7 +92,7 @@ int main()
 
     } lobby; 
 
-    struct Lobby2  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
+    struct sRoom2  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
     {
         int length = 20;
         int width = 20;
@@ -122,12 +122,30 @@ int main()
                                          asset(2,1, glm::vec3(7.0f, 1.0f, 7.0f))};
 
     } lobby2; 
-   
+    
+    struct sWeapon1
+    {
+        char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
+        glm::vec3 hip_offset = glm::vec3(0.3f, 0.3f, 0.2f); //FRONT, RIGHT, DOWN
+        glm::vec3 ads_offset = glm::vec3(0.1f, -0.002f, 0.135f);
+        float scale_factor = 0.1f;
+        float zoom_min = 75.0f;
+        float zoom_max = 35.0f;
+    } smg;
+    
+    struct sWeapon2
+    {
+        char* path = (char*) "3DModels/AirGun/AirGun.obj";
+        glm::vec3 hip_offset = glm::vec3(0.12f, 0.15f, 0.12f); //FRONT, RIGHT, DOWN
+        glm::vec3 ads_offset = glm::vec3(0.15f, 0.002f, 0.1f);
+        float scale_factor = 1.2f;
+        float zoom_min = 75.0f;
+        float zoom_max = 35.0f;
+    } airgun;
+
+
     //RENDERER
     Renderer renderer = Renderer();
-
-    char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
-    Model crytek(path);
 
     //ROOMS
     Room Lobby = Room(lobby.length, lobby.width, lobby.height, lobby.offset, lobby.DoorN, lobby.DoorS, lobby.DoorE, lobby.DoorW, lobby.lightPos, lobby.vertical, lobby.horizontal,
@@ -138,9 +156,9 @@ int main()
         &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
     Lobby2.makeRoom(renderer);
 
-    //SCENE
-    //nNode* Root = new nNode(); 
-    //Root->AddChildren(new nAsset(&REF, eObject));
+    //WEAPONS
+    Weapon SMG(smg.path, smg.hip_offset, smg.ads_offset, smg.scale_factor, smg.zoom_min, smg.zoom_max);
+    Weapon ARG(airgun.path, airgun.hip_offset, airgun.ads_offset, airgun.scale_factor, airgun.zoom_min, airgun.zoom_max);
 
     // CAMERA
     camera = Camera(glm::vec3(5.0f, 5.0f, 3.0f));
@@ -177,12 +195,14 @@ int main()
        // renderer.RenderGraph(Root, &camera);
         renderer.RenderRoom(&Lobby, &camera);
         renderer.RenderRoom(&Lobby2, &camera);
-        //renderer.RenderModel(&Agun, &camera, glfwGetTime());
 
         Lobby.getLights(renderer);
         Lobby2.getLights(renderer);
 
-        renderer.RenderModel(&crytek, &camera);
+
+        Weapon::InterpolateOffset(deltaTime);
+        //renderer.RenderWeapon(&SMG, &camera);
+        renderer.RenderWeapon(&ARG, &camera);
         //Swap Buffers, Poll IO events
         if(CapFPS)
             glfwSwapBuffers(window);
@@ -214,10 +234,10 @@ void process_input(GLFWwindow* window)
         
     if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
     {
-            Renderer::ads = true;    
+            Weapon::ads = true;    
     }
     else
-        Renderer::ads = false;
+        Weapon::ads = false;
 
     if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         polygon = !polygon; 
