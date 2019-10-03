@@ -13,10 +13,10 @@ int main()
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
 
    
-    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
+    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
                                                                                     //glfwGetPrimaryMonitor()   --for fullscreen app automatically
 
-    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {
@@ -43,6 +43,9 @@ int main()
     }    
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(0x00);  
+
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
@@ -81,6 +84,7 @@ int main()
                                            glm::vec3(5.0f/10.0f * width, height, length/2.0f),
                                            glm::vec3(8.0f/10.0f * width, height, length/2.0f)};
 
+        // CRATES
         std::vector<asset> vertical = {asset(1,1, glm::vec3(13.0f, 0.0f, 5.0f)), 
                                        asset(1,2, glm::vec3(13.0f, 0.0f, 6.0f)), 
                                        asset(1,3, glm::vec3(13.0f, 0.0f, 7.0f)),
@@ -88,6 +92,10 @@ int main()
 
         std::vector<asset> horizontal = {asset(2,2, glm::vec3(5.0f, 0.0f, 7.0f)), 
                                          asset(2,1, glm::vec3(5.0f, 1.0f, 7.0f))};
+
+        // TARGETS
+        std::vector<asset> target = {asset(glm::vec3(5.5f, 2.0f, 6.5f), 'W'),
+                                    asset(glm::vec3(13.5f, 2.0f, 6.0f), 'N')};
 
 
     } lobby; 
@@ -113,6 +121,7 @@ int main()
                                            glm::vec3(5.0f/10.0f * width, height, length/2.0f),
                                            glm::vec3(8.0f/10.0f * width, height, length/2.0f)};
 
+        // CRATES
         std::vector<asset> vertical = {asset(1,1, glm::vec3(10.0f, 0.0f, 11.0f)), 
                                        asset(1,2, glm::vec3(10.0f, 0.0f, 12.0f)), 
                                        asset(1,3, glm::vec3(10.0f, 0.0f, 13.0f)),
@@ -120,6 +129,11 @@ int main()
 
         std::vector<asset> horizontal = {asset(2,2, glm::vec3(7.0f, 0.0f, 7.0f)), 
                                          asset(2,1, glm::vec3(7.0f, 1.0f, 7.0f))};
+
+        // TARGETS POS AND ORIENTATION
+        std::vector<asset> target = {asset(glm::vec3(7.5f, 2.0f, 7.5f), 'E'),
+                                     asset(glm::vec3(10.0f, 3.0f, 13.5f), 'E')}; 
+
 
     } lobby2; 
     
@@ -147,12 +161,18 @@ int main()
     //RENDERER
     Renderer renderer = Renderer();
 
+    //TARGET
+    Target::LoadModel((char*) "3DModels/Target/poligono1.obj");
+    Target::LoadSmoothModel((char*) "3DModels/SmoothTarget/poligono1.obj");
+
     //ROOMS
-    Room Lobby = Room(lobby.length, lobby.width, lobby.height, lobby.offset, lobby.DoorN, lobby.DoorS, lobby.DoorE, lobby.DoorW, lobby.lightPos, lobby.vertical, lobby.horizontal,
+    Room Lobby = Room(lobby.length, lobby.width, lobby.height, lobby.offset, lobby.DoorN, lobby.DoorS, lobby.DoorE, lobby.DoorW, 
+        lobby.lightPos, lobby.vertical, lobby.horizontal, lobby.target,
         &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
     Lobby.makeRoom(renderer);
 
-    Room Lobby2 = Room(lobby2.length, lobby2.width, lobby2.height, lobby2.offset, lobby2.DoorN, lobby2.DoorS, lobby2.DoorE, lobby2.DoorW, lobby2.lightPos, lobby2.vertical, lobby2.horizontal,
+    Room Lobby2 = Room(lobby2.length, lobby2.width, lobby2.height, lobby2.offset, lobby2.DoorN, lobby2.DoorS, lobby2.DoorE, lobby2.DoorW, 
+        lobby2.lightPos, lobby2.vertical, lobby2.horizontal, lobby2.target,
         &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
     Lobby2.makeRoom(renderer);
 
@@ -187,7 +207,7 @@ int main()
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
         //Render
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         Lobby.cameraCollide(camera);
         Lobby2.cameraCollide(camera);
@@ -203,6 +223,7 @@ int main()
         Weapon::InterpolateOffset(deltaTime);
         //renderer.RenderWeapon(&SMG, &camera);
         renderer.RenderWeapon(&ARG, &camera);
+        
         //Swap Buffers, Poll IO events
         if(CapFPS)
             glfwSwapBuffers(window);

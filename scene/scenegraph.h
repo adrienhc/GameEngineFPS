@@ -11,15 +11,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "../utils/outline.h"
 #include "../material_system/asset.h"
 #include "../geometry/geometry.h"
+#include "../geometry/model.h"
 #include "../rendering/light.h"
 
 
 
 
-enum eType {eRoot, eTranslate, eRotate, eScale, eAsset, ePointLight};
-enum eShader {eObject, eInstanced, eLights};
+enum eType {eRoot, eTranslate, eRotate, eScale, eAsset, eModel, ePointLight};
+enum eShader {eObject, eInstanced, eLights, eModelshdr};
 
 
 class nNode
@@ -224,6 +226,87 @@ private:
 	Asset* asset;
 	eShader shader_type;
 };
+
+
+class nModel: public nNode
+{
+public:
+	nModel(Model* pModel, eShader type)
+	{
+		model = pModel;
+		shader_type = type; 
+		render = true;
+	}
+
+	nModel(Model* pModel, Model* pSmoothModel, Outline* pOutline, eShader type)
+	{
+		model = pModel;
+		smoothModel = pSmoothModel;
+		outline = pOutline;
+		shader_type = type;
+		render = true;
+	}
+
+	Model* GetModel()
+	{
+		return model;
+	}
+
+	Model* GetSmoothModel()
+	{
+		return smoothModel;
+	}
+
+	eShader GetShader()
+	{
+		return shader_type;
+	}
+
+	Outline* GetOutline()
+	{
+		return outline;
+	}
+
+	bool HasOutline()
+	{
+		return (outline != NULL);
+	}
+
+	void SetTransform(glm::mat4 transform)
+	{
+		model_transform = transform;
+		transform_set = true;
+	}
+
+	glm::mat4 GetTransform()
+	{
+		return model_transform;
+	}
+
+	bool HasTransform()
+	{
+		return transform_set;
+	}
+
+	virtual eType GetType()
+	{
+		return eModel;
+	}
+
+	void Instanced()
+	{
+		render = false;
+	}
+
+private:
+	Model* model = NULL;
+	Model* smoothModel = NULL;
+	Outline* outline = NULL;
+	bool transform_set = false;
+	glm::mat4 model_transform;
+	eShader shader_type;
+};
+
 
 
 class nPointLight: public nNode

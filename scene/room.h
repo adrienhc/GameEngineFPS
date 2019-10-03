@@ -9,6 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "../geometry/cluster.h"
+#include "../geometry/target.h"
 
 #include "../scene/scenegraph.h"
 
@@ -29,7 +30,8 @@ class Room
 friend class Renderer; // Let Renderer access private data, no accessor needed
 
 public:
-	Room(int length, int width, int height, glm::vec3 ofst, std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, std::vector<glm::vec3> ptLghtPs, std::vector<asset> vertical, std::vector<asset> horizontal,
+	Room(int length, int width, int height, glm::vec3 ofst, std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, 
+		std::vector<glm::vec3> ptLghtPs, std::vector<asset> vertical, std::vector<asset> horizontal, std::vector<asset> target,
 		Asset* floor, Asset* wall, Asset* door, Asset* beam, Asset* ceiling, Asset* crate, PointLight* ptLght);
 	~Room();
 	void makeRoom(Renderer renderer);	
@@ -69,10 +71,13 @@ private:
 	std::vector<int> DoorW;
 	int doorSpec = 6;
 
-	//CRATE CLUSTERS
+	//CRATE CLUSTERS -- GEOMETRY IS INSTANCED
 	std::vector<asset> vertical;
 	std::vector<asset> horizontal;
 	std::vector<BB> asset_bb;
+
+	//TARGETS -- NON INSTANCED, Only a few
+	std::vector<Target*> targets;
 
 	//MATERIALS
 	Asset* floor; 

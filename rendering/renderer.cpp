@@ -10,9 +10,16 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 	if (room == NULL || cam == NULL)
 		return;
 
-	RenderGraph(room->Root, cam); //RENDER NON INSTANCED -- TO SET UP LIGHTS, FIRST THING
+	RenderGraph(room->Lights, cam); //TO SET UP LIGHTS, FIRST THING
+	//RenderGraph(room->Root, cam); //For Targets if in Graph
+	
+	for(int i = 0; i < room->targets.size(); i++) //New Method Render Targets directly =) 
+	{
+		Traverse(room->targets[i]->GetNodeModel(), eModel);
+	}
 
-
+	instancedShader.setMaterial(room->crate->getMaterial()); 
+	room->i_crate->Render();
 	instancedShader.setMaterial(room->floor->getMaterial()); 
 	room->i_floor->Render();
 	instancedShader.setMaterial(room->wall->getMaterial());
@@ -23,9 +30,15 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 	room->i_beam->Render();
 	instancedShader.setMaterial(room->ceiling->getMaterial());
 	room->i_ceiling->Render();
-	instancedShader.setMaterial(room->crate->getMaterial()); //RENDER INSTANCED
-	room->i_crate->Render();
+}
 
+void Renderer::SetCamera(Camera* cam)
+{
+	myShader.setCamera(cam);
+	lightShader.setCamera(cam);
+	instancedShader.setCamera(cam);
+	modelShader.setCamera(cam);
+	outlineShader.setCamera(cam);
 }
 
 void Renderer::SetLights(Room* room)
@@ -33,10 +46,8 @@ void Renderer::SetLights(Room* room)
 	Traverse(room->Lights, eRoot); //"this" pointer from room, do not check for NULL as will say it is 
 }
 
-void Renderer::RenderWeapon(Weapon* weapon, Camera* cam)
+void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific actions to position it correctly 
 {
-
-	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
 
 	glm::vec4 weapon_offsets = weapon->GetOffset(); 
 	cam->Zoom = weapon_offsets.w;
@@ -48,18 +59,6 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam)
 	float front_offset = weapon_offsets.x; 
 	float right_offset = weapon_offsets.y;
 	float down_offset = weapon_offsets.z;
-	
-	//float front_offset = 0.3f;
-	//float right_offset = 0.2f;
-	//float down_offset = 0.2f;
-	/*
-	if(ads)
-	{
-		front_offset = 0.1f;
-		right_offset = -0.002f;
-		down_offset = 0.135f;
-	}
-	*/
 
 	glm::vec3 offset_weapon = cam->Front * front_offset + cam->Right * right_offset + cam->Up * -down_offset; 
 	modeltr = glm::translate(modeltr, offset_weapon);
@@ -69,7 +68,6 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam)
 	glm::vec3 point_to = cam->Position + cam->Front * point_offset;
 	glm::vec3 weapon_axis = glm::normalize(point_to - center_weapon); 
 
-	/////////    SMG    ///////////// 
 	modeltr = glm::scale(modeltr, weapon->scaling);
 
 	//ALIGN FRONT - POINT TO CAM FRONT DIR 
@@ -90,7 +88,16 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam)
 	modeltr = glm::rotate(modeltr, vert_angle, rot_axis);//glm::vec3(right_weapon.x, 0.0f, right_weapon.z)); //Align weapon vertically 
 
 	modelShader.setTransform(modeltr);
+
+	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
+
+	glEnable(GL_CULL_FACE); 
+	glCullFace(GL_BACK);
+
 	weapon->GetModel()->Draw(modelShader);
+
+	glDisable(GL_CULL_FACE); 
+
 }
 
 
@@ -100,10 +107,7 @@ void Renderer::RenderGraph(nNode* Root, Camera* cam)
 	if (Root == NULL || cam == NULL)
 		return;
 
-	myShader.setCamera(cam);
-	lightShader.setCamera(cam);
-	instancedShader.setCamera(cam);
-
+	SetCamera(cam);
 	Traverse(Root, eRoot); 
 }
 
@@ -220,6 +224,56 @@ void Renderer::Traverse(nNode* Root, eType type)
 		}
 
 	}
+
+	else if (type == eModel)
+	{		
+		//std::cout << "MODEL" << std::endl;
+
+		nModel* Mdl = dynamic_cast<nModel*> (Root);
+		
+		if(Mdl->RenderStatus()) //ALSO LEAVE OPTION TO RENDER WITH GEOMETRY SHADER WHEN EXPLODE
+		{
+			glm::mat4 model_transform;
+
+			if(Mdl->HasTransform()) //IF RENDER MODEL ON ITS OWN -- sometimes want to render without being part of a tree
+			{
+				model_transform = Mdl->GetTransform();
+			}
+			else
+				 model_transform = MatrixStack.top();
+
+			if(Mdl->HasOutline()) //IF MODEL HAS AN OUTLINE
+			{
+    			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+				glStencilFunc(GL_ALWAYS, 1, 0xFF);
+				glStencilMask(0xFF);
+				modelShader.setTransform(model_transform);
+				Mdl->GetModel()->Draw(modelShader);
+
+				glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+				glStencilMask(0x00);
+				outlineShader.setTransform(model_transform);
+				Mdl->GetSmoothModel()->Draw(outlineShader);
+
+				glStencilMask(0xFF);
+				glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+				glClear(GL_STENCIL_BUFFER_BIT);
+			
+			}
+			else
+			{
+				modelShader.setTransform(model_transform);
+				Mdl->GetModel()->Draw(modelShader);
+			}
+		}
+
+		for(std::list<nNode*>::iterator it = nChildren.begin(); it != nChildren.end(); it++)
+		{
+			Traverse(*it, (*it)->GetType());
+		}
+
+	}
+
 	else if (type == ePointLight)
 	{
 		//std::cout << "LIGHT" << std::endl;
@@ -231,6 +285,7 @@ void Renderer::Traverse(nNode* Root, eType type)
 		myShader.setPointLight(light, Lt->GetIndex()); //INDEX FROM SCENEGRAPH
 		instancedShader.setPointLight(light, Lt->GetIndex()); //INSTANCED SHADER TOO
 		modelShader.setPointLight(light, Lt->GetIndex()); //MODEL SHADER
+
 		//DRAWING LIGHT CUBE
 		model_transform = glm::scale(model_transform, glm::vec3(2.0f, 0.2f, 1.0f)); //change light cube dimensions
 		lightShader.setTransform(model_transform);

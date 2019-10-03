@@ -6,7 +6,6 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
-#include <string>
 
 #include "model.h"
 

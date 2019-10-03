@@ -2,34 +2,51 @@
 
 bool Room::active = true;
 
-Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, std::vector<glm::vec3> ptLghtPs, std::vector<asset> vrtcl, std::vector<asset> hrztl,
+Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, 
+    std::vector<glm::vec3> ptLghtPs, std::vector<asset> vrtcl, std::vector<asset> hrztl, std::vector<asset> trgt,
     Asset* flr, Asset* wll, Asset* dr, Asset* bm, Asset* ceil, Asset* crte, PointLight* ptLght)
 {
+    //DIMENSIONS
 	length = lgth;
 	width = wdth;
 	height = hght;
     offset = ofst;
 
+    //ROOM BOUNDING BOX
     room_min_bb = glm::vec3(offset.x - 0.5f, offset.y, offset.z - 0.5f );
     room_max_bb = glm::vec3(room_min_bb.x + width, room_min_bb.y + height, room_min_bb.z + length);
 
+    //ROOM DOORS
 	DoorN = DN;
 	DoorS = DS;
 	DoorE = DE;
 	DoorW = DW;
 
+    //ROOM LIGHTS POS
     pointLightPos = ptLghtPs;
 
+    //CRATE CLUSTERS
     vertical = vrtcl;
     horizontal = hrztl;
 
+    //TEXTURES
 	floor = flr; 
 	wall = wll; 
 	door = dr; 
 	beam = bm;
 	ceiling = ceil;
     crate = crte;
+
+    //LIGHTNING
     pointLight = ptLght;
+
+    //OBJECT OUTLINE
+    glm::vec3 outline_color = glm::vec3(1.0f, 0.0f, 0.0f);
+    float outline_size = 1.05f;
+
+    //TARGETS
+    for(int i = 0; i < trgt.size(); i++)
+        targets.push_back(new Target(adjustAssetPos(trgt[i].pos), trgt[i].orientation, outline_color, outline_size));
 }
 
 Room::~Room()
@@ -60,6 +77,19 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
         Ref->AddChildren(new nPointLight(pointLight, i));
         RefLights->AddChildren(new nPointLight(pointLight, i));
     }
+
+    //ADD TARGETS TO ROOT 
+    //for(int i = 0; i < targets.size(); i++)
+    //{
+        //ADD AS NEW MODEL IN TREE 
+        //Ref = Root->AddChildrenRecursive(new nTranslate(adjustAssetPos(glm::vec3 (2.0f, 1.0f, 2.0f))));
+        //Ref->AddChildren(new nModel(targets[i]->GetModel(), targets[i]->GetSmoothModel(), targets[i]->GetOutline(), eModelshdr));
+        
+        //OR ADD TARGET'S NODE MODEL DIRECTY =) 
+        //Root->AddChildren(targets[i]->GetNodeModel());
+    //}
+
+    //B
 
     //INSTANTIATE
     std::vector<glm::mat4> inst_tr;

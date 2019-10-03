@@ -26,8 +26,16 @@ struct asset
         pos = position;
     }
 
+    asset(glm::vec3 position, char _orientation)
+    {
+        pos = position;
+        orientation = _orientation;
+    }
+    
     int x, y;
     glm::vec3 pos;
+    char orientation;
+
 };
 
 class Cluster

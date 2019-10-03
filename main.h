@@ -24,14 +24,15 @@
 #include "geometry/cluster.h"
 #include "geometry/model.h"
 #include "geometry/weapon.h"
+#include "geometry/target.h"
 
 #include "scene/scenegraph.h"
 #include "scene/room.h"
 
 
 //Window
-const unsigned int WINDOW_WIDTH = 1920;//800;
-const unsigned int WINDOW_HEIGHT = 1080;//600;
+const unsigned int WINDOW_WIDTH = 1920; //800; //1920;//800;
+const unsigned int WINDOW_HEIGHT = 1080; //600; //1080;//600;
 
 //Framebuffer and Input 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);
