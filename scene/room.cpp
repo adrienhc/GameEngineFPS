@@ -816,12 +816,32 @@ bool Room::cameraCollide(Camera &camera)
         if (self_collision) //If only one that can collide
         { 
 
-            if ( boxCollide(cam_min_bb, cam_max_bb, room_min_bb, room_max_bb) ) //CHECK WALLS
+            for(int i = 0; i < targets.size(); i++) //CHECK TARGETS
             {
-                ret = true;
-                camera.PosFromBB(cam_min_bb, cam_max_bb);
-                cam_min_bb = camera.GetMinBB();
-                cam_max_bb = camera.GetMaxBB();
+                if(boxCollide(cam_min_bb, cam_max_bb, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max)) //Low Body
+                {
+                    ret = true;
+                    camera.PosFromBB(cam_min_bb, cam_max_bb);
+                    cam_min_bb = camera.GetMinBB();
+                    cam_max_bb = camera.GetMaxBB();   
+                }
+                
+                if(boxCollide(cam_min_bb, cam_max_bb, targets[i]->body_high_bb.min, targets[i]->body_high_bb.max)) //High Body
+                {
+                     ret = true;
+                    camera.PosFromBB(cam_min_bb, cam_max_bb);
+                    cam_min_bb = camera.GetMinBB();
+                    cam_max_bb = camera.GetMaxBB();   
+                    
+                }
+
+                if(boxCollide(cam_min_bb, cam_max_bb, targets[i]->head_bb.min, targets[i]->head_bb.max)) //Head 
+                {
+                    ret = true;
+                    camera.PosFromBB(cam_min_bb, cam_max_bb);
+                    cam_min_bb = camera.GetMinBB();
+                    cam_max_bb = camera.GetMaxBB();   
+                }
             }
 
             for(int i = 0; i < asset_bb.size(); i++)
@@ -832,6 +852,14 @@ bool Room::cameraCollide(Camera &camera)
                     cam_min_bb = camera.GetMinBB();
                     cam_max_bb = camera.GetMaxBB();
                 }
+
+            if ( boxCollide(cam_min_bb, cam_max_bb, room_min_bb, room_max_bb) ) //CHECK WALLS
+            {
+                ret = true;
+                camera.PosFromBB(cam_min_bb, cam_max_bb);
+                cam_min_bb = camera.GetMinBB();
+                cam_max_bb = camera.GetMaxBB();
+            }
 
         }
         else if (active) //take ticket if no one does

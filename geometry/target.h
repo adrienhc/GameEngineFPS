@@ -30,21 +30,24 @@ public:
 	Model* GetModel();
 	Model* GetSmoothModel();
 	Outline* GetOutline();
-	
-	bool Collide();
-	
+
+	BB body_low_bb;
+	BB body_high_bb;
+	BB head_bb;
+
+private: 
 	static Model* model;
 	static Model* smoothModel;
+
 	Outline* outline = NULL;
 	nModel* nodeModel = NULL;
 	glm::mat4 transform;
 
-private: 
+	
 	static bool loadedModel; //only load model once 
 	static bool loadedSmoothModel; //only load model once 
 	static int count;
 	bool shot;
-	BB boundingBox;
 };
 
 

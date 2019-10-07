@@ -13,10 +13,10 @@ int main()
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
 
    
-    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
                                                                                     //glfwGetPrimaryMonitor()   --for fullscreen app automatically
 
-    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
+    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {
@@ -57,7 +57,7 @@ int main()
                                         //ambient,  diffuse,  specular,  shininess,  color
     Asset crate = Asset(eCube, "crate", glm::vec3(0.4f), glm::vec3(0.8f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/cratebw.jpg");
     Asset floor = Asset(eSquare, "floor", glm::vec3(0.5f), glm::vec3(1.0f), glm::vec3(0.5f), 2.0f, glm::vec3(0.0f), true, "./textures/floornoborder.jpg");
-    Asset REF = Asset(eCube, "ref", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec3(1.0f, 0.0f, 0.0f), false, "");
+    Asset REF = Asset(eCube, "ref", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec3(1.0f, 1.0f, 0.0f), false, "");
     Asset ceiling = Asset(eSquare, "ceiling", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/ceilingbw.jpg");
     Asset wall = Asset(eSquare, "wall", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/rivetWallbw.jpg");
     Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.8f, 0.8f, 0.8f), false, "./textures/concretebw.jpg");
@@ -187,6 +187,24 @@ int main()
     float ratio = (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT;
     camera.SetView(0.01f, 50.0f, ratio);
 
+    nNode* Root = new nNode();
+    nNode* Ref = Root->AddChildrenRecursive(new nTranslate(glm::vec3(5.5f, 2.0f + 0.5f, 6.5f)));
+    
+    nNode* Reset = Ref;
+    Ref = Ref->AddChildrenRecursive(new nScale(glm::vec3(1.17f, 0.85f, 0.1f)));
+    Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(-0.05f, -0.75f, 0.0f)));
+    Ref->AddChildren(new nAsset(&REF, eObject));
+
+    Ref = Reset;
+    Ref = Ref->AddChildrenRecursive(new nScale(glm::vec3(1.5f, 0.95f, 0.1f)));
+    Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.1f, 0.1f, 0.0f)));
+    Ref->AddChildren(new nAsset(&REF, eObject));
+
+    Ref = Reset;
+    Ref = Ref->AddChildrenRecursive(new nScale(glm::vec3(0.85f, 0.8f, 0.1f)));
+    Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.8f, 0.0f)));
+    Ref->AddChildren(new nAsset(&REF, eObject));
+
     //RENDER LOOP
     while(!glfwWindowShouldClose(window))
     {
@@ -212,7 +230,8 @@ int main()
         Lobby.cameraCollide(camera);
         Lobby2.cameraCollide(camera);
 
-       // renderer.RenderGraph(Root, &camera);
+        //renderer.RenderGraph(Root, &camera);
+        
         renderer.RenderRoom(&Lobby, &camera);
         renderer.RenderRoom(&Lobby2, &camera);
 
@@ -221,8 +240,8 @@ int main()
 
 
         Weapon::InterpolateOffset(deltaTime);
-        //renderer.RenderWeapon(&SMG, &camera);
-        renderer.RenderWeapon(&ARG, &camera);
+        renderer.RenderWeapon(&SMG, &camera);
+        //renderer.RenderWeapon(&ARG, &camera);
         
         //Swap Buffers, Poll IO events
         if(CapFPS)
