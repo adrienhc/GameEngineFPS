@@ -127,3 +127,32 @@ Outline* Target::GetOutline()
 {
 	return outline;
 }
+
+void Target::Shot()
+{
+	if(!shot)
+	{
+		shot = true;
+		shotTime = glfwGetTime();
+		delete outline;
+		outline = NULL;
+		nodeModel->Explode();	
+	}
+}
+
+float Target::TimeSinceShot()
+{
+	if(!shot)
+		return 0.0f;
+	else
+	{
+
+		std::cout << glfwGetTime() - shotTime << std::endl;
+		return (glfwGetTime() - shotTime);
+	}
+}
+
+bool Target::Erase()
+{
+	return (TimeSinceShot() >= lifeSpan);
+}

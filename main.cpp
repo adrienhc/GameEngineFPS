@@ -227,8 +227,8 @@ int main()
         //Render
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        Lobby.cameraCollide(camera);
-        Lobby2.cameraCollide(camera);
+        Lobby.collisionChecks(camera);
+        Lobby2.collisionChecks(camera);
 
         //renderer.RenderGraph(Root, &camera);
         
@@ -239,7 +239,7 @@ int main()
         Lobby2.getLights(renderer);
 
 
-        Weapon::InterpolateOffset(deltaTime);
+        Weapon::InterpolateOffsets(deltaTime);
         renderer.RenderWeapon(&SMG, &camera);
         //renderer.RenderWeapon(&ARG, &camera);
         
@@ -278,6 +278,13 @@ void process_input(GLFWwindow* window)
     }
     else
         Weapon::ads = false;
+
+    if(glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
+    {
+            Weapon::fire = true;    
+    }
+    else
+        Weapon::fire = false;
 
     if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         polygon = !polygon; 

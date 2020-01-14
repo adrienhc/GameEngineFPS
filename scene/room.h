@@ -10,6 +10,7 @@
 
 #include "../geometry/cluster.h"
 #include "../geometry/target.h"
+#include "../geometry/weapon.h"
 
 #include "../scene/scenegraph.h"
 
@@ -35,7 +36,7 @@ public:
 		Asset* floor, Asset* wall, Asset* door, Asset* beam, Asset* ceiling, Asset* crate, PointLight* ptLght);
 	~Room();
 	void makeRoom(Renderer renderer);	
-	bool cameraCollide(Camera &camera);
+	bool collisionChecks(Camera &camera);
 	void getLights(Renderer renderer);
 
 	static bool collideOn()
@@ -104,15 +105,19 @@ private:
 	nNode* horizontalPlane(nNode* Root, Asset* asset);
 	nNode* verticalPlaneNS(nNode* Root, std::vector<int> Door);
 	nNode* verticalPlaneEW(nNode* Root, std::vector<int> Door);
+	nNode* addBeamNS(nNode* Root, std::vector<int> Door);
+	nNode* addBeamEW(nNode* Root, std::vector<int> Door); 
+
 	bool isDoor(int height, int width, std::vector<int> Door);
 	bool pointOpeningDoor(int height, int width, std::vector<int> Door);
 	bool boxOpeningDoor(int ref_height, int ref_width, int other_height, int other_width, std::vector<int> Door);
 	bool hasBeam(int ibool);
-	nNode* addBeamNS(nNode* Root, std::vector<int> Door);
-	nNode* addBeamEW(nNode* Root, std::vector<int> Door); 
+	
+	bool cameraCollide(Camera &camera);
+	bool bulletCollide(Camera &camera);
+
 	bool pointCollide(glm::vec3 &playerPos, glm::vec3 min_bb, glm::vec3 max_bb);
 	bool boxCollide(glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
-
 	void handlePointWall(glm::vec3 &playerPos, glm::vec3 min_bb, glm::vec3 max_bb);
 	void handleBoxWall(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
 	std::string handleBoxObject(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);

@@ -15,6 +15,9 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 	
 	for(int i = 0; i < room->targets.size(); i++) //New Method Render Targets directly =) 
 	{
+		float shotTime = room->targets[i]->TimeSinceShot(); 
+		modelExplodeShader.use();
+		modelExplodeShader.setFloat("deltaTime", shotTime);
 		Traverse(room->targets[i]->GetNodeModel(), eModel);
 	}
 
@@ -39,6 +42,7 @@ void Renderer::SetCamera(Camera* cam)
 	instancedShader.setCamera(cam);
 	modelShader.setCamera(cam);
 	outlineShader.setCamera(cam);
+	modelExplodeShader.setCamera(cam);
 }
 
 void Renderer::SetLights(Room* room)
@@ -49,7 +53,7 @@ void Renderer::SetLights(Room* room)
 void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific actions to position it correctly 
 {
 
-	glm::vec4 weapon_offsets = weapon->GetOffset(); 
+	glm::vec4 weapon_offsets = weapon->GetADSOffset(); 
 	cam->Zoom = weapon_offsets.w;
 	modelShader.setCamera(cam); //zoom camera when ADS
 
@@ -86,7 +90,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	if(cam->Front.y < 0.0f) //SMG  
 		vert_angle *= -1.0f;
 	modeltr = glm::rotate(modeltr, vert_angle, rot_axis);//glm::vec3(right_weapon.x, 0.0f, right_weapon.z)); //Align weapon vertically 
-
+	modeltr = glm::rotate(modeltr, glm::radians(weapon->GetRecoilOffset()), rot_axis); //recoil
 	modelShader.setTransform(modeltr);
 
 	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
@@ -260,6 +264,13 @@ void Renderer::Traverse(nNode* Root, eType type)
 				glClear(GL_STENCIL_BUFFER_BIT);
 			
 			}
+			else if (Mdl->GetShader() == eExplode)
+			{
+				modelExplodeShader.setTransform(model_transform);
+				//modelExplodeShader.setFloat("deltaTime", glfwGetTime());
+				Mdl->GetModel()->Draw(modelExplodeShader);
+				//std::cout << "YOU GOT SHOT" << std::endl;
+			}
 			else
 			{
 				modelShader.setTransform(model_transform);
@@ -285,6 +296,7 @@ void Renderer::Traverse(nNode* Root, eType type)
 		myShader.setPointLight(light, Lt->GetIndex()); //INDEX FROM SCENEGRAPH
 		instancedShader.setPointLight(light, Lt->GetIndex()); //INSTANCED SHADER TOO
 		modelShader.setPointLight(light, Lt->GetIndex()); //MODEL SHADER
+		modelExplodeShader.setPointLight(light, Lt->GetIndex()); //MODEL EXPLODE CUBE SHADER
 
 		//DRAWING LIGHT CUBE
 		model_transform = glm::scale(model_transform, glm::vec3(2.0f, 0.2f, 1.0f)); //change light cube dimensions

@@ -801,6 +801,13 @@ std::string Room::handleBoxObject(std::string update, glm::vec3 &player_min_bb, 
         return "None";
 }
 
+bool Room::collisionChecks(Camera &camera)
+{
+    bool camCheck = cameraCollide(camera);
+    bool bulletCheck = bulletCollide(camera);
+    return bulletCheck;
+}
+
 bool Room::cameraCollide(Camera &camera)
 {
     if (!active && !self_collision) //quick check to return earliest if no colllision allowed
@@ -882,6 +889,115 @@ bool Room::cameraCollide(Camera &camera)
     
 } 
 
+
+bool Room::bulletCollide(Camera &camera) //TO FIX: CAN SHOOT THROUGH CRATES OF OTHER ROOMS! 
+{
+    bool hit = false;
+    float placeholder;
+    float targDist = 0.0;
+    float boxDist = 1000.0;
+    float wallDist = 1000.0;
+    int index = 0;
+
+    if(Weapon::fire)
+    {
+        for(int i = 0; i < targets.size(); i++)
+        {
+            if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max, true, placeholder)) //Low Body
+            {
+                hit = true;
+                index = i; 
+                targDist = placeholder; 
+                break;
+            }
+            
+            if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_high_bb.min, targets[i]->body_high_bb.max, true, placeholder)) //High Body
+            {
+                 hit = true;
+                 index = i; 
+                 targDist = placeholder; 
+                 break;  
+            }
+
+            if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->head_bb.min, targets[i]->head_bb.max, true, placeholder)) //Head 
+            {
+                hit = true;
+                index = i;
+                targDist = placeholder; 
+                break;  
+            }
+        }
+    }
+
+    if(hit) //intersect crates
+    {
+        for(int i = 0; i < asset_bb.size(); i++)
+        {
+            if(Collision::rayBoxCollide(camera.Position, camera.Front, asset_bb[i].min, asset_bb[i].max, true, placeholder)) //Head 
+            {
+                if(placeholder >= 0 &&  placeholder < boxDist)
+                    boxDist = placeholder;
+            }
+
+            if(boxDist < targDist) //box in front of target
+                hit = false;
+        }
+    }
+
+    if(hit) //intersect walls
+    {
+       //case1 -> target in room = false -- case2 -> target in other room = true 
+       bool typeCheck = !self_collision;
+       if(Collision::rayBoxCollide(camera.Position, camera.Front, room_min_bb, room_max_bb, typeCheck, placeholder))
+       {
+            wallDist = placeholder;
+            
+            if(wallDist < targDist)
+            {
+                glm::vec3 intersection_point = camera.Position + wallDist * camera.Front;
+
+                if ( intersection_point.x == room_min_bb.x ) //EAST
+                {
+                    if ( !pointOpeningDoor(intersection_point.y, intersection_point.z + 0.5f - offset.z, DoorE) )
+                        hit = false;
+                }
+
+                else if ( room_max_bb.x == intersection_point.x ) //WEST
+                {
+                    if ( !pointOpeningDoor(intersection_point.y, intersection_point.z + 0.5f - offset.z, DoorW) )
+                        hit = false;
+                }
+
+                else if ( intersection_point.z == room_min_bb.z ) //SOUTH
+                {
+                    if ( !pointOpeningDoor(intersection_point.y, intersection_point.x + 0.5f - offset.x, DoorS) )
+                        hit = false;
+                }
+
+                else if ( room_max_bb.z == intersection_point.z ) //NORTH
+                {
+                    if ( !pointOpeningDoor(intersection_point.y, intersection_point.x + 0.5f - offset.x, DoorN) )
+                        hit = false;
+                }
+            }
+       }
+    }
+
+    if(hit) //target unobstructed AND in same room as of now 
+    {
+        targets[index]->Shot();
+    }
+
+
+    //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
+    for(int i = 0; i < targets.size(); i++)
+    {
+        if(targets[i]->Erase())
+            targets.erase(targets.begin()+i);
+    }
+
+    return hit;
+}
 
 void Room::getLights(Renderer renderer)
 {

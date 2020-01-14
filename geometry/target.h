@@ -31,6 +31,10 @@ public:
 	Model* GetSmoothModel();
 	Outline* GetOutline();
 
+	void Shot();
+	float TimeSinceShot();
+	bool Erase();
+
 	BB body_low_bb;
 	BB body_high_bb;
 	BB head_bb;
@@ -47,7 +51,10 @@ private:
 	static bool loadedModel; //only load model once 
 	static bool loadedSmoothModel; //only load model once 
 	static int count;
-	bool shot;
+
+	float lifeSpan = 100.0f; //0.30f;
+	bool shot = false;
+	float shotTime = 0.0f;
 };
 
 

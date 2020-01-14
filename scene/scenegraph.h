@@ -21,7 +21,7 @@
 
 
 enum eType {eRoot, eTranslate, eRotate, eScale, eAsset, eModel, ePointLight};
-enum eShader {eObject, eInstanced, eLights, eModelshdr};
+enum eShader {eObject, eInstanced, eLights, eModelshdr, eExplode};
 
 
 class nNode
@@ -291,6 +291,19 @@ public:
 	virtual eType GetType()
 	{
 		return eModel;
+	}
+
+	void Explode()
+	{
+		shader_type = eExplode;
+		if(outline)
+		{
+			//std::cout << "Outline Not Null" << std::endl;
+			//delete outline;
+			outline = NULL;
+			//std::cout << "Outline Null" << std::endl;
+		}
+		//outline = NULL;
 	}
 
 	void Instanced()

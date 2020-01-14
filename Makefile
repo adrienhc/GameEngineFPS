@@ -1,5 +1,6 @@
 EXEC = main
 OBJECTS = main.o
+OPTI = -O3
 
 FILES = main.cpp  GLAD/glad.c                                                 
 FILES += rendering/shader.cpp rendering/camera.cpp rendering/renderer.cpp rendering/light.cpp
@@ -17,7 +18,7 @@ CC = g++
 
 # Perform action on all object files (May or may not exist)           
 all: $(OBJECTS)                                                       
-	$(CC) -o $(EXEC) $(FILES) $(FLAGS)
+	$(CC) -o $(EXEC) $(OPTI) $(FILES) $(FLAGS)
 
 clean:
 	rm *.o  main

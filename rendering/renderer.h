@@ -49,11 +49,16 @@ private:
 	cTriangle Triangle;
 	cSquare Square;
 	
+	//Non Geometry
 	Shader myShader =  Shader("shaders/shader.vs", "shaders/shader.fs"); //PATH FROM MAIN
 	Shader instancedShader = Shader("shaders/instancedShader.vs", "shaders/instancedShader.fs");
     Shader lightShader = Shader("shaders/lightShader.vs", "shaders/lightShader.fs");
     Shader modelShader = Shader("shaders/modelShader.vs", "shaders/modelShader.fs");
     Shader outlineShader = Shader("shaders/outlineShader.vs", "shaders/outlineShader.fs");
+
+    //With Geometry
+    Shader modelExplodeShader = Shader("shaders/explodeShader.vs", "shaders/explodeCubeShader.gs", "shaders/explodeCubeShader.fs");
+
 };
 
 #endif //RENDER
