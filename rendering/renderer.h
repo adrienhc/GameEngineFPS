@@ -25,6 +25,7 @@
 
 #include "../scene/scenegraph.h"
 #include "../scene/room.h"
+#include "../scene/skybox.h"
 
 
 class Room;
@@ -37,6 +38,7 @@ public:
 	void RenderRoom(Room* room, Camera* cam);
 	void RenderWeapon(Weapon* weapon, Camera* cam);
 	void RenderOutline(Model* model, Camera* cam); 
+	void RenderSkybox(Skybox* skybox, Camera* cam);
 	void Instance(nNode* Root, eType type, Asset* Instanced, std::vector<glm::mat4> &m_transforms, std::vector<glm::mat3> &n_transforms); //instances together all instances of Asset in tree 
 	void SetCamera(Camera* camera);
 	void SetLights(Room* room);
@@ -55,6 +57,7 @@ private:
     Shader lightShader = Shader("shaders/lightShader.vs", "shaders/lightShader.fs");
     Shader modelShader = Shader("shaders/modelShader.vs", "shaders/modelShader.fs");
     Shader outlineShader = Shader("shaders/outlineShader.vs", "shaders/outlineShader.fs");
+    Shader skyboxShader = Shader("shaders/skyboxShader.vs", "shaders/skyboxShader.fs");
 
     //With Geometry
     Shader modelExplodeShader = Shader("shaders/explodeShader.vs", "shaders/explodeCubeShader.gs", "shaders/explodeCubeShader.fs");

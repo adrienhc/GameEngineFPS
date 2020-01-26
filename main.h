@@ -28,6 +28,7 @@
 
 #include "scene/scenegraph.h"
 #include "scene/room.h"
+#include "scene/skybox.h"
 
 
 //Window

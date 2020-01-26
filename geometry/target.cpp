@@ -146,8 +146,6 @@ float Target::TimeSinceShot()
 		return 0.0f;
 	else
 	{
-
-		std::cout << glfwGetTime() - shotTime << std::endl;
 		return (glfwGetTime() - shotTime);
 	}
 }

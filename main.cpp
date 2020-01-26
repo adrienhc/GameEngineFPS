@@ -50,10 +50,12 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
 
+    //LIGHT
     glm::vec3 LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
                                        //ambient        diffuse      //specular  //cst //lin //quad
     PointLight pointLight = PointLight(glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.09f, 0.032f);
 
+    //ASSETS
                                         //ambient,  diffuse,  specular,  shininess,  color
     Asset crate = Asset(eCube, "crate", glm::vec3(0.4f), glm::vec3(0.8f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/cratebw.jpg");
     Asset floor = Asset(eSquare, "floor", glm::vec3(0.5f), glm::vec3(1.0f), glm::vec3(0.5f), 2.0f, glm::vec3(0.0f), true, "./textures/floornoborder.jpg");
@@ -161,6 +163,14 @@ int main()
     //RENDERER
     Renderer renderer = Renderer();
 
+    //SKYBOX
+    Skybox skybox("./skybox/PositiveX.png",
+                  "./skybox/NegativeX.png",
+                  "./skybox/PositiveY.png",
+                  "./skybox/NegativeY.png",
+                  "./skybox/PositiveZ.png",
+                  "./skybox/NegativeZ.png");
+
     //TARGET
     Target::LoadModel((char*) "3DModels/Target/poligono1.obj");
     Target::LoadSmoothModel((char*) "3DModels/SmoothTarget/poligono1.obj");
@@ -239,9 +249,12 @@ int main()
         Lobby2.getLights(renderer);
 
 
+        renderer.RenderSkybox(&skybox, &camera);
+
         Weapon::InterpolateOffsets(deltaTime);
         renderer.RenderWeapon(&SMG, &camera);
         //renderer.RenderWeapon(&ARG, &camera);
+
         
         //Swap Buffers, Poll IO events
         if(CapFPS)

@@ -52,7 +52,7 @@ private:
 	static bool loadedSmoothModel; //only load model once 
 	static int count;
 
-	float lifeSpan = 100.0f; //0.30f;
+	float lifeSpan = 0.30f;//100.0f; //0.30f;
 	bool shot = false;
 	float shotTime = 0.0f;
 };

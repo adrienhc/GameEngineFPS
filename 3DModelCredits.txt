@@ -1,4 +1,4 @@
-I would like to thank the following people for freely sharing their 3D assets,
+I would like to thank the following people for freely sharing their 3D assets or Skyboxes,
 
 
 3dhaupt (M24R SMG)
@@ -6,3 +6,6 @@ https://3dhaupt.com/3d-model-weapon-submachine-gun-m24-r-retexurted/
 
 draconixdust (Target) 
 https://free3d.com/3d-model/shooting-range-targhet-22266.html
+
+Nucleartaxi (Skybox)
+https://spacedock.info/mod/1484/Nucleartaxi%27s%20Skybox:%20Galactic%20Core?ga=%253CGame+3102+%2527Kerbal+Space+Program%2527%253E

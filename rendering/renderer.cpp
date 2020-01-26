@@ -105,6 +105,16 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 }
 
 
+void Renderer::RenderSkybox(Skybox* skybox, Camera* cam)
+{
+	skyboxShader.use();
+	skyboxShader.setInt("skybox", 0);
+	glm::mat4 view = glm::mat4(glm::mat3(cam->GetViewMatrix()));  
+    skyboxShader.setMat4("viewing", view);
+    glm::mat4 proj = glm::perspective(glm::radians(cam->Zoom), cam->ViewRatio, cam->NearPlane, cam->FarPlane);
+    skyboxShader.setMat4("projection", proj);
+	skybox->Draw();
+}
 
 void Renderer::RenderGraph(nNode* Root, Camera* cam)
 {

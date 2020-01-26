@@ -803,6 +803,7 @@ std::string Room::handleBoxObject(std::string update, glm::vec3 &player_min_bb, 
 
 bool Room::collisionChecks(Camera &camera)
 {
+    //std::cout << "T S = " << targets.size() << std::endl;
     bool camCheck = cameraCollide(camera);
     bool bulletCheck = bulletCollide(camera);
     return bulletCheck;
@@ -825,6 +826,7 @@ bool Room::cameraCollide(Camera &camera)
 
             for(int i = 0; i < targets.size(); i++) //CHECK TARGETS
             {
+
                 if(boxCollide(cam_min_bb, cam_max_bb, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max)) //Low Body
                 {
                     ret = true;
