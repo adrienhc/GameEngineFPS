@@ -48,6 +48,7 @@ struct PointLight
 };
 
 #define NUM_POINT_LIGHTS 3
+uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
 
@@ -107,7 +108,7 @@ void createVertex(vec3 offset, vec4 center, vec3 faceNormal)
     vec3 Norm = normalize(FragNorm);
     vec3 result = vec3(0.0f, 0.0f, 0.0f);
 
-    for(int i = 0; i < NUM_POINT_LIGHTS; i++)
+    for(int i = 0; i < numLights; i++)
         result += CalcPointLight(pointLight[i], FragPos, Norm);
 
     VertexColor = result;

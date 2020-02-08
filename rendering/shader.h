@@ -12,6 +12,7 @@
 
 #include "../material_system/material.h"
 
+class PointLight; //as PointLight also includes Shader
 
 class Shader 
 {
@@ -29,6 +30,7 @@ public:
 
 	void setCamera(Camera* camera);
 	void setMaterial(Material* material); //WHAT DO I NEED TO SET MATERIAL/TEXTURE
+	void setLightInfo(int numLights);
 	void setPointLight(PointLight* light, int index);
 
 	void setTransform(glm::mat4 transform);

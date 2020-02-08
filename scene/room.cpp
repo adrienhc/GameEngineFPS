@@ -988,12 +988,15 @@ bool Room::bulletCollide(Camera &camera) //TO FIX: CAN SHOOT THROUGH CRATES OF O
     if(hit) //target unobstructed AND in same room as of now 
     {
         targets[index]->Shot();
+        shadowPass = true;
     }
 
 
     //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
     for(int i = 0; i < targets.size(); i++)
     {
+        //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
+        //shadowPass |= targets[i]->IsShot();
         if(targets[i]->Erase())
             targets.erase(targets.begin()+i);
     }
@@ -1004,5 +1007,5 @@ bool Room::bulletCollide(Camera &camera) //TO FIX: CAN SHOOT THROUGH CRATES OF O
 void Room::getLights(Renderer renderer)
 {
     if(self_collision) //If I am the room that collides with player, player is inside room
-        renderer.SetLights(this);
+        renderer.GetLights(this);
 }

@@ -13,8 +13,6 @@ out vec3 fragPos;
 out vec3 fragNorm;
 out vec2 fragTex;
 
-
-
 void main()
 {
 	gl_Position = projection * viewing * instance_model_tr * vec4 (vPos, 1.0);

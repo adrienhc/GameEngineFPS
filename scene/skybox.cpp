@@ -33,6 +33,7 @@ Skybox::Skybox(std::string right, std::string left, std::string top, std::string
 	glGenTextures(1, &cubemap);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemap);
 
+	//stbi_set_flip_vertically_on_load(false);
 	int width, height, nrChannels;
 
 	for(GLuint i = 0; i < 6; i++)

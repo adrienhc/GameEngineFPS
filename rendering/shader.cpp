@@ -263,6 +263,12 @@ void Shader::setTransform(glm::mat4 transform)
 
 }
 
+void Shader::setLightInfo(int numLights)
+{
+	use();
+	setInt("numLights", numLights);
+}
+
 void Shader::setPointLight(PointLight* light, int index) //of object in shader! (not class itself)
 {
 	use();

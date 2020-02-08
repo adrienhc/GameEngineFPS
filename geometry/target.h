@@ -32,6 +32,7 @@ public:
 	Outline* GetOutline();
 
 	void Shot();
+	bool IsShot();
 	float TimeSinceShot();
 	bool Erase();
 

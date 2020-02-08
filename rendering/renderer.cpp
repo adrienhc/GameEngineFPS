@@ -7,12 +7,46 @@ Renderer::Renderer()
 
 void Renderer::RenderRoom(Room* room, Camera* cam)
 {
+
 	if (room == NULL || cam == NULL)
 		return;
 
-	RenderGraph(room->Lights, cam); //TO SET UP LIGHTS, FIRST THING
-	//RenderGraph(room->Root, cam); //For Targets if in Graph
+	shadowLights.clear();
+	shadowLightsIndex.clear();
+	RenderGraph(room->Lights, cam); //traverse lights node and set camera 
+	SetLights(room); //say how many lights in room
+
+	//SHADOW PASS CONDITIONAL ON THE ROOM!
+	shadowPass = room->shadowPass;
+
+	//Shadow Pass for each Light
+	for(int i = 0; i < shadowLights.size(); i++)
+	{
+		//Create Depth Map  
+		if(shadowPass)
+		{
+			RenderDepthMapRoom(room, shadowLights[i], shadowLightsIndex[i]);
+		}
+		//Bind Depth Map  
+		shadowLights[i].bindShadowMap(myShader, shadowLightsIndex[i]);
+		shadowLights[i].bindShadowMap(modelShader, shadowLightsIndex[i]);
+		shadowLights[i].bindShadowMap(instancedShader, shadowLightsIndex[i]);
+	}
+
+	//Set DepthMap Sampler id for unused ones  
+	for(int i = shadowLights.size(); i < PointLight::MAX_LIGHTS; i++)
+	{
+		shadowLights[0].bindShadowMap(myShader, i);
+		shadowLights[0].bindShadowMap(modelShader, i);
+		shadowLights[0].bindShadowMap(instancedShader, i);	
+	}
+
+	// std::cout << std::endl;
+
+	room->shadowPass = false;
+	shadowPass = false;
 	
+	//Rendering Pass 
 	for(int i = 0; i < room->targets.size(); i++) //New Method Render Targets directly =) 
 	{
 		float shotTime = room->targets[i]->TimeSinceShot(); 
@@ -35,6 +69,35 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 	room->i_ceiling->Render();
 }
 
+void Renderer::RenderDepthMapRoom(Room* room, PointLight light, int lightIndex)
+{
+	light.shadowPassSetup(depthShader, lightIndex); //detpthShader is active
+
+	glCullFace(GL_FRONT); //group geometry that needs this kind of rendering
+	depthShader.setBool("isInstanced", false);
+	for(int i = 0; i < room->targets.size(); i++) //Render Targets directly, no outline since shadowPass  
+	{	
+		if(!room->targets[i]->IsShot())
+		{
+			Traverse(room->targets[i]->GetNodeModel(), eModel);
+		}
+	}
+	//ADD WEAPON RENDERING HERE
+
+	depthShader.setBool("isInstanced", true);
+	room->i_crate->Render();
+	room->i_beam->Render();
+
+	glCullFace(GL_BACK); //back to the default 
+	room->i_floor->Render();
+	room->i_wall->Render();
+	room->i_door->Render();
+	room->i_ceiling->Render();
+
+	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
 void Renderer::SetCamera(Camera* cam)
 {
 	myShader.setCamera(cam);
@@ -46,6 +109,16 @@ void Renderer::SetCamera(Camera* cam)
 }
 
 void Renderer::SetLights(Room* room)
+{
+	int numLights = room->pointLightPos.size();
+	//std::cout << numLights << std::endl;
+	myShader.setLightInfo(numLights);
+	instancedShader.setLightInfo(numLights);
+	modelShader.setLightInfo(numLights);
+	modelExplodeShader.setLightInfo(numLights);
+}
+
+void Renderer::GetLights(Room* room) //Set Current Lights to be those the player is in, before rendering Weapon!
 {
 	Traverse(room->Lights, eRoot); //"this" pointer from room, do not check for NULL as will say it is 
 }
@@ -94,7 +167,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	modelShader.setTransform(modeltr);
 
 	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
-
+	
 	glEnable(GL_CULL_FACE); 
 	glCullFace(GL_BACK);
 
@@ -217,6 +290,11 @@ void Renderer::Traverse(nNode* Root, eType type)
 			Asset* asset = Ast->GetAsset();
 			myShader.setMaterial(asset->getMaterial());
 			eShape shape = asset->getGeometry();
+
+			if(shadowPass)
+			{
+				depthShader.setTransform(model_transform); //depthShader be active! 
+			}
 			
 			if(shape == eCube)
 			{
@@ -256,7 +334,12 @@ void Renderer::Traverse(nNode* Root, eType type)
 			else
 				 model_transform = MatrixStack.top();
 
-			if(Mdl->HasOutline()) //IF MODEL HAS AN OUTLINE
+			if(shadowPass)
+			{
+				depthShader.setTransform(model_transform);
+				Mdl->GetModel()->Draw(depthShader);
+			}
+			else if(Mdl->HasOutline()) //IF MODEL HAS AN OUTLINE -- disable Outline for Shadow Pass, building depth map
 			{
     			glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 				glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -302,6 +385,9 @@ void Renderer::Traverse(nNode* Root, eType type)
 		PointLight* light = Lt->GetLight();
 		glm::mat4 model_transform = MatrixStack.top();
 		light->setTransform(model_transform);
+
+		shadowLights.push_back(*light); //Add this light to the lights to compute depth map for
+		shadowLightsIndex.push_back(Lt->GetIndex()); //so that have index of light in shader, can bind correct cubeMap to correct Texture slot
 
 		myShader.setPointLight(light, Lt->GetIndex()); //INDEX FROM SCENEGRAPH
 		instancedShader.setPointLight(light, Lt->GetIndex()); //INSTANCED SHADER TOO

@@ -28,13 +28,16 @@
 #include "../scene/skybox.h"
 
 
+extern const unsigned int WINDOW_WIDTH; //defined in main.h 
+extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
+
 class Room;
 
 class Renderer
 {
 public:
 	Renderer();
-	void RenderGraph(nNode* Root, Camera* camera);
+	void RenderGraph(nNode* Root, Camera* camera); //if not NULL, then build Shadow map 
 	void RenderRoom(Room* room, Camera* cam);
 	void RenderWeapon(Weapon* weapon, Camera* cam);
 	void RenderOutline(Model* model, Camera* cam); 
@@ -42,6 +45,7 @@ public:
 	void Instance(nNode* Root, eType type, Asset* Instanced, std::vector<glm::mat4> &m_transforms, std::vector<glm::mat3> &n_transforms); //instances together all instances of Asset in tree 
 	void SetCamera(Camera* camera);
 	void SetLights(Room* room);
+	void GetLights(Room* room);
 
 private:
 	void Traverse(nNode* Root, eType type);
@@ -51,6 +55,11 @@ private:
 	cTriangle Triangle;
 	cSquare Square;
 	
+	void RenderDepthMapRoom(Room* room, PointLight light, int lightIndex);
+	std::vector<PointLight> shadowLights; 
+	std::vector<int> shadowLightsIndex;
+	bool shadowPass = true;
+
 	//Non Geometry
 	Shader myShader =  Shader("shaders/shader.vs", "shaders/shader.fs"); //PATH FROM MAIN
 	Shader instancedShader = Shader("shaders/instancedShader.vs", "shaders/instancedShader.fs");
@@ -61,6 +70,7 @@ private:
 
     //With Geometry
     Shader modelExplodeShader = Shader("shaders/explodeShader.vs", "shaders/explodeCubeShader.gs", "shaders/explodeCubeShader.fs");
+    Shader depthShader = Shader("shaders/depthShader.vs", "shaders/depthShader.gs", "shaders/depthShader.fs");
 
 };
 

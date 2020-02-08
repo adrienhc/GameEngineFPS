@@ -140,6 +140,11 @@ void Target::Shot()
 	}
 }
 
+bool Target::IsShot()
+{
+	return shot;
+}
+
 float Target::TimeSinceShot()
 {
 	if(!shot)

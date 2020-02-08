@@ -100,6 +100,9 @@ private:
 	std::vector<glm::vec3> pointLightPos;
 	PointLight* pointLight;
 
+	//SHADOW PASS
+	bool shadowPass = true;
+
 	//METHODS
 	glm::vec3 adjustAssetPos(glm::vec3 Pos);
 	nNode* horizontalPlane(nNode* Root, Asset* asset);

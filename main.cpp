@@ -13,10 +13,10 @@ int main()
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
 
    
-    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
                                                                                     //glfwGetPrimaryMonitor()   --for fullscreen app automatically
 
-    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
+    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {
@@ -50,11 +50,6 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
 
-    //LIGHT
-    glm::vec3 LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
-                                       //ambient        diffuse      //specular  //cst //lin //quad
-    PointLight pointLight = PointLight(glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.09f, 0.032f);
-
     //ASSETS
                                         //ambient,  diffuse,  specular,  shininess,  color
     Asset crate = Asset(eCube, "crate", glm::vec3(0.4f), glm::vec3(0.8f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/cratebw.jpg");
@@ -69,7 +64,7 @@ int main()
     {
         int length = 20;
         int width = 20;
-        int height = 7;
+        int height = 10;
 
         glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -82,9 +77,13 @@ int main()
                                   2,2,2,2, 1,1,  
                                   5,0,3,1, 1,1};
 
-        std::vector<glm::vec3> lightPos = {glm::vec3(2.0f/10.0f * width, height, length/2.0f),
-                                           glm::vec3(5.0f/10.0f * width, height, length/2.0f),
-                                           glm::vec3(8.0f/10.0f * width, height, length/2.0f)};
+            //LIGHT
+        glm::vec3 LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        std::vector<glm::vec3> lightPos = {glm::vec3(width/2.0f, height, length/2.0f)};
+
+                                               //ambient        diffuse      //specular  //cst //lin //quad
+        PointLight* pointLight = new PointLight(lightPos.size(), glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.045f, 0.0075f);
 
         // CRATES
         std::vector<asset> vertical = {asset(1,1, glm::vec3(13.0f, 0.0f, 5.0f)), 
@@ -106,7 +105,7 @@ int main()
     {
         int length = 20;
         int width = 20;
-        int height = 7;
+        int height = 10;
 
         glm::vec3 offset = glm::vec3(0.0f, 0.0f, -length -0.05f);
 
@@ -119,9 +118,14 @@ int main()
                                   2,2,2,2, 1,1,  
                                   5,0,3,1, 1,1};
 
-        std::vector<glm::vec3> lightPos = {glm::vec3(2.0f/10.0f * width, height, length/2.0f),
-                                           glm::vec3(5.0f/10.0f * width, height, length/2.0f),
-                                           glm::vec3(8.0f/10.0f * width, height, length/2.0f)};
+        //LIGHT
+        glm::vec3 LightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+        std::vector<glm::vec3> lightPos = {glm::vec3(width/2.0f, height, length/2.0f)};
+                                
+
+                                       //ambient        diffuse      //specular           //cst //lin = 0.09 //quad = 0.032
+        PointLight* pointLight = new PointLight(lightPos.size(), glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.045f, 0.0075f);
 
         // CRATES
         std::vector<asset> vertical = {asset(1,1, glm::vec3(10.0f, 0.0f, 11.0f)), 
@@ -178,12 +182,12 @@ int main()
     //ROOMS
     Room Lobby = Room(lobby.length, lobby.width, lobby.height, lobby.offset, lobby.DoorN, lobby.DoorS, lobby.DoorE, lobby.DoorW, 
         lobby.lightPos, lobby.vertical, lobby.horizontal, lobby.target,
-        &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
+        &floor, &wall, &door, &beam, &ceiling, &crate, lobby.pointLight);
     Lobby.makeRoom(renderer);
 
     Room Lobby2 = Room(lobby2.length, lobby2.width, lobby2.height, lobby2.offset, lobby2.DoorN, lobby2.DoorS, lobby2.DoorE, lobby2.DoorW, 
         lobby2.lightPos, lobby2.vertical, lobby2.horizontal, lobby2.target,
-        &floor, &wall, &door, &beam, &ceiling, &crate, &pointLight);
+        &floor, &wall, &door, &beam, &ceiling, &crate, lobby2.pointLight);
     Lobby2.makeRoom(renderer);
 
     //WEAPONS
