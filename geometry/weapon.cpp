@@ -7,6 +7,9 @@ float Weapon::ads_time_offset = 0.0f;
 bool Weapon::fire = false;
 float Weapon::fire_time = 0.05f;
 float Weapon::fire_time_offset = 0.0f;
+int Weapon::recoil_sign = 1;
+
+bool Weapon::flash = false;
 
 Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_factor, float zoom_minimum, float zoom_maximum)
 {
@@ -16,6 +19,7 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	scaling = glm::vec3(scale_factor);
 	zoom_min = zoom_minimum;
 	zoom_max = zoom_maximum;
+	recoil_sign = 1.0f;
 }
 
 Weapon::~Weapon()
@@ -45,13 +49,24 @@ void Weapon::InterpolateOffsets(float delta_time)
 
 	if(fire)
 	{
-		fire_time_offset += delta_time;
+		fire_time_offset += delta_time * recoil_sign;
 		if ( fire_time_offset > fire_time )
+		{
+			recoil_sign = -1;
 			fire_time_offset = fire_time;
+		}
+		else if ( fire_time_offset < 0.0f )
+		{
+			recoil_sign = 1;
+			fire_time_offset = 0.0f;
+		}
+
+		flash = (recoil_sign == 1); // && (fire_time_offset < 0.3f * fire_time);
 	}
 	else
 	{
-		fire_time_offset -= delta_time;
+		recoil_sign = -1;
+		fire_time_offset += delta_time * recoil_sign;
 		if ( fire_time_offset < 0.0f )
 			fire_time_offset = 0.0f;
 	}
@@ -65,6 +80,11 @@ glm::vec4 Weapon::GetADSOffset()
 	float zoom =  (1.0f/ads_time)  * ( ( ads_time - ads_time_offset ) * zoom_min + ads_time_offset * zoom_max);
 
 	return glm::vec4(front, right, down, zoom);
+}
+
+bool Weapon::IsFullyADS()
+{
+	return ads_time_offset >= ads_time;
 }
 
 float Weapon::GetRecoilOffset()

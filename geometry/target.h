@@ -36,6 +36,12 @@ public:
 	float TimeSinceShot();
 	bool Erase();
 
+	void ResetDist(float max_dist);
+	bool TestDist(float dist);
+	void SetHitRay(bool val);
+	bool HitRay();
+
+
 	BB body_low_bb;
 	BB body_high_bb;
 	BB head_bb;
@@ -56,6 +62,8 @@ private:
 	float lifeSpan = 0.30f;//100.0f; //0.30f;
 	bool shot = false;
 	float shotTime = 0.0f;
+	float collisionDist = 1000.0f;
+	bool hitRay = false;
 };
 
 

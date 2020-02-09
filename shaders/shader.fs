@@ -124,24 +124,30 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 norm, vec3 fragPos, vec3 
 void main()
 {
 
-	vec3 norm = normalize(fragNorm);
-	vec3 viewDir = normalize(cameraPos - fragPos);
+	//vec3 norm = normalize(fragNorm);
+	//vec3 viewDir = normalize(cameraPos - fragPos);
 
 
-	vec3 result = vec3(0.0f, 0.0f, 0.0f);
+	//vec3 result = vec3(0.0f, 0.0f, 0.0f);
 
-	for(int i = 0; i < numLights; i++)
-		result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
+	//for(int i = 0; i < numLights; i++)
+	//	result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
+
+	vec4 col;
 
 	if(material.has_texture)
 	{
-		result = result * texture(imgTexture, fragTex).xyz;
+		col = texture(imgTexture, fragTex);
+		if(col.a < 0.1)
+			discard;
+		//result = result * col.xyz;
 	}
     else
     { 
-    	result = result * material.color;
+    	col = vec4(material.color, 1.0f);
+    	//result = result * material.color;
     }
 
-    FragColor = vec4(result, 1.0f);
+    FragColor = col;
 
 } 

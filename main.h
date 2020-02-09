@@ -39,7 +39,7 @@ const unsigned int WINDOW_HEIGHT = 1080;
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);
 void process_input(GLFWwindow* window);
 void mouse_callback( GLFWwindow* window, double xpos, double ypos);
-void scroll_callback( GLFWwindow* window, double xoffset, double yoffset);
+//void scroll_callback( GLFWwindow* window, double xoffset, double yoffset);
 
 bool CapFPS = true;
 bool DisplayFPS = false;

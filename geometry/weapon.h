@@ -8,6 +8,7 @@
 #include <iostream>
 
 #include "model.h"
+#include "../material_system/asset.h"
 
 //could be an FSM, using design pattern!
 class Weapon 
@@ -17,6 +18,7 @@ public:
 	~Weapon();
 	Model* GetModel();
 	glm::vec4 GetADSOffset(); //get the correct offset by interpolation from hip to ads //also do cam zoom  
+	bool IsFullyADS();
 	float GetRecoilOffset();
 	glm::vec3 scaling;
 	static bool ads;//weapon is being aimed
@@ -25,7 +27,10 @@ public:
 	static bool fire;//pulled the trigger
 	static float fire_time; //time to aim in seconds
 	static float fire_time_offset;
+	static int recoil_sign;
+	static bool flash;
 	static void InterpolateOffsets(float delta_time);
+	Asset* muzzleFlash = new Asset(eSquare, "muzzleFlash", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f), 32.0f, glm::vec3(0.0f), true, "./textures/muzzleflashtrimmed2.png");
 
 private:
 	Model* model;

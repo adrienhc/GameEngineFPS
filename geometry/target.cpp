@@ -128,6 +128,26 @@ Outline* Target::GetOutline()
 	return outline;
 }
 
+void Target::ResetDist(float max_dist)
+{
+	collisionDist = max_dist;
+}
+
+bool Target::TestDist(float dist)
+{
+	return collisionDist <= dist;
+}
+
+void Target::SetHitRay(bool val)
+{
+	hitRay = val;
+}
+
+bool Target::HitRay()
+{
+	return hitRay;
+}
+
 void Target::Shot()
 {
 	if(!shot)

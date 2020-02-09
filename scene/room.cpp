@@ -1,11 +1,18 @@
 #include "room.h"
 
 bool Room::active = true;
+int Room::sharedID = 0;
+float Room::minBulletDist = 1000.0f;
+float Room::maxBulletDist = 1000.0f;
 
 Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, 
     std::vector<glm::vec3> ptLghtPs, std::vector<asset> vrtcl, std::vector<asset> hrztl, std::vector<asset> trgt,
     Asset* flr, Asset* wll, Asset* dr, Asset* bm, Asset* ceil, Asset* crte, PointLight* ptLght)
 {
+    //ID -- Take current and increment for next rooms
+    ID = sharedID;
+    sharedID++;
+
     //DIMENSIONS
 	length = lgth;
 	width = wdth;
@@ -892,46 +899,54 @@ bool Room::cameraCollide(Camera &camera)
 } 
 
 
-bool Room::bulletCollide(Camera &camera) //TO FIX: CAN SHOOT THROUGH CRATES OF OTHER ROOMS! 
+bool Room::bulletCollide(Camera &camera) 
 {
     bool hit = false;
     float placeholder;
-    float targDist = 0.0;
-    float boxDist = 1000.0;
-    float wallDist = 1000.0;
-    int index = 0;
+    float maxRange = 100.0f; //if do not hit any geometry, cutoff value, max range 
+    float targDist = 1000.0f; //always assume target way too far away
+    float boxDist = 1000.0f;
+    float wallDist = 1000.0f;
 
+    //reset tempDist within targets 
+    for(int i = 0; i < targets.size(); i++)
+    {
+        targets[i]->ResetDist(maxBulletDist);
+        targets[i]->SetHitRay(false);
+    }
+
+    //Intersect targets first
     if(Weapon::fire)
     {
         for(int i = 0; i < targets.size(); i++)
         {
             if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max, true, placeholder)) //Low Body
             {
-                hit = true;
-                index = i; 
-                targDist = placeholder; 
-                break;
+                targDist = placeholder < maxRange ? placeholder : 1000.0f; 
+                targets[i]->ResetDist(targDist);
+                targets[i]->SetHitRay(true);
             }
             
-            if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_high_bb.min, targets[i]->body_high_bb.max, true, placeholder)) //High Body
+            else if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_high_bb.min, targets[i]->body_high_bb.max, true, placeholder)) //High Body
             {
-                 hit = true;
-                 index = i; 
-                 targDist = placeholder; 
-                 break;  
+                 targDist = placeholder < maxRange ? placeholder : 1000.0f; 
+                 targets[i]->ResetDist(targDist);
+                 targets[i]->SetHitRay(true); 
             }
 
-            if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->head_bb.min, targets[i]->head_bb.max, true, placeholder)) //Head 
+            else if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->head_bb.min, targets[i]->head_bb.max, true, placeholder)) //Head 
             {
-                hit = true;
-                index = i;
-                targDist = placeholder; 
-                break;  
+                targDist = placeholder < maxRange ? placeholder : 1000.0f; 
+                targets[i]->ResetDist(targDist);
+                targets[i]->SetHitRay(true);
             }
+
+            if(0.0 <= targDist)
+                minBulletDist = targDist < minBulletDist ? targDist : minBulletDist;
         }
     }
 
-    if(hit) //intersect crates
+    if(Weapon::fire)
     {
         for(int i = 0; i < asset_bb.size(); i++)
         {
@@ -941,67 +956,95 @@ bool Room::bulletCollide(Camera &camera) //TO FIX: CAN SHOOT THROUGH CRATES OF O
                     boxDist = placeholder;
             }
 
-            if(boxDist < targDist) //box in front of target
-                hit = false;
+            minBulletDist = boxDist < minBulletDist ? boxDist : minBulletDist;
         }
     }
 
-    if(hit) //intersect walls
+    //if firing and hit target, find if wall in front of it
+    if(Weapon::fire)
     {
-       //case1 -> target in room = false -- case2 -> target in other room = true 
-       bool typeCheck = !self_collision;
-       if(Collision::rayBoxCollide(camera.Position, camera.Front, room_min_bb, room_max_bb, typeCheck, placeholder))
+       
+       if(Collision::rayBoxCollide(camera.Position, camera.Front, room_min_bb, room_max_bb, false, placeholder))
        {
-            wallDist = placeholder;
             
-            if(wallDist < targDist)
+            bool wallHit = false;
+            
+            if(0 <= placeholder)
+                wallDist = placeholder;
+
+            if(wallDist < minBulletDist) //targDist)
             {
                 glm::vec3 intersection_point = camera.Position + wallDist * camera.Front;
 
                 if ( intersection_point.x == room_min_bb.x ) //EAST
                 {
                     if ( !pointOpeningDoor(intersection_point.y, intersection_point.z + 0.5f - offset.z, DoorE) )
-                        hit = false;
+                        wallHit = true;
+
+                    
                 }
 
                 else if ( room_max_bb.x == intersection_point.x ) //WEST
                 {
                     if ( !pointOpeningDoor(intersection_point.y, intersection_point.z + 0.5f - offset.z, DoorW) )
-                        hit = false;
+                        wallHit = true;
                 }
 
                 else if ( intersection_point.z == room_min_bb.z ) //SOUTH
                 {
                     if ( !pointOpeningDoor(intersection_point.y, intersection_point.x + 0.5f - offset.x, DoorS) )
-                        hit = false;
+                        wallHit = true;
                 }
 
                 else if ( room_max_bb.z == intersection_point.z ) //NORTH
                 {
                     if ( !pointOpeningDoor(intersection_point.y, intersection_point.x + 0.5f - offset.x, DoorN) )
-                        hit = false;
+                        wallHit = true;
+                }
+
+                else if (intersection_point.y == room_min_bb.y) //FLOOR
+                {
+                    wallHit = true;
+                }
+
+                else if (intersection_point.y == room_max_bb.y) //CEILING
+                {
+                    wallHit = true;
+                }
+
+                if(wallHit) //if wall in front of ray 
+                {
+                    minBulletDist = wallDist < minBulletDist ? wallDist : minBulletDist;
                 }
             }
        }
     }
+    return hit;
+}
 
-    if(hit) //target unobstructed AND in same room as of now 
-    {
-        targets[index]->Shot();
-        shadowPass = true;
-    }
+void Room::setupCollisions()
+{
+    minBulletDist = 1000.0f;
+}
 
-
+void Room::postCollisions()
+{
     //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
     for(int i = 0; i < targets.size(); i++)
     {
         //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
-        //shadowPass |= targets[i]->IsShot();
+        if(Weapon::fire)
+            std::cout << minBulletDist << std::endl;
+
+        if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
+        {
+            targets[i]->Shot();
+            shadowPass = true;
+        }
+        
         if(targets[i]->Erase())
             targets.erase(targets.begin()+i);
     }
-
-    return hit;
 }
 
 void Room::getLights(Renderer renderer)

@@ -55,6 +55,16 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 		Traverse(room->targets[i]->GetNodeModel(), eModel);
 	}
 
+	//Bullet holes
+	if(Weapon::flash && Room::minBulletDist < Room::maxBulletDist)
+	{
+		instancedShader.use(); 
+		instancedShader.setFloat("radiusImpact", 0.05f);
+		glm::vec3 bulletImpact = cam->Position + glm::normalize(cam->Front) * Room::minBulletDist;
+		instancedShader.setVec3("bulletImpact", bulletImpact);
+	}
+
+	//Render Instanced Geometry
 	instancedShader.setMaterial(room->crate->getMaterial()); 
 	room->i_crate->Render();
 	instancedShader.setMaterial(room->floor->getMaterial()); 
@@ -145,6 +155,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	glm::vec3 point_to = cam->Position + cam->Front * point_offset;
 	glm::vec3 weapon_axis = glm::normalize(point_to - center_weapon); 
 
+	modeltr = glm::translate(modeltr,  -1.0f * weapon_axis * 0.02f * weapon->GetRecoilOffset()); //Horizontal recoil
 	modeltr = glm::scale(modeltr, weapon->scaling);
 
 	//ALIGN FRONT - POINT TO CAM FRONT DIR 
@@ -163,14 +174,47 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	if(cam->Front.y < 0.0f) //SMG  
 		vert_angle *= -1.0f;
 	modeltr = glm::rotate(modeltr, vert_angle, rot_axis);//glm::vec3(right_weapon.x, 0.0f, right_weapon.z)); //Align weapon vertically 
-	modeltr = glm::rotate(modeltr, glm::radians(weapon->GetRecoilOffset()), rot_axis); //recoil
-	modelShader.setTransform(modeltr);
+	modeltr = glm::rotate(modeltr, glm::radians(weapon->GetRecoilOffset()), rot_axis); //Vertical recoil
 
 	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
 	
+
+	if(Weapon::fire && !weapon->IsFullyADS())
+	{
+
+		float time = Weapon::fire_time_offset; //glfwGetTime();
+		float spinSpeed = 1000.0f;
+		float rotationMuzzle = time * spinSpeed;
+		float frontOffsetMuzzle = 6.0f;
+
+		//Muzzle Flash 
+		myShader.setMaterial(weapon->muzzleFlash->getMaterial());
+		
+		glm::mat4 muzzleStart_V = glm::rotate(glm::mat4(1.0f), glm::radians(-90.0f), cam->WorldUp);
+		muzzleStart_V = glm::rotate(muzzleStart_V, rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::mat4 muzzleStart;
+
+		glm::vec3 undoRotation_V = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.8f, 0.0f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
+		muzzleStart = glm::translate(muzzleStart_V, undoRotation_V);
+		muzzleStart = modeltr * muzzleStart;
+		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->scaling)));
+		Square.Render();
+
+
+		glm::mat4 muzzleStart_H = glm::rotate(muzzleStart_V, glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		glm::vec3 undoRotation_H = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.0f, 0.8f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
+		muzzleStart = glm::translate(muzzleStart_H, undoRotation_H);
+		muzzleStart = modeltr * muzzleStart;
+		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->scaling)));
+		Square.Render();	
+	}
+	
+
+	//Weapon Model
 	glEnable(GL_CULL_FACE); 
 	glCullFace(GL_BACK);
 
+	modelShader.setTransform(modeltr);
 	weapon->GetModel()->Draw(modelShader);
 
 	glDisable(GL_CULL_FACE); 

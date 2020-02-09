@@ -5,12 +5,14 @@ in vec3 fragNorm;
 in vec2 fragTex;
 out vec4 FragColor;
 
-uniform sampler2D imgTexture; //to pass in the 2D texture object to the fs
+//CAMERA
 uniform vec3 cameraPos;
 
+//LIGHT OTHER
 uniform vec3 lightColor;
 uniform vec3 lightPos;
 
+//MATERIAL
 struct Material
 {
 	vec3 ambient;
@@ -21,9 +23,10 @@ struct Material
 	bool has_texture;
 	vec3 color;
 };
-
 uniform Material material;
+uniform sampler2D imgTexture; //to pass in the 2D texture object to the fs
 
+//LIGHTNING
 struct PointLight
 {
 	vec3 position;	
@@ -43,12 +46,15 @@ struct PointLight
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
+//SHADOWS
 uniform samplerCube depthMap0;
 uniform samplerCube depthMap1;
 uniform samplerCube depthMap2;
 uniform float far_plane;
 
-
+//BULLET HOLES
+uniform float radiusImpact;
+uniform vec3 bulletImpact;
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -130,25 +136,31 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 norm, vec3 fragPos, vec3 
 
 void main()
 {
-
-	vec3 norm = normalize(fragNorm);
-	vec3 viewDir = normalize(cameraPos - fragPos);
-
-	vec3 result = vec3(0.0f, 0.0f, 0.0f);
-
-	for(int i = 0; i < numLights; i++)
-		result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
-	
-	if(material.has_texture)
+	if(length(bulletImpact - fragPos) < radiusImpact)
 	{
-		result = result * texture(imgTexture, fragTex).xyz;
+		FragColor = vec4(vec3(0.0f), 1.0f);
 	}
-    else
-    { 
-    	result = result * material.color;
-    }
+	else
+	{
+		vec3 norm = normalize(fragNorm);
+		vec3 viewDir = normalize(cameraPos - fragPos);
 
-    FragColor = vec4(result, 1.0f);
+		vec3 result = vec3(0.0f, 0.0f, 0.0f);
+
+		for(int i = 0; i < numLights; i++)
+			result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
+		
+		if(material.has_texture)
+		{
+			result = result * texture(imgTexture, fragTex).xyz;
+		}
+	    else
+	    { 
+	    	result = result * material.color;
+	    }
+
+	    FragColor = vec4(result, 1.0f);
+    }
 } 
 
 

@@ -32,7 +32,7 @@ int main()
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
-    glfwSetScrollCallback(window, scroll_callback);
+    //glfwSetScrollCallback(window, scroll_callback);
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -59,6 +59,7 @@ int main()
     Asset wall = Asset(eSquare, "wall", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/rivetWallbw.jpg");
     Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.8f, 0.8f, 0.8f), false, "./textures/concretebw.jpg");
     Asset door = Asset(eSquare, "door", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/doorbw.jpg");
+
 
     struct sRoom1  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
     {
@@ -124,7 +125,7 @@ int main()
         std::vector<glm::vec3> lightPos = {glm::vec3(width/2.0f, height, length/2.0f)};
                                 
 
-                                       //ambient        diffuse      //specular           //cst //lin = 0.09 //quad = 0.032
+                                                                //ambient        diffuse      //specular  //cst //lin = 0.09 //quad = 0.032
         PointLight* pointLight = new PointLight(lightPos.size(), glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.045f, 0.0075f);
 
         // CRATES
@@ -241,9 +242,13 @@ int main()
         //Render
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
+        Room::setupCollisions();   
         Lobby.collisionChecks(camera);
         Lobby2.collisionChecks(camera);
+        Lobby.postCollisions();
+        Lobby2.postCollisions();
 
+        
         //renderer.RenderGraph(Root, &camera);
         
         renderer.RenderRoom(&Lobby, &camera);
@@ -343,7 +348,7 @@ void mouse_callback( GLFWwindow* window, double xpos, double ypos)
     camera.ProcessMouseMovements(xoffset, yoffset);
 }
 
-void scroll_callback( GLFWwindow* window, double xoffset, double yoffset)
-{
-    camera.ProcessMouseScroll(yoffset);
-}
+//void scroll_callback( GLFWwindow* window, double xoffset, double yoffset)
+//{
+    //camera.ProcessMouseScroll(yoffset);
+//}

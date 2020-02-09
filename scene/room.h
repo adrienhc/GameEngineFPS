@@ -44,8 +44,15 @@ public:
 		return !active;
 	}
 
+	static void setupCollisions();	
+	static float minBulletDist;
+	void postCollisions();
 
 private:
+	//ROOM ID
+	static int sharedID;
+	int ID;
+
 	//SCENE GRAPH
 	nNode* Root = NULL;
 	nNode* Lights = NULL; //Return Lights in World Space (!= than Room Space)
@@ -103,6 +110,9 @@ private:
 	//SHADOW PASS
 	bool shadowPass = true;
 
+	//BULLET COLLISION MIN DIST
+	static float maxBulletDist;
+
 	//METHODS
 	glm::vec3 adjustAssetPos(glm::vec3 Pos);
 	nNode* horizontalPlane(nNode* Root, Asset* asset);
@@ -115,7 +125,7 @@ private:
 	bool pointOpeningDoor(int height, int width, std::vector<int> Door);
 	bool boxOpeningDoor(int ref_height, int ref_width, int other_height, int other_width, std::vector<int> Door);
 	bool hasBeam(int ibool);
-	
+
 	bool cameraCollide(Camera &camera);
 	bool bulletCollide(Camera &camera);
 
@@ -124,6 +134,7 @@ private:
 	void handlePointWall(glm::vec3 &playerPos, glm::vec3 min_bb, glm::vec3 max_bb);
 	void handleBoxWall(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
 	std::string handleBoxObject(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
+
 };
 
 
