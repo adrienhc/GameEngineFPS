@@ -53,8 +53,9 @@ uniform samplerCube depthMap2;
 uniform float far_plane;
 
 //BULLET HOLES
+#define MAX_BULLET_HOLES 10
 uniform float radiusImpact;
-uniform vec3 bulletImpact;
+uniform vec3 bulletHoles[MAX_BULLET_HOLES];
 
 vec3 sampleOffsetDirections[20] = vec3[]
 (
@@ -136,31 +137,34 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 norm, vec3 fragPos, vec3 
 
 void main()
 {
-	if(length(bulletImpact - fragPos) < radiusImpact)
+	for(int i = 0; i < MAX_BULLET_HOLES; i++)
 	{
-		FragColor = vec4(vec3(0.0f), 1.0f);
-	}
-	else
-	{
-		vec3 norm = normalize(fragNorm);
-		vec3 viewDir = normalize(cameraPos - fragPos);
-
-		vec3 result = vec3(0.0f, 0.0f, 0.0f);
-
-		for(int i = 0; i < numLights; i++)
-			result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
-		
-		if(material.has_texture)
+		if(length(bulletHoles[i] - fragPos) < radiusImpact)
 		{
-			result = result * texture(imgTexture, fragTex).xyz;
+			FragColor = vec4(vec3(0.0f), 1.0f);
+			return;
 		}
-	    else
-	    { 
-	    	result = result * material.color;
-	    }
+	}
 
-	    FragColor = vec4(result, 1.0f);
+	vec3 norm = normalize(fragNorm);
+	vec3 viewDir = normalize(cameraPos - fragPos);
+
+	vec3 result = vec3(0.0f, 0.0f, 0.0f);
+
+	for(int i = 0; i < numLights; i++)
+		result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
+	
+	if(material.has_texture)
+	{
+		result = result * texture(imgTexture, fragTex).xyz;
+	}
+    else
+    { 
+    	result = result * material.color;
     }
+
+    FragColor = vec4(result, 1.0f);
+    
 } 
 
 

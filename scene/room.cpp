@@ -812,7 +812,9 @@ bool Room::collisionChecks(Camera &camera)
 {
     //std::cout << "T S = " << targets.size() << std::endl;
     bool camCheck = cameraCollide(camera);
-    bool bulletCheck = bulletCollide(camera);
+    bool bulletCheck = false;
+    if(Weapon::newBullet)
+        bulletCheck = bulletCollide(camera);
     return bulletCheck;
 }
 
@@ -1029,21 +1031,23 @@ void Room::setupCollisions()
 
 void Room::postCollisions()
 {
-    //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
-    for(int i = 0; i < targets.size(); i++)
+    if(Weapon::newBullet)
     {
-        //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
-        if(Weapon::fire)
-            std::cout << minBulletDist << std::endl;
-
-        if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
+        //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
+        for(int i = 0; i < targets.size(); i++)
         {
-            targets[i]->Shot();
-            shadowPass = true;
+            //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
+            //if(Weapon::fire)
+             //   std::cout << minBulletDist << std::endl;
+            if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
+            {
+                targets[i]->Shot();
+                shadowPass = true;
+            }
+            
+            if(targets[i]->Erase())
+                targets.erase(targets.begin()+i);
         }
-        
-        if(targets[i]->Erase())
-            targets.erase(targets.begin()+i);
     }
 }
 

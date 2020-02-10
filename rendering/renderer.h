@@ -39,7 +39,7 @@ public:
 	Renderer();
 	void RenderGraph(nNode* Root, Camera* camera); //if not NULL, then build Shadow map 
 	void RenderRoom(Room* room, Camera* cam);
-	void RenderWeapon(Weapon* weapon, Camera* cam);
+	void RenderWeapon(Weapon* weapon, Camera* cam, float deltaTime);
 	void RenderOutline(Model* model, Camera* cam); 
 	void RenderSkybox(Skybox* skybox, Camera* cam);
 	void Instance(nNode* Root, eType type, Asset* Instanced, std::vector<glm::mat4> &m_transforms, std::vector<glm::mat3> &n_transforms); //instances together all instances of Asset in tree 
@@ -59,6 +59,10 @@ private:
 	std::vector<PointLight> shadowLights; 
 	std::vector<int> shadowLightsIndex;
 	bool shadowPass = true;
+
+	int bulletHolesIndex = 0;
+	int MAX_BULLET_HOLES = 10;
+	std::vector<glm::vec3> bulletHoles;
 
 	//Non Geometry
 	Shader myShader =  Shader("shaders/shader.vs", "shaders/shader.fs"); //PATH FROM MAIN

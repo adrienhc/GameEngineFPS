@@ -248,7 +248,7 @@ int main()
         Lobby.postCollisions();
         Lobby2.postCollisions();
 
-        
+
         //renderer.RenderGraph(Root, &camera);
         
         renderer.RenderRoom(&Lobby, &camera);
@@ -260,8 +260,7 @@ int main()
 
         renderer.RenderSkybox(&skybox, &camera);
 
-        Weapon::InterpolateOffsets(deltaTime);
-        renderer.RenderWeapon(&SMG, &camera);
+        renderer.RenderWeapon(&SMG, &camera, deltaTime);
         //renderer.RenderWeapon(&ARG, &camera);
 
         
@@ -329,6 +328,11 @@ void process_input(GLFWwindow* window)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
         camera.ProcessKeyboard(UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+    {
+        if(!Weapon::reload)
+            Weapon::reload = true;
+    }
 }
 
 void mouse_callback( GLFWwindow* window, double xpos, double ypos)

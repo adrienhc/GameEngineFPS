@@ -3,6 +3,10 @@
 Renderer::Renderer()
 {
     //MatrixStack.push(glm::mat4(1.0f));
+    for(int i = 0; i < MAX_BULLET_HOLES; i++)
+    {
+    	bulletHoles.push_back(glm::vec3(1000.0f));
+    }
 }
 
 void Renderer::RenderRoom(Room* room, Camera* cam)
@@ -55,13 +59,23 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 		Traverse(room->targets[i]->GetNodeModel(), eModel);
 	}
 
-	//Bullet holes
-	if(Weapon::flash && Room::minBulletDist < Room::maxBulletDist)
+	//Bullet holes -- only need to be done for one of the rooms 
+	if((room->ID == 0) && (Weapon::newBullet) && (Room::minBulletDist < Room::maxBulletDist))
 	{
 		instancedShader.use(); 
-		instancedShader.setFloat("radiusImpact", 0.05f);
+		instancedShader.setFloat("radiusImpact", 0.03f);
+		
 		glm::vec3 bulletImpact = cam->Position + glm::normalize(cam->Front) * Room::minBulletDist;
-		instancedShader.setVec3("bulletImpact", bulletImpact);
+		bulletHoles[bulletHolesIndex] = bulletImpact;
+		bulletHolesIndex++;
+		if(bulletHolesIndex > MAX_BULLET_HOLES)
+			bulletHolesIndex = 0;
+		
+		for(int i = 0; i < MAX_BULLET_HOLES; i++)
+		{
+			std::string str_index = std::to_string(i);
+			instancedShader.setVec3("bulletHoles[" + str_index + "]", bulletHoles[i]);
+		}
 	}
 
 	//Render Instanced Geometry
@@ -133,8 +147,9 @@ void Renderer::GetLights(Room* room) //Set Current Lights to be those the player
 	Traverse(room->Lights, eRoot); //"this" pointer from room, do not check for NULL as will say it is 
 }
 
-void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific actions to position it correctly 
-{
+void Renderer::RenderWeapon(Weapon* weapon, Camera* cam, float deltaTime) //NEED Weapon Specific actions to position it correctly 
+{	
+	weapon->Update(deltaTime);
 
 	glm::vec4 weapon_offsets = weapon->GetADSOffset(); 
 	cam->Zoom = weapon_offsets.w;
@@ -156,7 +171,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	glm::vec3 weapon_axis = glm::normalize(point_to - center_weapon); 
 
 	modeltr = glm::translate(modeltr,  -1.0f * weapon_axis * 0.02f * weapon->GetRecoilOffset()); //Horizontal recoil
-	modeltr = glm::scale(modeltr, weapon->scaling);
+	modeltr = glm::scale(modeltr, weapon->GetScaling());
 
 	//ALIGN FRONT - POINT TO CAM FRONT DIR 
 	glm::vec3 front_loaded = glm::vec3(0.0f, 0.0f, 1.0f); //Dir Vector of loaded weapom -- same for all 
@@ -174,15 +189,16 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 	if(cam->Front.y < 0.0f) //SMG  
 		vert_angle *= -1.0f;
 	modeltr = glm::rotate(modeltr, vert_angle, rot_axis);//glm::vec3(right_weapon.x, 0.0f, right_weapon.z)); //Align weapon vertically 
-	modeltr = glm::rotate(modeltr, glm::radians(weapon->GetRecoilOffset()), rot_axis); //Vertical recoil
+	modeltr = glm::rotate(modeltr, glm::radians(weapon->GetRecoilOffset()), rot_axis); //Vertical recoil -- No Recoil If reloading
+	modeltr = glm::rotate(modeltr, glm::radians(90.0f * (float) sin(weapon->GetReloadOffset() * (3.1415f))), rot_axis); //When Reloading -- Rotation by 0 if not reload 
 
 	glClear(GL_DEPTH_BUFFER_BIT); //To Avoid Weapon Clipping into Objects
 	
 
-	if(Weapon::fire && !weapon->IsFullyADS())
+	if(weapon->IsFiring() && !weapon->IsFullyADS())
 	{
 
-		float time = Weapon::fire_time_offset; //glfwGetTime();
+		float time = weapon->GetFireOffset(); //glfwGetTime();
 		float spinSpeed = 1000.0f;
 		float rotationMuzzle = time * spinSpeed;
 		float frontOffsetMuzzle = 6.0f;
@@ -197,7 +213,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 		glm::vec3 undoRotation_V = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.8f, 0.0f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
 		muzzleStart = glm::translate(muzzleStart_V, undoRotation_V);
 		muzzleStart = modeltr * muzzleStart;
-		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->scaling)));
+		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->GetScaling())));
 		Square.Render();
 
 
@@ -205,7 +221,7 @@ void Renderer::RenderWeapon(Weapon* weapon, Camera* cam) //NEED Weapon Specific 
 		glm::vec3 undoRotation_H = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.0f, 0.8f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
 		muzzleStart = glm::translate(muzzleStart_H, undoRotation_H);
 		muzzleStart = modeltr * muzzleStart;
-		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->scaling)));
+		myShader.setTransform(glm::scale(muzzleStart, 1.0f/(3.0f*weapon->GetScaling())));
 		Square.Render();	
 	}
 	
