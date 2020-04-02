@@ -21,7 +21,7 @@ struct Material
 	float shininess;	//int btw 1, 256 (smaller = more scatter)
 
 	bool has_texture;
-	vec3 color;
+	vec4 color;
 };
 uniform Material material;
 uniform sampler2D imgTexture; //to pass in the 2D texture object to the fs
@@ -38,8 +38,6 @@ struct PointLight
 	float constant;
 	float linear;
 	float quadratic;
-
-	float index;
 };
 
 #define NUM_POINT_LIGHTS 3
@@ -157,13 +155,16 @@ void main()
 	if(material.has_texture)
 	{
 		result = result * texture(imgTexture, fragTex).xyz;
+		FragColor = vec4(result, 1.0f);
 	}
     else
     { 
-    	result = result * material.color;
+    	result = result * material.color.xyz;
+    	FragColor = vec4(result, 1.0f);
+    	//FragColor = vec4(1.0f);
     }
 
-    FragColor = vec4(result, 1.0f);
+    
     
 } 
 

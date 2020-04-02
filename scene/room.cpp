@@ -1,6 +1,7 @@
 #include "room.h"
 
 bool Room::active = true;
+bool Room::shadowPass = true;
 int Room::sharedID = 0;
 float Room::minBulletDist = 1000.0f;
 float Room::maxBulletDist = 1000.0f;
@@ -48,8 +49,8 @@ Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  
     pointLight = ptLght;
 
     //OBJECT OUTLINE
-    glm::vec3 outline_color = glm::vec3(1.0f, 0.0f, 0.0f);
-    float outline_size = 1.05f;
+    glm::vec4 outline_color = glm::vec4(0.576f, 0.164f, 0.164f, 1.0f);
+    float outline_size = 0.05f;
 
     //TARGETS
     for(int i = 0; i < trgt.size(); i++)
@@ -69,12 +70,18 @@ glm::vec3 Room::adjustAssetPos(glm::vec3 Pos)
 
 void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
 {
+    std::vector<nNode*> Roots;
+
     //NON INSTANTIATED
     Root = new nNode();
     Lights = new nNode();
 
+    std::vector<nNode*> Tiles;
+    std::vector<nNode*> Cubes;
+
     //LIGHTS
     nNode* Ref = Root;
+    nNode* RefBeam = NULL;
     nNode* RefLights = Lights;
 
     for(int i = 0; i < pointLightPos.size(); i++)
@@ -85,6 +92,7 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
         RefLights->AddChildren(new nPointLight(pointLight, i));
     }
 
+    g_light = new Group(Lights);
     //ADD TARGETS TO ROOT 
     //for(int i = 0; i < targets.size(); i++)
     //{
@@ -103,7 +111,7 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
     std::vector<glm::mat3> inst_norm;
 
     //INSTANTIATED 
-    //WALLS + DOOR + BEAM + CRATES
+    //FLOOR AND CEILING
     nNode* Instanciated = new nNode();
     Ref = Instanciated->AddChildrenRecursive(new nRotate(glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f), true)); //FLOOR
     Ref = Ref->AddChildrenRecursive(new nTranslate(offset));
@@ -124,47 +132,76 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
     inst_tr.clear();
     inst_norm.clear();
 
-    delete Instanciated;
+    Roots.push_back(Instanciated);
+    Tiles.push_back(Instanciated);
 
+    //SEPARATE WALLS AND BEAMS
     Instanciated = new nNode();
     Ref = Instanciated->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); //SOUTH
     Ref = Ref->AddChildrenRecursive(new nTranslate(offset));
-    Ref = verticalPlaneNS(Ref, DoorS);
+    Ref = verticalPlaneNS(Ref, DoorS, false);
+    nNode* InstanciatedBeam = new nNode();
+    RefBeam = InstanciatedBeam->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); //SOUTH
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(offset));
+    RefBeam = verticalPlaneNS(RefBeam, DoorS, true);
+
     Ref = Instanciated;
     Ref = Ref->AddChildrenRecursive(new nRotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); 
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.0f, (float) length))); //NORTH
     Ref = Ref->AddChildrenRecursive(new nTranslate(offset));
-    Ref = verticalPlaneNS(Ref, DoorN);
+    Ref = verticalPlaneNS(Ref, DoorN, false);
+    RefBeam = InstanciatedBeam;
+    RefBeam = RefBeam->AddChildrenRecursive(new nRotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); 
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.0f, (float) length))); //NORTH
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(offset));
+    RefBeam = verticalPlaneNS(RefBeam, DoorN, true);
     
+
     Ref = Instanciated->AddChildrenRecursive(new nRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f))); //EAST
     Ref = Ref->AddChildrenRecursive(new nTranslate(offset));
-    Ref = verticalPlaneEW(Ref, DoorE);
+    Ref = verticalPlaneEW(Ref, DoorE, false);
+    RefBeam = InstanciatedBeam->AddChildrenRecursive(new nRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f))); //EAST
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(offset));
+    RefBeam = verticalPlaneEW(RefBeam, DoorE, true);
+
     Ref = Instanciated;
     Ref = Ref->AddChildrenRecursive(new nRotate(glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f)));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3((float) width, 0.0f, 0.0f))); //WEST
     Ref = Ref->AddChildrenRecursive(new nTranslate(offset));
-    Ref = verticalPlaneEW(Ref, DoorW);
+    Ref = verticalPlaneEW(Ref, DoorW, false);
+    RefBeam = InstanciatedBeam;
+    RefBeam = RefBeam->AddChildrenRecursive(new nRotate(glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f)));
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3((float) width, 0.0f, 0.0f))); //WEST
+    RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(offset));
+    RefBeam = verticalPlaneEW(RefBeam, DoorW, true);
 
     renderer.Instance(Instanciated, eRoot, wall, inst_tr, inst_norm); //WALL
-    i_wall = new cSquare(inst_tr, inst_norm);
+    i_wall = new cSquare(inst_tr, inst_norm);    
     inst_tr.clear();
     inst_norm.clear();
 
     renderer.Instance(Instanciated, eRoot, door, inst_tr, inst_norm); //DOOR
     i_door = new cSquare(inst_tr, inst_norm);
     inst_tr.clear();
-    inst_norm.clear();    
+    inst_norm.clear();
 
-    renderer.Instance(Instanciated, eRoot, beam, inst_tr, inst_norm); //BEAM
+    renderer.Instance(InstanciatedBeam, eRoot, beam, inst_tr, inst_norm); //BEAM    
     i_beam = new cCube(inst_tr, inst_norm);
     inst_tr.clear();
     inst_norm.clear();
 
-    delete Instanciated;
+    Roots.push_back(Instanciated);
+    Roots.push_back(InstanciatedBeam);
+    Tiles.push_back(Instanciated);
+    Cubes.push_back(InstanciatedBeam);
     
+    //CRATES
     Instanciated = new nNode();
     //VERTICAL CRATES
     for(int i = 0; i < vertical.size(); i++)
@@ -182,7 +219,12 @@ void Room::makeRoom(Renderer renderer) //MAKES SCENE GRAPH, AND INSTANTIATES ROO
     inst_tr.clear();
     inst_norm.clear(); 
 
-    delete Instanciated;
+    Roots.push_back(Instanciated);
+    Cubes.push_back(Instanciated);
+
+    g_layout = new Group(Roots);
+    g_tiles = new Group(Tiles);
+    g_cubes = new Group(Cubes);
 }
 
 
@@ -205,69 +247,79 @@ nNode* Room::horizontalPlane(nNode* Root, Asset* asset) //floor or ceiling
 }
 
 
-nNode* Room::verticalPlaneNS(nNode* Root, std::vector<int> Door)
+nNode* Room::verticalPlaneNS(nNode* Root, std::vector<int> Door, bool justBeams)
 {
-    nNode* Ref = Root;
-    for(int i = 0; i < height; i++)
+    if(!justBeams)
     {
-        for(int j = 0; j < width; j++)
+        nNode* Ref = Root;
+        for(int i = 0; i < height; i++)
         {
-            if( !isDoor(i, j, Door) )
-                Ref = Ref->AddChildrenRecursive(new nAsset(wall, eInstanced));
-            else
+            for(int j = 0; j < width; j++)
             {
-                if( !pointOpeningDoor(i, j, Door) )                      
-                    Ref = Ref->AddChildrenRecursive(new nAsset(door, eInstanced));    
+                if( !isDoor(i, j, Door) )
+                    Ref = Ref->AddChildrenRecursive(new nAsset(wall, eInstanced));
+                else
+                {
+                    if( !pointOpeningDoor(i, j, Door) )                      
+                        Ref = Ref->AddChildrenRecursive(new nAsset(door, eInstanced));    
+                }
+
+                if(j < width-1)
+                    Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(1.0f, 0.0f, 0.0f)));
             }
-
-            if(j < width-1)
-                Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(1.0f, 0.0f, 0.0f)));
+            
+            Ref = Ref->AddChildrenRecursive(new nTranslate (glm::vec3(-1.0f * (width - 1), 1.0f, 0.0f)));
         }
-        
-        Ref = Ref->AddChildrenRecursive(new nTranslate (glm::vec3(-1.0f * (width - 1), 1.0f, 0.0f)));
     }
-
-    for(int i = 0; i < Door.size(); i+=doorSpec)
+    else
     {
-        if(hasBeam(Door[i+5]))
+        for(int i = 0; i < Door.size(); i+=doorSpec)
         {
-    	   std::vector<int> mDoor(Door.begin()+i, Door.begin()+i+4);
-    	   Root = addBeamNS(Root, mDoor);
+            if(hasBeam(Door[i+5]))
+            {
+               std::vector<int> mDoor(Door.begin()+i, Door.begin()+i+4);
+               Root = addBeamNS(Root, mDoor);
+            }
         }
     }
-
+   
     return Root;
 }
 
 
-nNode* Room::verticalPlaneEW(nNode* Root, std::vector<int> Door)
+nNode* Room::verticalPlaneEW(nNode* Root, std::vector<int> Door, bool justBeams)
 {
-    nNode* Ref = Root;
-    for(int i = 0; i < height; i++)
+    if(!justBeams)
     {
-        for(int j = 0; j < length; j++)
+        nNode* Ref = Root;
+        for(int i = 0; i < height; i++)
         {
-            if( !isDoor(i, j, Door) )
-                Ref = Ref->AddChildrenRecursive(new nAsset(wall, eInstanced));
-            else
+            for(int j = 0; j < length; j++)
             {
-                if( !pointOpeningDoor(i, j, Door) )                      
-                    Ref = Ref->AddChildrenRecursive(new nAsset(door, eInstanced));
-                
+                if( !isDoor(i, j, Door) )
+                    Ref = Ref->AddChildrenRecursive(new nAsset(wall, eInstanced));
+                else
+                {
+                    if( !pointOpeningDoor(i, j, Door) )                      
+                        Ref = Ref->AddChildrenRecursive(new nAsset(door, eInstanced));
+                    
+                }
+                if(j < length-1)
+                    Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.0f, 1.0f)));
             }
-            if(j < length-1)
-                Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.0f, 1.0f)));
-        }
-        
-        Ref = Ref->AddChildrenRecursive(new nTranslate (glm::vec3(0.0f, 1.0f, -1.0f * (length - 1))));
+            
+            Ref = Ref->AddChildrenRecursive(new nTranslate (glm::vec3(0.0f, 1.0f, -1.0f * (length - 1))));
+        }    
     }
-
-    for(int i = 0; i < Door.size(); i+=doorSpec)
+    else
     {
-        if(hasBeam(Door[i+5]))
+        for(int i = 0; i < Door.size(); i+=doorSpec)
         {
-    	   std::vector<int> mDoor(Door.begin()+i, Door.begin()+i+4);
-    	   Root = addBeamEW(Root, mDoor);
+            if(hasBeam(Door[i+5]))
+            {
+               std::vector<int> mDoor(Door.begin()+i, Door.begin()+i+4);
+               Root = addBeamEW(Root, mDoor);
+            }
         }
     }
 
@@ -1027,32 +1079,119 @@ bool Room::bulletCollide(Camera &camera)
 void Room::setupCollisions()
 {
     minBulletDist = 1000.0f;
+    shadowPass = false;
 }
 
 void Room::postCollisions()
 {
-    if(Weapon::newBullet)
+    //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
+    for(int i = 0; i < targets.size(); i++)
     {
-        //CHECK IF TARGET HAS BEEN SHOT SINCE LONGER THAN ITS LIFESPAN
-        for(int i = 0; i < targets.size(); i++)
+        //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
+        //if(Weapon::fire)
+         //   std::cout << minBulletDist << std::endl;
+        if(Weapon::newBullet)
         {
-            //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
-            //if(Weapon::fire)
-             //   std::cout << minBulletDist << std::endl;
             if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
             {
                 targets[i]->Shot();
                 shadowPass = true;
             }
-            
-            if(targets[i]->Erase())
-                targets.erase(targets.begin()+i);
         }
+
+        if(targets[i]->Erase())
+            targets.erase(targets.begin()+i);
     }
 }
+
 
 void Room::getLights(Renderer renderer)
 {
     if(self_collision) //If I am the room that collides with player, player is inside room
         renderer.GetLights(this);
+}
+
+
+void Room::addLayoutLayer(AbstractLayer* layer)
+{
+    //Submit layout under strict conditions -- fustrum culling
+    layer->Add(g_layout);
+}
+
+void Room::addCubesLayer(InstancedLayer* instanced_layer)
+{
+    instanced_layer->Add(g_cubes);
+}
+
+void Room::addTilesLayer(InstancedLayer* instanced_layer)
+{
+    instanced_layer->Add(g_tiles);
+}
+
+void Room::addLightsLayer(SceneLayer* scene, bool renderable)
+{
+    //Always submit light, or under lax conditions -- room and distance from player?
+    scene->AddLight(g_light, renderable);
+}
+
+void Room::addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_layer, AbstractLayer* particle_layer, AbstractLayer* depthmap_layer)
+{
+    nNode* TargetsDepthmap = new nNode();
+    nNode* TargetsParticle = new nNode();
+    nNode* TargetsOutline = new nNode();
+    nNode* TargetsRender = new nNode();
+
+    for(int i = 0; i < targets.size(); i++)
+    {
+        nModel* targetModel = targets[i]->GetNodeModel(); 
+        //Explode Group
+        if(targets[i]->IsShot()) 
+        {
+            if(particle_layer) //&& targetModel->GetShader() == eExplode)
+            {
+                TargetsParticle->AddChildren(targetModel);
+            }
+        }        
+        else
+        {
+            //Outline Group
+            if(outline_layer && targetModel->HasOutline())
+            {
+                targetModel->EnableOutline();
+                TargetsOutline->AddChildren(targetModel);
+            }
+
+            //Regular Model
+            if(model_layer)
+                TargetsRender->AddChildren(targetModel);
+            if(depthmap_layer)
+                TargetsDepthmap->AddChildren(targetModel);
+        }
+    }
+
+    if(particle_layer)
+    {
+        Group* g_TargetsParticle = new Group(TargetsParticle);
+        particle_layer->Add(g_TargetsParticle);
+    }
+
+    //PUSH OUTLINES FIRST!!! -- disables outline for NodeModel when pushed
+    if(outline_layer) //if add outline, add model at the same time too?
+    {
+        Group* g_TargetsOutline = new Group(TargetsOutline);
+        outline_layer->Add(g_TargetsOutline);
+    }
+
+    //PUSH MODELS LAST
+    if(model_layer)
+    {
+        Group* g_TargetsRender = new Group(TargetsRender);
+        model_layer->Add(g_TargetsRender);
+    }
+
+    if(depthmap_layer)
+    {
+        Group* g_TargetsDepthmap = new Group(TargetsDepthmap);
+        depthmap_layer->Add(g_TargetsDepthmap);
+    }
 }

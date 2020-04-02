@@ -22,7 +22,6 @@ uniform mat3 normal_transform;
 
 
 /// PARTICLES ///
-
 uniform float deltaTime;
 const float size = 0.1;
 const vec3 color =  vec3(0.576f, 0.164f, 0.164f);

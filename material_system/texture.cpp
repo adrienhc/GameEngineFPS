@@ -6,6 +6,7 @@ Texture::Texture(std::string path)
 {
 	glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
+
     //set teture parameters
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //S coord
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //T coord
@@ -46,4 +47,9 @@ void Texture::Bind()
 void Texture::unBind()
 {
 	 glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+unsigned int Texture::GetID()
+{
+    return texture;
 }

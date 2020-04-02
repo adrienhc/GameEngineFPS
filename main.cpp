@@ -5,9 +5,10 @@ int main()
 
     //GLFW WINDOW SETUP
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //for OpenGL 3.3
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); //for OpenGL 3.3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
     if(!CapFPS)
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
@@ -50,22 +51,24 @@ int main()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
 
+    glEnable(GL_MULTISAMPLE); 
+
     //ASSETS
-                                        //ambient,  diffuse,  specular,  shininess,  color
-    Asset crate = Asset(eCube, "crate", glm::vec3(0.4f), glm::vec3(0.8f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/cratebw.jpg");
-    Asset floor = Asset(eSquare, "floor", glm::vec3(0.5f), glm::vec3(1.0f), glm::vec3(0.5f), 2.0f, glm::vec3(0.0f), true, "./textures/floornoborder.jpg");
-    Asset REF = Asset(eCube, "ref", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec3(1.0f, 1.0f, 0.0f), false, "");
-    Asset ceiling = Asset(eSquare, "ceiling", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec3(0.0f), true, "./textures/ceilingbw.jpg");
-    Asset wall = Asset(eSquare, "wall", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/rivetWallbw.jpg");
-    Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.8f, 0.8f, 0.8f), false, "./textures/concretebw.jpg");
-    Asset door = Asset(eSquare, "door", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec3(0.0f), true, "./textures/doorbw.jpg");
+                                              //ambient,  diffuse,           specular,   shininess,  color
+    Asset crate = Asset(eCube, "crate", glm::vec3(0.4f), glm::vec3(0.8f), glm::vec3(1.0f), 32.0f, glm::vec4(1.0f), true, "./textures/cratebw.jpg");
+    Asset floor = Asset(eSquare, "floor", glm::vec3(0.5f), glm::vec3(1.0f), glm::vec3(0.5f), 2.0f, glm::vec4(1.0f), true, "./textures/floornoborder.jpg");
+    Asset REF = Asset(eCube, "ref", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec4(0.0f, 1.0f, 0.0f, 0.5f), false, "");
+    Asset ceiling = Asset(eSquare, "ceiling", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec4(1.0f), true, "./textures/ceilingbw.jpg");
+    Asset wall = Asset(eSquare, "wall", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(1.0f), true, "./textures/rivetWallbw.jpg");
+    Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(0.8f, 0.8f, 0.8f, 1.0f), false, "./textures/concretebw.jpg");
+    Asset door = Asset(eSquare, "door", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(1.0f), true, "./textures/doorbw.jpg");
 
 
     struct sRoom1  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
     {
         int length = 20;
         int width = 20;
-        int height = 10;
+        int height = 7;
 
         glm::vec3 offset = glm::vec3(0.0f, 0.0f, 0.0f);
 
@@ -83,7 +86,7 @@ int main()
 
         std::vector<glm::vec3> lightPos = {glm::vec3(width/2.0f, height, length/2.0f)};
 
-                                               //ambient        diffuse      //specular  //cst //lin //quad
+                                               //numberOf         //ambient        diffuse      //specular  //cst //lin //quad
         PointLight* pointLight = new PointLight(lightPos.size(), glm::vec3(0.6f),  LightColor, LightColor, 1.0f, 0.045f, 0.0075f);
 
         // CRATES
@@ -106,7 +109,7 @@ int main()
     {
         int length = 20;
         int width = 20;
-        int height = 10;
+        int height = 7;
 
         glm::vec3 offset = glm::vec3(0.0f, 0.0f, -length -0.05f);
 
@@ -147,6 +150,7 @@ int main()
     struct sWeapon1
     {
         char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
+        //char* path = (char*) "3DModels/untitled.obj";
         glm::vec3 hip_offset = glm::vec3(0.3f, 0.3f, 0.2f); //FRONT, RIGHT, DOWN
         glm::vec3 ads_offset = glm::vec3(0.1f, -0.002f, 0.135f);
         float scale_factor = 0.1f;
@@ -193,7 +197,7 @@ int main()
 
     //WEAPONS
     Weapon SMG(smg.path, smg.hip_offset, smg.ads_offset, smg.scale_factor, smg.zoom_min, smg.zoom_max);
-    Weapon ARG(airgun.path, airgun.hip_offset, airgun.ads_offset, airgun.scale_factor, airgun.zoom_min, airgun.zoom_max);
+    //Weapon ARG(airgun.path, airgun.hip_offset, airgun.ads_offset, airgun.scale_factor, airgun.zoom_min, airgun.zoom_max);
 
     // CAMERA
     camera = Camera(glm::vec3(5.0f, 5.0f, 3.0f));
@@ -202,6 +206,26 @@ int main()
     float ratio = (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT;
     camera.SetView(0.01f, 50.0f, ratio);
 
+    Player Player(&camera, &SMG);
+
+    //LAYERS
+    Shader batchShader = Shader("shaders/batch/batchShader.vs", "shaders/batch/batchShader.fs"); 
+    SceneLayer weapon = SceneLayer(&camera, &batchShader);
+    SceneLayer targets = SceneLayer(&camera, &batchShader);
+    SceneLayer scene = SceneLayer(&camera, &batchShader);
+    InstancedLayer instanced = InstancedLayer(&camera, &batchShader);
+
+    Shader outlineShader = Shader("shaders/batch/outlineShader.vs", "shaders/batch/outlineShader.fs"); 
+    OutlineLayer outline = OutlineLayer(&camera, &outlineShader);
+
+    Shader particleShader = Shader("shaders/batch/particleCubeShader.vs", "shaders/batch/particleCubeShader.gs", "shaders/batch/particleCubeShader.fs");
+    SceneLayer particle = ParticleLayer(&camera, &particleShader);
+
+    Shader depthShader = Shader("shaders/batch/depthShader.vs", "shaders/batch/depthShader.gs", "shaders/batch/depthShader.fs");
+    DepthmapLayer depthmap = DepthmapLayer(&camera, &depthShader); 
+
+    //TARGET BOUNDING BOXES
+    /*
     nNode* Root = new nNode();
     nNode* Ref = Root->AddChildrenRecursive(new nTranslate(glm::vec3(5.5f, 2.0f + 0.5f, 6.5f)));
     
@@ -219,51 +243,129 @@ int main()
     Ref = Ref->AddChildrenRecursive(new nScale(glm::vec3(0.85f, 0.8f, 0.1f)));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.8f, 0.0f)));
     Ref->AddChildren(new nAsset(&REF, eObject));
+    */
 
+    //Fragment Shader supports 32 textures!
+    float deltaTimeAcc = 0.0f;
+    int Frames;
     //RENDER LOOP
     while(!glfwWindowShouldClose(window))
     {
 
-        //timing
+        //TIMING
         float current_frame = glfwGetTime();
         deltaTime = current_frame - lastFrame;
         if(DisplayFPS)
-            std::cout << "F.P.S = " << 1.0f/deltaTime << std::endl;
+        {
+            deltaTimeAcc += deltaTime;
+            Frames++;
+            if(deltaTimeAcc > 1.0f)
+            {
+                std::cout << Frames << " fps" << std::endl;
+                Frames = 0;
+                deltaTimeAcc = 0.0f;
+            }
+        }
         lastFrame = current_frame;
 
-        //Input Processing
+        //INPUT PROCESSING
         process_input(window);
+
+        //GAME LOGIC
+        Room::setupCollisions();   
+        Lobby.collisionChecks(camera);
+        Lobby2.collisionChecks(camera);
+        Lobby.postCollisions();
+        Lobby2.postCollisions();
+        Player.Update(deltaTime);
+
+        //RENDERING
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
         if(polygon)
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-        //Render
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-        Room::setupCollisions();   
-        Lobby.collisionChecks(camera);
-        Lobby2.collisionChecks(camera);
-        Lobby.postCollisions();
-        Lobby2.postCollisions();
+        //STATIC GEOMETRY
+        if(firstPass)
+        {
+            //SCENE
+            scene.Clear();
+            Lobby.addLightsLayer(&scene, true);
+            Lobby2.addLightsLayer(&scene, true);
+            Lobby.addLayoutLayer(&scene);
+            Lobby2.addLayoutLayer(&scene);   
+        }
 
+        //DEPTHMAP LAYER
+        if(firstPass || Room::shadowPass)
+        {
+            std::cout << "Update" << std::endl;
+            //DEPTHMAP, TARGETS AND OUTLINE
+            glStencilMask(0xFF);
+            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 
-        //renderer.RenderGraph(Root, &camera);
+            depthmap.Clear();
+            Lobby.addLightsLayer(&depthmap);
+            Lobby2.addLightsLayer(&depthmap);
+            Lobby.addLayoutLayer(&depthmap);
+            Lobby2.addLayoutLayer(&depthmap);
+
+            targets.Clear();
+            outline.Clear();
+            Lobby.addLightsLayer(&targets);
+            Lobby2.addLightsLayer(&targets);
+            Lobby.addTargetsLayer(&targets, &outline, NULL, &depthmap);
+            Lobby2.addTargetsLayer(&targets, &outline, NULL, &depthmap);
+            depthmap.Render(); //Render DepthMap of scene from each of light's layers POV
+
+        }
         
-        renderer.RenderRoom(&Lobby, &camera);
-        renderer.RenderRoom(&Lobby2, &camera);
+        // std::cout << "START" << std::endl;
+        
+        //PLAYER LAYER
+        //Do Stencil Shennenigans so that Gun Not Overwritten
+        glStencilMask(0xFF);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_GEQUAL, 2, 0xFF);
+        weapon.Clear();
+        Lobby.addLightsLayer(&weapon);
+        Lobby2.addLightsLayer(&weapon);
+        Player.addLayer(&weapon);
+        glEnable(GL_CULL_FACE); 
+        glCullFace(GL_BACK);
+        weapon.Render();
+        glDisable(GL_CULL_FACE);  
+        
+        //OUTLINED OBJECTS LAYER 
+        //Target //if shared outline ok
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_GEQUAL, 1, 0XFF);
+        targets.RenderKeep();
+        //Outline //if shared outline ok 
+        glStencilFunc(GL_GREATER, 1, 0xFF);
+        outline.RenderKeep();
 
-        Lobby.getLights(renderer);
-        Lobby2.getLights(renderer);
-
-
+        //ROOM LAYER
+        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+        glStencilFunc(GL_GREATER, 2, 0XFF); //From here on, do not overwrite Gun
+        scene.RenderKeep();
+        
+        Lobby.addTargetsLayer(NULL, NULL, &particle, NULL);
+        Lobby2.addTargetsLayer(NULL, NULL, &particle, NULL);
+        particle.ClearLight();
+        Lobby.addLightsLayer(&particle);
+        Lobby2.addLightsLayer(&particle);
+        particle.Render();        
+        
+        //SKYBOX LAYER
         renderer.RenderSkybox(&skybox, &camera);
-
-        renderer.RenderWeapon(&SMG, &camera, deltaTime);
-        //renderer.RenderWeapon(&ARG, &camera);
-
         
+        if(firstPass)
+            firstPass = false;
+
         //Swap Buffers, Poll IO events
         if(CapFPS)
             glfwSwapBuffers(window);
@@ -273,6 +375,7 @@ int main()
         glfwPollEvents();
     }
     
+
     //terminate GLFW Window
     glfwTerminate();
     return 0;

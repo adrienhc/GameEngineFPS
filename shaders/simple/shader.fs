@@ -1,25 +1,28 @@
 #version 330 core
+
+in vec3 fragPos;
+in vec3 fragNorm;
+in vec2 fragTex;
 out vec4 FragColor;
-
-in vec3 FragPos;
-in vec3 FragNorm;
-in vec2 TexCoords;
-
-
-uniform vec3 cameraPos;
-
-
-struct Material
-{
-	sampler2D texture_diffuse1;
-	sampler2D texture_specular1;
-	sampler2D texture_normal1;
-};
-
-uniform Material material;
 
 uniform vec3 lightColor;
 uniform vec3 lightPos;
+
+uniform sampler2D imgTexture; //to pass in the 2D texture object to the fs
+uniform vec3 cameraPos;
+
+struct Material
+{
+	vec3 ambient;
+	vec3 diffuse;
+	vec3 specular;
+	float shininess;	//int btw 1, 256 (smaller = more scatter)
+
+	bool has_texture;
+	vec4 color;
+};
+
+uniform Material material;
 
 struct PointLight
 {
@@ -51,7 +54,6 @@ vec3 sampleOffsetDirections[20] = vec3[]
    vec3( 1,  0,  1), vec3(-1,  0,  1), vec3( 1,  0, -1), vec3(-1,  0, -1),
    vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
 );   
-
 
 float ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 {
@@ -88,21 +90,23 @@ float ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 	return shadow / float(samples);
 }
 
-vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragPos, vec3 norm, vec2 texCoords, vec3 viewDir)
+
+
+vec3 CalcPointLight(PointLight pointLight, int i, vec3 norm, vec3 fragPos, vec3 viewDir)
 {
 	//ambient
-	vec3 ambient = pointLight.ambient * vec3(texture(material.texture_diffuse1, texCoords).rgb);
+	vec3 ambient = pointLight.ambient * material.ambient;
 
 	//diffuse
 	vec3 lightDir = normalize(pointLight.position - fragPos);
 	float diff = max(dot(norm, lightDir) , 0.0);
-	vec3 diffuse = pointLight.diffuse * vec3(texture(material.texture_diffuse1, texCoords).rgb) * diff;
+	vec3 diffuse = pointLight.diffuse * (material.diffuse * diff);
 
 
 	//specular
 	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), 16.0);  //Default MATERIAL Shininess of 32	
-	vec3 specular = pointLight.specular * vec3(texture(material.texture_specular1, texCoords).r) * spec;
+	float spec = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
+	vec3 specular = pointLight.specular * (material.specular * spec);
 
 	//attenuation
 	float distance = length(pointLight.position - fragPos);
@@ -117,21 +121,33 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragPos, vec3 norm, vec2 
 	return (ambient + (1.0f - shadow)*(diffuse + specular));
 }
 
-
 void main()
-{   
-	
-	//USE NORMAL MAP
-	//vec3 Norm = vec3(texture(material.texture_normal1, TexCoords)); //NEED TANGENT SPACE!
+{
 
-	vec3 Norm = normalize(FragNorm);
-	vec3 viewDir = normalize(cameraPos - FragPos);
+	//vec3 norm = normalize(fragNorm);
+	//vec3 viewDir = normalize(cameraPos - fragPos);
 
-	vec3 result = vec3(0.0f, 0.0f, 0.0f);
 
-	for(int i = 0; i < numLights; i++)
-		result += CalcPointLight(pointLight[i], i, FragPos, Norm, TexCoords, viewDir);
+	//vec3 result = vec3(0.0f, 0.0f, 0.0f);
 
-	FragColor = vec4(result, 1.0f);
-   
-}
+	//for(int i = 0; i < numLights; i++)
+	//	result += CalcPointLight(pointLight[i], i, norm, fragPos, viewDir);
+
+	vec4 col;
+
+	if(material.has_texture)
+	{
+		col = texture(imgTexture, fragTex);
+		if(col.a < 0.1)
+			discard;
+		//result = result * col.xyz;
+	}
+    else
+    { 
+    	col = material.color;
+    	//result = result * material.color;
+    }
+
+    FragColor = col;
+
+} 

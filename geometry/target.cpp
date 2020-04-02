@@ -43,7 +43,7 @@ Target::Target(glm::vec3 position, char orientation) //'N' 'S' 'E' 'W'
 	head_bb.Translate(position);
 }
 
-Target::Target(glm::vec3 position, char orientation, glm::vec3 outline_color, float outline_size) //'N' 'S' 'E' 'W'
+Target::Target(glm::vec3 position, char orientation, glm::vec4 outline_color, float outline_size) //'N' 'S' 'E' 'W'
 {
 	//Target Mdel Node
 	glm::vec3 Up = glm::vec3(0.0f, 1.0f, 0.0f);

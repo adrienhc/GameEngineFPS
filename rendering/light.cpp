@@ -69,7 +69,7 @@ void PointLight::setTransform(glm::mat4 trsf)
 	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 }	
 
-void PointLight::shadowPassSetup(Shader depthShader, int index)
+void PointLight::shadowPassSetup(Shader* depthShader, int index)
 {
 	//change viewport to fit shadow map, bind and clear depth map
 	glViewport(0, 0, SHADOW_WIDTH, SHADOW_HEIGHT);
@@ -77,36 +77,51 @@ void PointLight::shadowPassSetup(Shader depthShader, int index)
 	glClear(GL_DEPTH_BUFFER_BIT);
 
 	//setup depthShader's values
-	depthShader.use();
+	depthShader->use();
 	for(int i = 0; i < shadowTransform.size(); i++)
 	{
 		std::string index = std::to_string(i);
-		depthShader.setMat4("shadowMatrices[" + index + "]", shadowTransform[i]);
+		depthShader->setMat4("shadowMatrices[" + index + "]", shadowTransform[i]);
 	}
-	depthShader.setVec3("lightPosition", position);
-	depthShader.setFloat("far_plane", far);
+	depthShader->setVec3("lightPosition", position);
+	depthShader->setFloat("far_plane", far);
 }
 
-void PointLight::bindShadowMap(Shader shader, int index)
+void PointLight::bindShadowMap(Shader* shader, int index)
 {
-	shader.use();
+	shader->use();
 	
 	if(index == 0) //only need set it once 
-		shader.setFloat("far_plane", far);
+		shader->setFloat("far_plane", far);
 
 	int depthMapIndex = index;
-	int offset = 5; //so that 2d and cube map indexes do not overlap!
+	int offset = 5; //so that 2d and cube map indexes do not overlap! -- 
 
 	if(NUM_LIGHTS <= depthMapIndex && depthMapIndex < MAX_LIGHTS)
 		index = 0;
 	
 	std::string dmi = std::to_string(depthMapIndex);
 	//std::cout << "depthMap" + dmi << " " + std::to_string(offset + index) + " " << "Max Lights = " << NUM_LIGHTS << std::endl;
-	shader.setInt("depthMap" + dmi, offset + index);
+	shader->setInt("depthMap" + dmi, offset + index);
 
 	if(depthMapIndex < NUM_LIGHTS)
 	{
 		glActiveTexture(GL_TEXTURE0 + offset + index);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, shadowCubemap[index]);
 	}
+}
+
+
+void PointLight::bindShadowMapBatch(Shader* shader, int room_index, int shader_index)
+{
+	shader->use();
+	
+	if(shader_index == 0) //only need set it once 
+		shader->setFloat("far_plane", far);
+	
+	shader->setInt("depthMap" + std::to_string(shader_index), RENDERER_TEXTURE_OFFSET + shader_index);
+
+	glActiveTexture(GL_TEXTURE0 + RENDERER_TEXTURE_OFFSET + shader_index);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, shadowCubemap[room_index]);
+
 }

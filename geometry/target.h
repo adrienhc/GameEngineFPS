@@ -20,7 +20,7 @@ class Target
 {
 public:
 	Target(glm::vec3 position, char orientation); //'N' 'S' 'E' 'W' -- For Bounding Box 
-	Target(glm::vec3 position, char orientation, glm::vec3 outline_color, float outline_size); //Special outline
+	Target(glm::vec3 position, char orientation, glm::vec4 outline_color, float outline_size); //Special outline
 	~Target();
 	static void LoadModel(char* path);
 	static void LoadSmoothModel(char* path);

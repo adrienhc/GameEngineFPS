@@ -32,17 +32,17 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 			RenderDepthMapRoom(room, shadowLights[i], shadowLightsIndex[i]);
 		}
 		//Bind Depth Map  
-		shadowLights[i].bindShadowMap(myShader, shadowLightsIndex[i]);
-		shadowLights[i].bindShadowMap(modelShader, shadowLightsIndex[i]);
-		shadowLights[i].bindShadowMap(instancedShader, shadowLightsIndex[i]);
+		shadowLights[i].bindShadowMap(&myShader, shadowLightsIndex[i]);
+		shadowLights[i].bindShadowMap(&modelShader, shadowLightsIndex[i]);
+		shadowLights[i].bindShadowMap(&instancedShader, shadowLightsIndex[i]);
 	}
 
 	//Set DepthMap Sampler id for unused ones  
 	for(int i = shadowLights.size(); i < PointLight::MAX_LIGHTS; i++)
 	{
-		shadowLights[0].bindShadowMap(myShader, i);
-		shadowLights[0].bindShadowMap(modelShader, i);
-		shadowLights[0].bindShadowMap(instancedShader, i);	
+		shadowLights[0].bindShadowMap(&myShader, i);
+		shadowLights[0].bindShadowMap(&modelShader, i);
+		shadowLights[0].bindShadowMap(&instancedShader, i);	
 	}
 
 	// std::cout << std::endl;
@@ -77,25 +77,11 @@ void Renderer::RenderRoom(Room* room, Camera* cam)
 			instancedShader.setVec3("bulletHoles[" + str_index + "]", bulletHoles[i]);
 		}
 	}
-
-	//Render Instanced Geometry
-	instancedShader.setMaterial(room->crate->getMaterial()); 
-	room->i_crate->Render();
-	instancedShader.setMaterial(room->floor->getMaterial()); 
-	room->i_floor->Render();
-	instancedShader.setMaterial(room->wall->getMaterial());
-	room->i_wall->Render();
-	instancedShader.setMaterial(room->door->getMaterial());
-	room->i_door->Render();
-	instancedShader.setMaterial(room->beam->getMaterial());
-	room->i_beam->Render();
-	instancedShader.setMaterial(room->ceiling->getMaterial());
-	room->i_ceiling->Render();
 }
 
 void Renderer::RenderDepthMapRoom(Room* room, PointLight light, int lightIndex)
 {
-	light.shadowPassSetup(depthShader, lightIndex); //detpthShader is active
+	light.shadowPassSetup(&depthShader, lightIndex); //detpthShader is active
 
 	glCullFace(GL_FRONT); //group geometry that needs this kind of rendering
 	depthShader.setBool("isInstanced", false);
@@ -113,10 +99,10 @@ void Renderer::RenderDepthMapRoom(Room* room, PointLight light, int lightIndex)
 	room->i_beam->Render();
 
 	glCullFace(GL_BACK); //back to the default 
-	room->i_floor->Render();
+	//room->i_floor->Render();
 	room->i_wall->Render();
 	room->i_door->Render();
-	room->i_ceiling->Render();
+	//room->i_ceiling->Render();
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -144,11 +130,20 @@ void Renderer::SetLights(Room* room)
 
 void Renderer::GetLights(Room* room) //Set Current Lights to be those the player is in, before rendering Weapon!
 {
+	//RenderGraph(room->Lights, cam); //traverse lights node and set camera 
 	Traverse(room->Lights, eRoot); //"this" pointer from room, do not check for NULL as will say it is 
+	int numLights = room->pointLightPos.size();
+	myShader.setLightInfo(numLights);
+	modelShader.setLightInfo(numLights);
 }
 
 void Renderer::RenderWeapon(Weapon* weapon, Camera* cam, float deltaTime) //NEED Weapon Specific actions to position it correctly 
 {	
+
+	myShader.setCamera(cam);
+	modelShader.setCamera(cam);
+
+
 	weapon->Update(deltaTime);
 
 	glm::vec4 weapon_offsets = weapon->GetADSOffset(); 
@@ -455,10 +450,10 @@ void Renderer::Traverse(nNode* Root, eType type)
 		modelExplodeShader.setPointLight(light, Lt->GetIndex()); //MODEL EXPLODE CUBE SHADER
 
 		//DRAWING LIGHT CUBE
-		model_transform = glm::scale(model_transform, glm::vec3(2.0f, 0.2f, 1.0f)); //change light cube dimensions
-		lightShader.setTransform(model_transform);
-		lightShader.setVec3("lightColor", glm::vec3(1.0f));
-		Cube.Render();
+		//model_transform = glm::scale(model_transform, glm::vec3(2.0f, 0.2f, 1.0f)); //change light cube dimensions
+		//lightShader.setTransform(model_transform);
+		//lightShader.setVec3("lightColor", glm::vec3(1.0f));
+		//Cube.Render();
 
 		for(std::list<nNode*>::iterator it = nChildren.begin(); it != nChildren.end(); it++)
 		{

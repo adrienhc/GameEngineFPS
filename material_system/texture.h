@@ -15,6 +15,7 @@ public:
 		void Free();
 		void Bind();
 		void unBind();
+		unsigned int GetID();
 private:
 		unsigned char *data = NULL;
 		int width, height, nrChannels;

@@ -12,7 +12,7 @@
 #include <vector>
 #include <iostream>
 
-enum eShape {eTriangle, eSquare, eCube}; 
+enum eShape {eTriangle, eSquare, eCube, eInvertedCube}; 
 
 class cTriangle   //REFINE AND MAKE IT WORK
 {
@@ -115,7 +115,8 @@ class cCube
 	    bool instanced = false;
     	int num_instanced;
 
-		float vertices[288] = {
+
+	float vertices[288] = {
 	    //position           //normals          //texture
 	    -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 
 	     0.5f, -0.5f, -0.5f, 0.0f, 0.0f, -1.0f, 1.0f, 0.0f,
@@ -169,6 +170,185 @@ class cCube
 	    
 	};
 
+
 };
+
+
+
+struct batchSquare
+{
+	glm::vec3 Position[4] = {
+	    glm::vec3(-0.5f, -0.5f, 0.0f),  
+	    glm::vec3( 0.5f, -0.5f, 0.0f),  
+	    glm::vec3( 0.5f,  0.5f, 0.0f),  
+	    glm::vec3(-0.5f,  0.5f, 0.0f),  
+	};
+
+	glm::vec3 Normal[4] = {
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+	};
+
+	glm::vec2 TexCoord[24] = {
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+	};
+
+
+	unsigned short indices[6] =
+	{
+	    0, 1, 2, 2, 3, 0 	    
+	};
+
+};
+
+
+
+struct batchCube
+{
+	glm::vec3 Position[24] = {
+	    glm::vec3(-0.5f, -0.5f, -0.5f),  
+	    glm::vec3( 0.5f, -0.5f, -0.5f),  
+	    glm::vec3( 0.5f,  0.5f, -0.5f),  
+	    glm::vec3(-0.5f,  0.5f, -0.5f),  
+
+	    glm::vec3(-0.5f, -0.5f,  0.5f),  
+	    glm::vec3( 0.5f, -0.5f,  0.5f),  
+	    glm::vec3( 0.5f,  0.5f,  0.5f),  	     
+	    glm::vec3(-0.5f,  0.5f,  0.5f),  
+
+	    glm::vec3(-0.5f,  0.5f,  0.5f),  
+	    glm::vec3(-0.5f,  0.5f, -0.5f),  
+	    glm::vec3(-0.5f, -0.5f, -0.5f),  
+	    glm::vec3(-0.5f, -0.5f,  0.5f),  
+
+	    glm::vec3( 0.5f,  0.5f,  0.5f),  
+	    glm::vec3( 0.5f,  0.5f, -0.5f),  
+	    glm::vec3( 0.5f, -0.5f, -0.5f),  
+	    glm::vec3( 0.5f, -0.5f,  0.5f),  
+
+	    glm::vec3(-0.5f, -0.5f, -0.5f),  
+	    glm::vec3( 0.5f, -0.5f, -0.5f),  
+	    glm::vec3( 0.5f, -0.5f,  0.5f),  
+	    glm::vec3(-0.5f, -0.5f,  0.5f),  
+
+	    glm::vec3(-0.5f,  0.5f, -0.5f),
+	    glm::vec3( 0.5f,  0.5f, -0.5f),
+	    glm::vec3( 0.5f,  0.5f,  0.5f),
+	    glm::vec3(-0.5f,  0.5f,  0.5f)
+	};
+
+	glm::vec3 Normal[24] = {
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+	
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f)
+	};
+
+	glm::vec3 InvertedNormal[24] = {
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+		glm::vec3(0.0f, 0.0f, 1.0f),
+
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+		glm::vec3(0.0f, 0.0f, -1.0f),
+
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+		glm::vec3(1.0f, 0.0f, 0.0f),
+
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+		glm::vec3(-1.0f, 0.0f, 0.0f),
+	
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+		glm::vec3(0.0f, 1.0f, 0.0f),
+
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f),
+		glm::vec3(0.0f, -1.0f, 0.0f)
+	};
+
+	glm::vec2 TexCoord[24] = {
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f),
+
+		glm::vec2(0.0f, 0.0f),
+		glm::vec2(1.0f, 0.0f),
+		glm::vec2(1.0f, 1.0f),
+		glm::vec2(0.0f, 1.0f)
+	};
+
+	unsigned short indices[36] =
+	{
+	    0, 1, 2, 2, 3, 0,
+	    4, 5, 6, 6, 7, 4,
+	    8, 9, 10, 10, 11, 8,
+	    12, 13, 14, 14, 15, 12,
+	    16, 17, 18, 18, 19, 16,
+	    20, 21, 22, 22, 23, 20
+	};
+};
+
+
 
 #endif //GEOMETRY

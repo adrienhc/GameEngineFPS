@@ -65,16 +65,16 @@ private:
 	std::vector<glm::vec3> bulletHoles;
 
 	//Non Geometry
-	Shader myShader =  Shader("shaders/shader.vs", "shaders/shader.fs"); //PATH FROM MAIN
-	Shader instancedShader = Shader("shaders/instancedShader.vs", "shaders/instancedShader.fs");
-    Shader lightShader = Shader("shaders/lightShader.vs", "shaders/lightShader.fs");
-    Shader modelShader = Shader("shaders/modelShader.vs", "shaders/modelShader.fs");
-    Shader outlineShader = Shader("shaders/outlineShader.vs", "shaders/outlineShader.fs");
-    Shader skyboxShader = Shader("shaders/skyboxShader.vs", "shaders/skyboxShader.fs");
+	Shader myShader =  Shader("shaders/simple/shader.vs", "shaders/simple/shader.fs"); //PATH FROM MAIN
+	Shader instancedShader = Shader("shaders/simple/instancedShader.vs", "shaders/simple/instancedShader.fs");
+    Shader lightShader = Shader("shaders/simple/lightShader.vs", "shaders/simple/lightShader.fs");
+    Shader modelShader = Shader("shaders/simple/modelShader.vs", "shaders/simple/modelShader.fs");
+    Shader outlineShader = Shader("shaders/simple/outlineShader.vs", "shaders/simple/outlineShader.fs");
+    Shader skyboxShader = Shader("shaders/simple/skyboxShader.vs", "shaders/simple/skyboxShader.fs");
 
     //With Geometry
-    Shader modelExplodeShader = Shader("shaders/explodeShader.vs", "shaders/explodeCubeShader.gs", "shaders/explodeCubeShader.fs");
-    Shader depthShader = Shader("shaders/depthShader.vs", "shaders/depthShader.gs", "shaders/depthShader.fs");
+    Shader modelExplodeShader = Shader("shaders/simple/explodeShader.vs", "shaders/simple/explodeCubeShader.gs", "shaders/simple/explodeCubeShader.fs");
+    Shader depthShader = Shader("shaders/simple/depthShader.vs", "shaders/simple/depthShader.gs", "shaders/simple/depthShader.fs");
 
 };
 

@@ -15,15 +15,23 @@ class Material
 public:
 
 	Material(glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular,
-			  float shininess, glm::vec3 color, bool texture, std::string texPath);
+			  float shininess, glm::vec4 color, bool texture, std::string texPath);
 	~Material();
 	Texture* getTexture();
+	unsigned int getTextureID();
+	glm::vec4 getColor();
+	unsigned int getColorPacked();
+	unsigned int getLightingPacked();
 	
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;
 	float shininess;	
-	glm::vec3 color;
+	unsigned int lightingPacked;
+
+	glm::vec4 color;
+	unsigned int colorPacked;
+	
 	bool has_texture;
 	Texture* texture;
 };

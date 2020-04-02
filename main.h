@@ -15,8 +15,21 @@
 
 #include "rendering/shader.h"
 #include "rendering/camera.h"
-#include "rendering/renderer.h"
 #include "rendering/light.h"
+#include "rendering/group.h"
+
+#include "rendering/renderer.h"
+#include "rendering/batch/batchrenderer.h"
+#include "rendering/batch/batchoutline.h"
+#include "rendering/batch/batchparticle.h"
+#include "rendering/batch/batchdepthmap.h"
+#include "rendering/batch/batchinstanced.h"
+
+#include "rendering/layers/scenelayer.h"
+#include "rendering/layers/outlinelayer.h"
+#include "rendering/layers/particlelayer.h"
+#include "rendering/layers/depthmaplayer.h"
+#include "rendering/layers/instancedlayer.h"
 
 #include "material_system/asset.h"
 
@@ -30,6 +43,8 @@
 #include "scene/room.h"
 #include "scene/skybox.h"
 
+#include "player/player.h"
+
 
 //Window
 const unsigned int WINDOW_WIDTH = 1920; 
@@ -41,8 +56,8 @@ void process_input(GLFWwindow* window);
 void mouse_callback( GLFWwindow* window, double xpos, double ypos);
 //void scroll_callback( GLFWwindow* window, double xoffset, double yoffset);
 
-bool CapFPS = true;
-bool DisplayFPS = false;
+bool CapFPS = false;
+bool DisplayFPS = true;
 bool Gravity = true;
 
 // timing
@@ -60,6 +75,9 @@ bool polygon = false;
 
 //texture blending
 float blend = 0.6f;
+
+//depthmap first
+bool firstPass = true;
 
 
 #endif

@@ -14,6 +14,7 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	zoom_min = zoom_minimum;
 	zoom_max = zoom_maximum;
 	recoil_sign = 1.0f;
+	model_transform = glm::mat4(1.0f);
 }
 
 Weapon::~Weapon()
@@ -156,4 +157,14 @@ float Weapon::GetRecoilOffset()
 float Weapon::GetReloadOffset()
 {
 	return  reload_time_offset/reload_time;
+}
+
+glm::mat4 Weapon::SetModelTransform(glm::mat4 weapon_transform)
+{
+	model_transform = weapon_transform;
+}
+
+glm::mat4 Weapon::GetModelTransform()
+{
+	return model_transform;
 }

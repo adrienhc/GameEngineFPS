@@ -93,6 +93,17 @@ Shader::Shader(const char* vertexPath, const char* fragmentPath)
 	// 4 -- cleanup
 	glDeleteShader(vertex);
 	glDeleteShader(fragment);
+
+	// 5 -- Activate Texture slots 
+	
+	use();
+	int texture_slots[TEXTURE_SLOTS];
+	for(int i = 0; i < TEXTURE_SLOTS; i++)
+	{
+		texture_slots[i] = i;
+	}
+	setIntArray("textures", texture_slots, (int) TEXTURE_SLOTS);
+	
 }
 
 
@@ -205,6 +216,15 @@ Shader::Shader(const char* vertexPath, const char* geometryPath, const char* fra
 	glDeleteShader(vertex);
 	glDeleteShader(geometry);
 	glDeleteShader(fragment);	
+
+	// 5 -- Activate Texture slots 
+	use();
+	int texture_slots[TEXTURE_SLOTS];
+	for(int i = 0; i < TEXTURE_SLOTS; i++)
+	{
+		texture_slots[i] = i;
+	}
+	setIntArray("textures", texture_slots, (int) TEXTURE_SLOTS);
 }
 
 void Shader::use()
@@ -223,12 +243,22 @@ void Shader::setInt(const std::string &name, int value) const
 	glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
 }
 
+void Shader::setIntArray(const std::string &name, int* values, int count) const
+{
+	glUniform1iv(glGetUniformLocation(ID, name.c_str()), count, values);
+}
+
 void Shader::setFloat(const std::string &name, float value) const
 {
 	glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
 }
 
 void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
+{
+	glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+}
+
+void Shader::setVec4(const std::string &name, const glm::vec4 &value) const
 {
 	glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
@@ -299,5 +329,5 @@ void Shader::setMaterial(Material* material)
     	material->getTexture()->Bind();
     }
     else
-    	setVec3("material.color", material->color);
+    	setVec4("material.color", material->color);
 }

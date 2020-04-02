@@ -21,6 +21,10 @@
 #include "../rendering/light.h"
 #include "../rendering/camera.h"
 #include "../rendering/renderer.h"
+#include "../rendering/group.h"
+#include "../rendering/layers/abstractlayer.h"
+#include "../rendering/layers/scenelayer.h"
+#include "../rendering/layers/instancedlayer.h"
 
 
 class Renderer;
@@ -38,6 +42,11 @@ public:
 	void makeRoom(Renderer renderer);	
 	bool collisionChecks(Camera &camera);
 	void getLights(Renderer renderer);
+	void addLayoutLayer(AbstractLayer* layer);
+	void addCubesLayer(InstancedLayer* instanced_layer);
+	void addTilesLayer(InstancedLayer* instanced_layer);
+	void addLightsLayer(SceneLayer* layer, bool renderable = false);
+	void addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_layer, AbstractLayer* particle_layer, AbstractLayer* depthmap_layer);
 
 	static bool collideOn()
 	{
@@ -47,6 +56,9 @@ public:
 	static void setupCollisions();	
 	static float minBulletDist;
 	void postCollisions();
+	static bool shadowPass;
+
+	
 
 private:
 	//ROOM ID
@@ -102,13 +114,22 @@ private:
 	cCube* i_beam = NULL;
 	cSquare* i_ceiling = NULL;
 	cCube* i_crate = NULL;
+
+	//GEOMETRY GROUP
+	Group* g_layout = NULL; //ALL ROOM GEOMETRY
+
+	Group* g_tiles = NULL;
+	Group* g_cubes = NULL;
 	
 	//LIGHT INFO
 	std::vector<glm::vec3> pointLightPos;
 	PointLight* pointLight;
 
+	//LIGHT GROUP
+	Group* g_light = NULL;
+
 	//SHADOW PASS
-	bool shadowPass = true;
+	//bool shadowPass;
 
 	//BULLET COLLISION MIN DIST
 	static float maxBulletDist;
@@ -116,8 +137,8 @@ private:
 	//METHODS
 	glm::vec3 adjustAssetPos(glm::vec3 Pos);
 	nNode* horizontalPlane(nNode* Root, Asset* asset);
-	nNode* verticalPlaneNS(nNode* Root, std::vector<int> Door);
-	nNode* verticalPlaneEW(nNode* Root, std::vector<int> Door);
+	nNode* verticalPlaneNS(nNode* Root, std::vector<int> Door, bool justBeams);
+	nNode* verticalPlaneEW(nNode* Root, std::vector<int> Door, bool justBeams);
 	nNode* addBeamNS(nNode* Root, std::vector<int> Door);
 	nNode* addBeamEW(nNode* Root, std::vector<int> Door); 
 

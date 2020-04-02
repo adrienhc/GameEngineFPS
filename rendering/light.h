@@ -12,6 +12,8 @@
 #include "shader.h"
 #include <glm/gtx/string_cast.hpp>
 
+#define RENDERER_TEXTURE_OFFSET 20
+
 class Shader; //since shader also includes PointLight
 
 class PointLight
@@ -33,8 +35,9 @@ public:
 	float linear;
 	float quadratic;
 
-	void shadowPassSetup(Shader depthShader, int index);
-	void bindShadowMap(Shader shader, int index);
+	void shadowPassSetup(Shader* depthShader, int index);
+	void bindShadowMap(Shader* shader, int index);
+	void bindShadowMapBatch(Shader* shader, int room_index, int shader_index);
 
 private: 
 	int NUM_LIGHTS;

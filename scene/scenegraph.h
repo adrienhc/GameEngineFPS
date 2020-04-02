@@ -21,7 +21,7 @@
 
 
 enum eType {eRoot, eTranslate, eRotate, eScale, eAsset, eModel, ePointLight};
-enum eShader {eObject, eInstanced, eLights, eModelshdr, eExplode};
+enum eShader {eObject, eInstanced, eLights, eModelshdr, eExplode, eNULL};
 
 
 class nNode
@@ -207,6 +207,22 @@ public:
 		return asset;
 	}
 
+	void SetTransform(glm::mat4 transform)
+	{
+		model_transform = transform;
+		transform_set = true;
+	}
+
+	glm::mat4 GetTransform()
+	{
+		return model_transform;
+	}
+
+	bool HasTransform()
+	{
+		return transform_set;
+	}
+
 	eShader GetShader()
 	{
 		return shader_type;
@@ -224,6 +240,8 @@ public:
 
 private:
 	Asset* asset;
+	bool transform_set = false;
+	glm::mat4 model_transform;
 	eShader shader_type;
 };
 
@@ -267,6 +285,21 @@ public:
 		return outline;
 	}
 
+	void DisableOutline()
+	{
+		render_outline = false;
+	}
+
+	void EnableOutline()
+	{
+		render_outline = true;
+	}
+
+	bool RenderOutline()
+	{
+		return render_outline;
+	}
+
 	bool HasOutline()
 	{
 		return (outline != NULL);
@@ -296,14 +329,10 @@ public:
 	void Explode()
 	{
 		shader_type = eExplode;
-		if(outline)
-		{
-			//std::cout << "Outline Not Null" << std::endl;
-			//delete outline;
-			outline = NULL;
-			//std::cout << "Outline Null" << std::endl;
-		}
-		//outline = NULL;
+		//if(outline)
+		//{
+		//	outline = NULL; //Legacy simple Renderer
+		//}
 	}
 
 	void Instanced()
@@ -316,6 +345,7 @@ private:
 	Model* smoothModel = NULL;
 	Outline* outline = NULL;
 	bool transform_set = false;
+	bool render_outline = false;
 	glm::mat4 model_transform;
 	eShader shader_type;
 };
@@ -328,8 +358,10 @@ public:
 	nPointLight(PointLight* pLight, int id)
 	{
 		light = pLight;
-		index = id;
+		index = id; //INDEX WITHIN ROOM -- FrameBuffer And ShadowMapBuffer Index
 		render = true;
+		float lightShininess = 2.0f;
+		asset = new Asset(eInvertedCube, "lightBulb", glm::vec4(1.0f), glm::vec4(light->diffuse, 1.0f), glm::vec4(light->specular, 1.0f), lightShininess, glm::vec4(light->diffuse, 1.0f), false, "");
 	}
 
 	PointLight* GetLight()
@@ -339,7 +371,12 @@ public:
 
 	int GetIndex()
 	{
-		return index;
+		return index; //INDEX WITHIN ROOM -- FrameBuffer And ShadowMapBuffer Index
+	}
+
+	Asset* GetAsset()
+	{
+		return asset;
 	}
 
 	virtual eType GetType()
@@ -356,6 +393,7 @@ public:
 private:
 	PointLight* light;
 	int index;
+	Asset* asset = NULL;
 };
 
 

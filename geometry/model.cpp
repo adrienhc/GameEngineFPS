@@ -10,6 +10,22 @@ Model::Model(char* path, bool gamma)
 
 	for (int i =0; i < textures_loaded.size(); i++)
 		std::cout << textures_loaded[i].path << " " << textures_loaded[i].type << std::endl;
+
+	/*for(int i = 0; i < meshes.size(); i++)
+	{
+		int max = 0;
+
+		for(int j = 0; j < meshes[i].indices.size(); j++)
+		{
+			//std::cout << meshes[i].indices[j] << " ";
+			//if(meshes[i].indices[j] > max)
+			//	max = meshes[i].indices[j];	
+		}
+		//std::cout << "Max I Mesh = " << max << std::endl;
+		//std::cout << "Last = " << meshes[i].indices[meshes[i].indices.size()-1] << std::endl;
+		std::cout << std::endl << std::endl;
+	}
+	*/
 }
 
 void Model::Draw(Shader shader)
@@ -24,7 +40,7 @@ void Model::loadModel(std::string path)
 {
 	//importing model, the main scene node, then going through tree to load the rest 
 	Assimp::Importer import;
-	const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs); // | aiProcess_CalcTangentSpace);
+	const aiScene* scene = import.ReadFile(path, aiProcess_OptimizeMeshes | aiProcess_Triangulate | aiProcess_FlipUVs); // | aiProcess_CalcTangentSpace);
 
 	if( !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode )
 	{
@@ -84,7 +100,9 @@ Mesh Model::processMesh(aiMesh* mesh, const aiScene* scene)
 		aiFace face = mesh->mFaces[i];
 
 		for(unsigned int j = 0; j < face.mNumIndices; j++)
+		{
 			indices.push_back(face.mIndices[j]);
+		}
 	}
 
 	//load textures
