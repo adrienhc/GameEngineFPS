@@ -5,7 +5,7 @@
 #include "../batch/batchrenderer.h"
 #include "../light.h"
 
-#define SHADER_MAX_LIGHTS 9
+#define SHADER_MAX_LIGHTS 3
 
 class SceneLayer: public AbstractLayer
 {

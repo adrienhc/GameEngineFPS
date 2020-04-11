@@ -1,0 +1,15 @@
+# Blender MTL File: 'L96.obj'
+# Material Count: 1
+
+newmtl L96_Sniper_Rifle
+Ns 94.117647
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+map_Kd Textures/L96_Albedo.png
+map_Bump Textures/L96_Normal.png
+map_Ks Textures/L96_Metallic.tga

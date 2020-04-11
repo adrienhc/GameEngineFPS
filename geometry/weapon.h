@@ -47,9 +47,9 @@ private:
 	float zoom_min;
 	float zoom_max;
 	unsigned int clip_size = 30; //MAKE VARY PER WEAPON
-	unsigned int bullets = 30; //MAKE VARY PER WEAPON
+	unsigned int bullets = clip_size; //MAKE VARY PER WEAPON
 	float ads_time = 0.2f; //MAKE VARY PER WEAPON
-	float fire_time = 0.05f; //MAKE VARY PER WEAPON
+	float fire_time = 0.03f; //HALF OF TIME BETWEEN TWO BULLETS //MAKE VARY PER WEAPON 
 	float reload_time = 1.0f; //MAKE VARY PER WEAPON
 
 	//Shared for all weapons

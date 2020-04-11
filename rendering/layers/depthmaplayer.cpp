@@ -14,6 +14,7 @@ void DepthmapLayer::Render()
 		return;
 
 	Shader* m_Shader = GetShader();
+	PointLight::shadowPassBegin();
 
 	//Submit Data Once??? What if Overflow and Flushes while submitting??
 	//i index of Light Groups, One Group Per Room 
@@ -38,10 +39,12 @@ void DepthmapLayer::Render()
 	}
 
 	m_Groups.clear();
+	PointLight::shadowPassEnd();
+
+	//BLUR SHADOW MAPS 
+	BlurShadowMaps();
 	m_UpdateLights = false;
 
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 
@@ -49,9 +52,6 @@ void DepthmapLayer::RenderKeep()
 {
 	if(!m_UpdateLights)
 		return;
-
-	//SETUP LIGHTS FOR SCENE
-	Shader* m_Shader = GetShader();
 
 	if(!m_Groups.empty())
 	{
@@ -63,8 +63,12 @@ void DepthmapLayer::RenderKeep()
 		m_Renderer->End();
 		m_Groups.clear();//OK SINCE ONLY SUBMIT ONCE
 	}
-	
 	//Submit Data Once??? What if Overflow and Flushes while submitting??
+
+	//SETUP LIGHTS FOR SCENE
+	Shader* m_Shader = GetShader();
+	PointLight::shadowPassBegin();
+
 	//i index of Light Groups, One Group Per Room 
 	for(int i = 0; i <  m_SceneLights.size(); i++)
 	{
@@ -79,8 +83,26 @@ void DepthmapLayer::RenderKeep()
 		}	
 	}
 
+	PointLight::shadowPassEnd();
+
+	BlurShadowMaps();
 	m_UpdateLights = false;
 
-	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+}
+
+
+void DepthmapLayer::BlurShadowMaps()
+{
+	for(int i = 0; i <  m_SceneLights.size(); i++)
+	{
+		//Depth Shader Setup
+		std::vector<PointLight*> m_PointLights = m_SceneLights[i]->GetLights();
+		//index of Lights within Room they are in, to know which FBO and CubeMap to bind  
+		std::vector<int> m_PointLightsRoomIndex = m_SceneLights[i]->GetLightsRoomIndex();
+		for(int j = 0; j < m_PointLights.size(); j++)
+		{
+			m_PointLights[j]->blurVsmCubemap(m_GausBlurCubemap, m_PointLightsRoomIndex[j]); //detpthShader is active
+
+		}	
+	}
 }

@@ -4,9 +4,6 @@
 #include "scenelayer.h"
 #include "../batch/batchdepthmap.h"
 
-extern const unsigned int WINDOW_WIDTH; //defined in main.h 
-extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
-
 class DepthmapLayer: public SceneLayer
 {
 	public:
@@ -14,6 +11,12 @@ class DepthmapLayer: public SceneLayer
 		~DepthmapLayer();
 		void Render();
 		void RenderKeep();
+
+	private:
+		Shader* m_CopyCubemap = new Shader("shaders/utils/copyCubemap.vs", "shaders/utils/copyCubemap.gs", "shaders/utils/copyCubemap.fs");
+		Shader* m_GausBlurCubemap = new Shader("shaders/utils/blurCubemap.vs", "shaders/utils/blurCubemap.gs", "shaders/utils/gausBlurCubemap.fs");
+		Shader* m_BilateralFilterCubemap = new Shader("shaders/utils/blurCubemap.vs", "shaders/utils/blurCubemap.gs", "shaders/utils/bilateralFilterCubemap.fs");
+		void BlurShadowMaps();
 };
 
 #endif //DEPTH_MAP_LAYER_H

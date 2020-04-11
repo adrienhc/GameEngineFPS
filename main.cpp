@@ -52,6 +52,7 @@ int main()
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
 
     glEnable(GL_MULTISAMPLE); 
+    glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
 
     //ASSETS
                                               //ambient,  diffuse,           specular,   shininess,  color
@@ -62,6 +63,7 @@ int main()
     Asset wall = Asset(eSquare, "wall", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(1.0f), true, "./textures/rivetWallbw.jpg");
     Asset beam = Asset(eCube, "concrete", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(0.8f, 0.8f, 0.8f, 1.0f), false, "./textures/concretebw.jpg");
     Asset door = Asset(eSquare, "door", glm::vec3(0.5f), glm::vec3(0.6f), glm::vec3(0.2f), 32.0f, glm::vec4(1.0f), true, "./textures/doorbw.jpg");
+    Asset crosshair = Asset(eSquare, "crosshair", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f), 32.0f, glm::vec4(0.0f), true, "./textures/crosshair.png");
 
 
     struct sRoom1  //offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 
@@ -150,7 +152,6 @@ int main()
     struct sWeapon1
     {
         char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
-        //char* path = (char*) "3DModels/untitled.obj";
         glm::vec3 hip_offset = glm::vec3(0.3f, 0.3f, 0.2f); //FRONT, RIGHT, DOWN
         glm::vec3 ads_offset = glm::vec3(0.1f, -0.002f, 0.135f);
         float scale_factor = 0.1f;
@@ -160,6 +161,7 @@ int main()
     
     struct sWeapon2
     {
+        //char* path = (char*) "3DModels/L96 Sniper Rifle/L96.obj";
         char* path = (char*) "3DModels/AirGun/AirGun.obj";
         glm::vec3 hip_offset = glm::vec3(0.12f, 0.15f, 0.12f); //FRONT, RIGHT, DOWN
         glm::vec3 ads_offset = glm::vec3(0.15f, 0.002f, 0.1f);
@@ -197,7 +199,7 @@ int main()
 
     //WEAPONS
     Weapon SMG(smg.path, smg.hip_offset, smg.ads_offset, smg.scale_factor, smg.zoom_min, smg.zoom_max);
-    //Weapon ARG(airgun.path, airgun.hip_offset, airgun.ads_offset, airgun.scale_factor, airgun.zoom_min, airgun.zoom_max);
+    // Weapon ARG(airgun.path, airgun.hip_offset, airgun.ads_offset, airgun.scale_factor, airgun.zoom_min, airgun.zoom_max);
 
     // CAMERA
     camera = Camera(glm::vec3(5.0f, 5.0f, 3.0f));
@@ -247,6 +249,7 @@ int main()
 
     //Fragment Shader supports 32 textures!
     float deltaTimeAcc = 0.0f;
+    float shadowCooldown = 0.0f;
     int Frames;
     //RENDER LOOP
     while(!glfwWindowShouldClose(window))
@@ -267,6 +270,10 @@ int main()
             }
         }
         lastFrame = current_frame;
+
+        //shadowCooldown -= deltaTime;
+        //if(shadowCooldown < 0.0)
+        //    shadowCooldown = 0.0f;
 
         //INPUT PROCESSING
         process_input(window);
@@ -324,7 +331,6 @@ int main()
         }
         
         // std::cout << "START" << std::endl;
-        
         //PLAYER LAYER
         //Do Stencil Shennenigans so that Gun Not Overwritten
         glStencilMask(0xFF);
@@ -338,7 +344,7 @@ int main()
         glCullFace(GL_BACK);
         weapon.Render();
         glDisable(GL_CULL_FACE);  
-        
+
         //OUTLINED OBJECTS LAYER 
         //Target //if shared outline ok
         glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);

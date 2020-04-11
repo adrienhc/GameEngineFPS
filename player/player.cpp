@@ -68,6 +68,7 @@ void Player::addLayer(AbstractLayer* layer)
 		float time = weapon->GetFireOffset(); //glfwGetTime();
 		float spinSpeed = 1000.0f;
 		float rotationMuzzle = time * spinSpeed;
+		float scaleMuzzle = 1.0f;
 		float frontOffsetMuzzle = 6.0f;
 
 		//Muzzle Flash 
@@ -78,7 +79,7 @@ void Player::addLayer(AbstractLayer* layer)
 		glm::vec3 undoRotation_V = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.8f, 0.0f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
 		muzzleStart = glm::translate(muzzleStart_V, undoRotation_V);
 		muzzleStart = modeltr * muzzleStart;
-		muzzleStart = glm::scale(muzzleStart, 1.0f/(3.0f*weapon->GetScaling()));
+		muzzleStart = glm::scale(muzzleStart, scaleMuzzle * 1.0f/(3.0f*weapon->GetScaling()));
 		nAsset* flash1 = new nAsset(weapon->muzzleFlash, eObject);
 		flash1->SetTransform(muzzleStart);
 		Player->AddChildren(flash1);
@@ -88,7 +89,7 @@ void Player::addLayer(AbstractLayer* layer)
 		glm::vec3 undoRotation_H = glm::rotate( glm::vec3(frontOffsetMuzzle, 0.0f, 0.8f), - 1.0f * rotationMuzzle, glm::vec3(1.0f, 0.0f, 0.0f) );
 		muzzleStart = glm::translate(muzzleStart_H, undoRotation_H);
 		muzzleStart = modeltr * muzzleStart;
-		muzzleStart = glm::scale(muzzleStart, 1.0f/(3.0f*weapon->GetScaling()));
+		muzzleStart = glm::scale(muzzleStart, scaleMuzzle * 1.0f/(3.0f*weapon->GetScaling()));
 		nAsset* flash2 = new nAsset(weapon->muzzleFlash, eObject);
 		flash2->SetTransform(muzzleStart);
 		Player->AddChildren(flash2);

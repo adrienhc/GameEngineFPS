@@ -3,7 +3,6 @@ layout (points) in;
 layout (triangle_strip, max_vertices = 24) out;
 
 /// INPUT OUTPUT ///
-
 in VS_OUT
 {
     vec4 fragPos;
@@ -18,7 +17,6 @@ uniform mat4 viewing;
 uniform mat4 projection;
 
 /// LIGHTNING ///
-
 struct PointLight
 {
     vec3 position;  
@@ -32,7 +30,7 @@ struct PointLight
     float quadratic;
 };
 
-#define NUM_POINT_LIGHTS 9
+#define NUM_POINT_LIGHTS 3
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 

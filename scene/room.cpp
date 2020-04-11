@@ -887,6 +887,8 @@ bool Room::cameraCollide(Camera &camera)
 
             for(int i = 0; i < targets.size(); i++) //CHECK TARGETS
             {
+                if(targets[i]->IsShot()) //if target already shot, ignore collision box
+                    continue;
 
                 if(boxCollide(cam_min_bb, cam_max_bb, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max)) //Low Body
                 {
@@ -974,6 +976,9 @@ bool Room::bulletCollide(Camera &camera)
     {
         for(int i = 0; i < targets.size(); i++)
         {
+            if(targets[i]->IsShot()) //if target already shot, ignore collision box
+                continue;
+
             if(Collision::rayBoxCollide(camera.Position, camera.Front, targets[i]->body_low_bb.min, targets[i]->body_low_bb.max, true, placeholder)) //Low Body
             {
                 targDist = placeholder < maxRange ? placeholder : 1000.0f; 
@@ -1091,8 +1096,8 @@ void Room::postCollisions()
         //if(Weapon::fire)
          //   std::cout << minBulletDist << std::endl;
         if(Weapon::newBullet)
-        {
-            if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
+        {   //if tagrget shot that had not been shot before, shadow pass 
+            if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay() && !targets[i]->IsShot())
             {
                 targets[i]->Shot();
                 shadowPass = true;

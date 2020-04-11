@@ -33,19 +33,63 @@ struct PointLight
 	float quadratic;
 };
 
-#define NUM_POINT_LIGHTS 9
-uniform PointLight pointLight[NUM_POINT_LIGHTS];
+
+#define NUM_POINT_LIGHTS 3
 uniform int numLights;
+uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
 //SHADOWS
-uniform samplerCube depthMap0;
-uniform samplerCube depthMap1;
-uniform samplerCube depthMap2;
+uniform samplerCube depthMaps[NUM_POINT_LIGHTS];
 uniform float far_plane;
 
+//DEBUG MODE VISUALIZE SHADOW MAP
+#define DEBUG 0
 
+float DEBUG_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
+{
+	vec3 fragToLight = fragPos - lightPos;
 
+	float closestDepth = texture(depthMaps[i], fragToLight).x;
+	FragColor = vec4(closestDepth, 1.0f - closestDepth, 0.0f, 1.0f); //close is green, red is far 
 
+	return 0.0f;
+}
+
+float SIMPLE_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
+{
+	float bias = 0.05f;
+	vec3 fragToLight = fragPos - lightPos;
+	float closestDepth = texture(depthMaps[i], fragToLight).x;
+	closestDepth *= far_plane;
+	float currentDepth = length(fragToLight);
+	
+	if (currentDepth - bias > closestDepth)
+		return 0.0f;
+	else
+		return 1.0f;
+}
+
+float VSM_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
+{
+	vec3 moments;
+	vec3 fragToLight = fragPos - lightPos;
+
+	moments = texture(depthMaps[i], fragToLight).xyz;
+
+	float currentDepth = length(fragToLight) / far_plane;
+
+	float p = currentDepth <= moments.x ? 1.0f : 0.0f; 
+	float variance = max(moments.y - moments.x * moments.x, 0.00002); 
+	//variance = min(0.00005f, variance); //since Chebyshev has problem with high variance 
+
+	float mean_dist = currentDepth - moments.x;
+	float pMax = variance / (variance + mean_dist * mean_dist);
+	
+	float low = 0.2f;
+	float high = 1.0f;
+	pMax = clamp((pMax-low)/(high-low), 0.0f, 1.0f);
+	return min(max(p, pMax), 1.0f);
+}
 
 
 vec3 sampleOffsetDirections[20] = vec3[]
@@ -57,7 +101,7 @@ vec3 sampleOffsetDirections[20] = vec3[]
    vec3( 0,  1,  1), vec3( 0, -1,  1), vec3( 0, -1, -1), vec3( 0,  1, -1)
 );   
 
-float ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
+float PCF_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 {
 	float shadow = 0.0;
 	float bias = 0.05f;
@@ -68,23 +112,11 @@ float ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 
 	float closestDepth;
 	vec3 fragToLight = fragPos - lightPos;
-
 	
-	//DEBUG
-	//closestDepth = texture(depthMap0, fragToLight).r;
-	//FragColor = vec4(closestDepth, 1.0f - closestDepth, 0.0f, 1.0f); //close is green, red is far 
-	//return 0.0f;
-
 	//sample around point of interest, average it all 
 	for(int k = 0; k < samples; k++)
 	{	
-		if(i == 0) 
-			closestDepth = texture(depthMap0, fragToLight + sampleOffsetDirections[k] * diskRadius).r;
-		else if(i == 1) 
-			closestDepth = texture(depthMap1, fragToLight + sampleOffsetDirections[k] * diskRadius).r;
-		else if(i == 2)
-			closestDepth = texture(depthMap2, fragToLight + sampleOffsetDirections[k] * diskRadius).r;
-
+		closestDepth = texture(depthMaps[i], fragToLight + sampleOffsetDirections[k] * diskRadius).r;
 		closestDepth *= far_plane;
 		float currentDepth = length(fragToLight);
 		
@@ -92,14 +124,11 @@ float ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 			shadow += 1.0f;
 
 		if(k == testSamples && (shadow == 0.0f || shadow == float(testSamples) + 1.0f))
-			return shadow / (float(testSamples) + 1.0f);
+			return (1.0f - shadow / (float(testSamples) + 1.0f));
 	}
-	
-	//DEBUG
-	//FragColor = vec4(vec3(closestDepth / far_plane), 1.0);  
-	//FragColor = vec4(closestDepth, 1.0f - closestDepth, 0.0f, 1.0f); //close is green, red is far 
 
-	return shadow / float(samples);
+	return (1.0f - shadow / float(samples));
+	
 }
 
 
@@ -125,16 +154,21 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, v
 	float attenuation = 1.0 / ( pointLight.constant + pointLight.linear * distance + pointLight.quadratic * (distance * distance) );
 
 	ambient *= attenuation;
+	// ambient /= numLights;
 	diffuse *= attenuation;
 	specular *= attenuation;
 
 	float cutoffDistance = 15; //Distance at which Light has no effect and assume shadow? 
-	float shadow = 1.0f;
-
+	float shadow = 0.0f;
 	if(abs(pointLight.position.z - fragPos.z) < cutoffDistance && abs(pointLight.position.x - fragPos.x) < cutoffDistance)
-		shadow = ShadowCalculation(fragPos, pointLight.position, i);
+	{	
+		if(DEBUG == 1)
+			shadow = DEBUG_ShadowCalculation(fragPos, pointLight.position, i);
+		else
+			shadow = VSM_ShadowCalculation(fragPos, pointLight.position, i);
+	}
 	
-	return (ambient + (1.0f - shadow)*(diffuse + specular));
+	return (ambient + (shadow)*(diffuse + specular));
 }
 
 void main()
@@ -165,11 +199,13 @@ void main()
 	}
 
 	vec3 result = vec3(0.0f);
+	
 	for(int i = 0; i < numLights; i++)
-	{
+	{	
 	 	result += CalcPointLight(pointLight[i], i, fragAmb, fragDiff, fragSpec, norm, fragPos.xyz, viewDir);
 	}
 
-	FragColor = vec4(result, 1.0f) * fragCol;
+	if(DEBUG == 0)
+		FragColor = vec4(result, 1.0f) * fragCol;
 	
 }

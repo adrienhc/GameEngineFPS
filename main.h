@@ -47,8 +47,8 @@
 
 
 //Window
-const unsigned int WINDOW_WIDTH = 1920; 
-const unsigned int WINDOW_HEIGHT = 1080;
+const unsigned int WINDOW_WIDTH = 800;//1920; 
+const unsigned int WINDOW_HEIGHT = 600;//1080;
 
 //Framebuffer and Input 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);
