@@ -5,10 +5,12 @@ int main()
 
     //GLFW WINDOW SETUP
     glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); //for OpenGL 3.3
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4); //for OpenGL 4.5
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 5);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_SAMPLES, 4);
+
+    // glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_FALSE);
 
     if(!CapFPS)
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
@@ -53,6 +55,8 @@ int main()
 
     glEnable(GL_MULTISAMPLE); 
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+    glEnable(GL_LINE_SMOOTH);
 
     //ASSETS
                                               //ambient,  diffuse,           specular,   shininess,  color
@@ -101,8 +105,9 @@ int main()
                                          asset(2,1, glm::vec3(5.0f, 1.0f, 7.0f))};
 
         // TARGETS
-        std::vector<asset> target = {asset(glm::vec3(5.5f, 2.0f, 6.5f), 'W'),
-                                    asset(glm::vec3(13.5f, 2.0f, 6.0f), 'N')};
+        std::vector<asset> target = { asset(glm::vec3(5.5f, 2.0f, 6.5f), 'W'),
+                                      asset(glm::vec3(7.5f, 1.0f, 13.0f), 'S'),
+                                      asset(glm::vec3(13.5f, 2.0f, 6.0f), 'N')};
 
 
     } lobby; 
@@ -220,8 +225,11 @@ int main()
     Shader outlineShader = Shader("shaders/batch/outlineShader.vs", "shaders/batch/outlineShader.fs"); 
     OutlineLayer outline = OutlineLayer(&camera, &outlineShader);
 
-    Shader particleShader = Shader("shaders/batch/particleCubeShader.vs", "shaders/batch/particleCubeShader.gs", "shaders/batch/particleCubeShader.fs");
-    SceneLayer particle = ParticleLayer(&camera, &particleShader);
+    ParticleSystem ParticleSys = ParticleSystem();
+    Shader particleCubeShader = Shader("shaders/particles/particleShader.vs", "shaders/particles/particleCubeShader.gs", "shaders/particles/particleShader.fs");
+    ParticleLayer particleCube = ParticleLayer(&camera, &particleCubeShader, &ParticleSys, pCube);
+    Shader particleLineShader = Shader("shaders/particles/particleShader.vs", "shaders/particles/particleLineShader.gs", "shaders/particles/particleShader.fs");
+    ParticleLayer particleLine = ParticleLayer(&camera, &particleLineShader, &ParticleSys, pLine);
 
     Shader depthShader = Shader("shaders/batch/depthShader.vs", "shaders/batch/depthShader.gs", "shaders/batch/depthShader.fs");
     DepthmapLayer depthmap = DepthmapLayer(&camera, &depthShader); 
@@ -247,9 +255,11 @@ int main()
     Ref->AddChildren(new nAsset(&REF, eObject));
     */
 
+    //RNG SEED
+    srand (static_cast <unsigned> (glfwGetTime()));
     //Fragment Shader supports 32 textures!
     float deltaTimeAcc = 0.0f;
-    float shadowCooldown = 0.0f;
+    // float shadowCooldown = 0.0f;
     int Frames;
     //RENDER LOOP
     while(!glfwWindowShouldClose(window))
@@ -284,8 +294,15 @@ int main()
         Lobby2.collisionChecks(camera);
         Lobby.postCollisions();
         Lobby2.postCollisions();
+
+        //TIME UPDATE
+        ParticleSys.Update(deltaTime);
         Player.Update(deltaTime);
 
+        //PARTICLE SYSTEM
+        Lobby.addBulletImpact(&camera, &scene, &ParticleSys);
+        Player.addParticle(&ParticleSys);
+        
         //RENDERING
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
@@ -294,6 +311,12 @@ int main()
         else
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+
+       /* if(!firstPass)
+        {
+            glfwTerminate();
+            return 0;
+        } */
 
         //STATIC GEOMETRY
         if(firstPass)
@@ -330,7 +353,6 @@ int main()
 
         }
         
-        // std::cout << "START" << std::endl;
         //PLAYER LAYER
         //Do Stencil Shennenigans so that Gun Not Overwritten
         glStencilMask(0xFF);
@@ -339,11 +361,11 @@ int main()
         weapon.Clear();
         Lobby.addLightsLayer(&weapon);
         Lobby2.addLightsLayer(&weapon);
-        Player.addLayer(&weapon);
+        Player.addLayer(&weapon); //NO MUZZLE FLASH
         glEnable(GL_CULL_FACE); 
         glCullFace(GL_BACK);
         weapon.Render();
-        glDisable(GL_CULL_FACE);  
+        glDisable(GL_CULL_FACE); 
 
         //OUTLINED OBJECTS LAYER 
         //Target //if shared outline ok
@@ -358,17 +380,25 @@ int main()
         glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
         glStencilFunc(GL_GREATER, 2, 0XFF); //From here on, do not overwrite Gun
         scene.RenderKeep();
-        
-        Lobby.addTargetsLayer(NULL, NULL, &particle, NULL);
-        Lobby2.addTargetsLayer(NULL, NULL, &particle, NULL);
-        particle.ClearLight();
-        Lobby.addLightsLayer(&particle);
-        Lobby2.addLightsLayer(&particle);
-        particle.Render();        
+
+        //PARTICLES LAYER
+        Lobby.addTargetsLayer(NULL, NULL, &particleCube, NULL);
+        Lobby2.addTargetsLayer(NULL, NULL, &particleCube, NULL);
+        particleCube.ClearLight();
+        Lobby.addLightsLayer(&particleCube);
+        Lobby2.addLightsLayer(&particleCube);       
         
         //SKYBOX LAYER
         renderer.RenderSkybox(&skybox, &camera);
         
+        //PARTICLES RENDER
+        particleCube.Render();
+        particleLine.Render();
+
+        //TRANSPARENCY ITEMS 
+        Player.addLayer(&weapon, true); //ADD MUZZLE FLASH
+        weapon.Render();
+
         if(firstPass)
             firstPass = false;
 

@@ -2,11 +2,33 @@
 
 SceneLayer::SceneLayer(Camera* camera, Shader* shader)
 :AbstractLayer(new BatchRenderer(), camera, shader)
-{}
+{
+	shader->use();
+	shader->setFloat("radiusImpact", 0.03f);
+
+	//If Create SceneLayer directly!
+	for(int i = 0; i < SHADER_MAX_BULLET_HOLES; i++)
+    {
+    	//m_BulletHoles.push_back(glm::vec3(1000.0f));
+    	std::string str_index = std::to_string(i);
+		shader->setVec3("bulletHoles[" + str_index + "]", glm::vec3(1000.0f));
+    }
+}
 
 SceneLayer::SceneLayer(BatchAbstract* renderer, Camera* camera, Shader* shader)
 :AbstractLayer(renderer, camera, shader)
-{}
+{
+	shader->use();
+	shader->setFloat("radiusImpact", 0.03f);
+
+	//If Create SceneLayer directly!
+	for(int i = 0; i < SHADER_MAX_BULLET_HOLES; i++)
+    {
+    	// m_BulletHoles.push_back(glm::vec3(1000.0f));
+    	std::string str_index = std::to_string(i);
+		shader->setVec3("bulletHoles[" + str_index + "]", glm::vec3(1000.0f));
+    }
+}
 
 SceneLayer::~SceneLayer()
 {}
@@ -73,6 +95,19 @@ void SceneLayer::ClearLight()
 {
 	m_SceneLights.clear();
 	m_UpdateLights = true;
+}
+
+void SceneLayer::AddBulletHole(glm::vec3 bullet_hole)
+{
+	//std::cout << "BHI " << m_BulletHolesIndex << std::endl;	
+	Shader* m_Shader = GetShader();
+	m_Shader->use();
+	std::string str_index = std::to_string(m_BulletHolesIndex);
+	m_Shader->setVec3("bulletHoles[" + str_index + "]", bullet_hole);
+	
+	m_BulletHolesIndex++;
+	if(m_BulletHolesIndex > SHADER_MAX_BULLET_HOLES)
+		m_BulletHolesIndex = 0;
 }
 
 void SceneLayer::Clear()

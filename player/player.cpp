@@ -53,16 +53,20 @@ void Player::Update(float deltaTime)
 	weapon->SetModelTransform(modeltr);
 }
 
-void Player::addLayer(AbstractLayer* layer)
+void Player::addLayer(AbstractLayer* layer, bool flash)
 {
+
 	nNode* Player = new nNode();
 	glm::mat4 modeltr = weapon->GetModelTransform();
 
-	nModel* model = new nModel(weapon->GetModel(), eModelshdr);
-	model->SetTransform(modeltr);
-	Player->AddChildren(model);
+	if(!flash)
+	{
+		nModel* model = new nModel(weapon->GetModel(), eModelshdr);
+		model->SetTransform(modeltr);
+		Player->AddChildren(model);
+	}
 
-	if(weapon->IsFiring() && !weapon->IsFullyADS())
+	if(flash && weapon->IsFiring() && !weapon->IsFullyADS())
 	{
 
 		float time = weapon->GetFireOffset(); //glfwGetTime();
@@ -97,4 +101,46 @@ void Player::addLayer(AbstractLayer* layer)
 
 	Group* g_player = new Group(Player);
 	layer->Add(g_player);
+}
+
+void Player::addParticle(ParticleSystem* particle_system)
+{
+	float frontOffsetMuzzle = 4.0f;
+	float heightOffsetMuzzle = 0.6f;
+	glm::vec4 muzzleFront = glm::vec4(0.0f, heightOffsetMuzzle, frontOffsetMuzzle, 1.0f); //Weapon Loaded Facing Z axis
+	glm::vec4 muzzleBack = glm::vec4(0.0f, heightOffsetMuzzle, 0.8f * frontOffsetMuzzle, 1.0f);
+	glm::mat4 modeltr = weapon->GetModelTransform();
+	
+	glm::vec4 emissionPoint = modeltr * muzzleFront;
+	glm::vec3 emissionFront = glm::vec3(emissionPoint.x, emissionPoint.y, emissionPoint.z)/emissionPoint.w;
+	
+	glm::vec4 emissionPointBack = modeltr * muzzleBack;
+	glm::vec3 emissionBack = glm::vec3(emissionPointBack.x, emissionPointBack.y, emissionPointBack.z)/emissionPointBack.w;
+
+	glm::vec3 emissionDirection = emissionFront - emissionBack;
+
+	/*if(weapon->IsFlashing() && !weapon->IsFullyADS())
+	{
+		Particle* base = new Particle(weapon->baseFlash, emissionPoint, emissionDirection);
+		particle_system->Add(base, pCube, 100);			
+	}*/
+
+	if(weapon->GetMagazineCapacity() == 0.0f || weapon->IsReloading())
+	{
+		Particle* base = new Particle(weapon->baseSmokeStill, emissionPoint, emissionDirection);
+		// float smokeFactor = 1.0f - ();
+		particle_system->Add(base, pCube, 16);
+	}
+	else if(weapon->IsFlashing())
+	{
+		Particle* base = new Particle(weapon->baseSmokeFire, emissionPoint, emissionDirection);
+		particle_system->Add(base, pCube, 8);
+	}
+
+	if(weapon->NewBullet())
+	{
+		Particle* base = new Particle(weapon->baseBullet, emissionPoint, emissionDirection);
+		particle_system->Add(base, pLine, 1);
+	}
+	
 }

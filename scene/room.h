@@ -16,6 +16,9 @@
 
 #include "../material_system/asset.h"
 
+#include "../particle_system/particle_system.h"
+#include "../particle_system/particle.h"
+
 #include "../utils/collision.h"
 
 #include "../rendering/light.h"
@@ -47,7 +50,8 @@ public:
 	void addTilesLayer(InstancedLayer* instanced_layer);
 	void addLightsLayer(SceneLayer* layer, bool renderable = false);
 	void addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_layer, AbstractLayer* particle_layer, AbstractLayer* depthmap_layer);
-
+	void addBulletImpact(Camera* camera, SceneLayer* layer, ParticleSystem* particle_system);
+	
 	static bool collideOn()
 	{
 		return !active;
@@ -128,11 +132,13 @@ private:
 	//LIGHT GROUP
 	Group* g_light = NULL;
 
-	//SHADOW PASS
-	//bool shadowPass;
+	//PARTICLE IMPACT
+	Particle* baseImpactShort;
+	Particle* baseImpactLong;
 
 	//BULLET COLLISION MIN DIST
 	static float maxBulletDist;
+	static float maxRange; //if do not hit any geometry, cutoff value, max range 
 
 	//METHODS
 	glm::vec3 adjustAssetPos(glm::vec3 Pos);

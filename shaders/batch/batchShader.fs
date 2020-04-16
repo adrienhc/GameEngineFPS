@@ -38,6 +38,11 @@ struct PointLight
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
+//BULLET HOLES
+#define MAX_BULLET_HOLES 5
+uniform float radiusImpact;
+uniform vec3 bulletHoles[MAX_BULLET_HOLES];
+
 //SHADOWS
 uniform samplerCube depthMaps[NUM_POINT_LIGHTS];
 uniform float far_plane;
@@ -173,6 +178,16 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, v
 
 void main()
 {
+
+	for(int i = 0; i < MAX_BULLET_HOLES; i++)
+	{
+		if(length(bulletHoles[i] - fragPos.xyz) < radiusImpact)
+		{
+			FragColor = vec4(vec3(0.0f), 1.0f);
+			return;
+		}
+	}
+
 	vec3 norm = normalize(fragNorm);
 	vec3 viewDir = normalize(cameraPos - fragPos.xyz);
 	
@@ -206,6 +221,9 @@ void main()
 	}
 
 	if(DEBUG == 0)
+	{
 		FragColor = vec4(result, 1.0f) * fragCol;
+		//FragColor = vec4(fragTexDiffID/TEXTURE_SLOTS, 0.0f, 0.0f, 1.0f);
+	}
 	
 }

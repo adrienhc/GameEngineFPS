@@ -24,8 +24,10 @@ struct VertexDataOutline
 struct VertexDataParticle
 {
 	glm::vec4 Position;
-	unsigned int Color;
-	float Size;
+	glm::vec3 Normal;
+	glm::vec2 TexCoord; //Cone Rim, Angle - Random offsets 
+	glm::vec4 ParticleData; //Life, Speed, Size, MAX_Rotation; 
+	unsigned int Color; 
 };
 
 struct VertexDataDepthmap

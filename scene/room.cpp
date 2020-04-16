@@ -5,6 +5,7 @@ bool Room::shadowPass = true;
 int Room::sharedID = 0;
 float Room::minBulletDist = 1000.0f;
 float Room::maxBulletDist = 1000.0f;
+float Room::maxRange = 100.0f;
 
 Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, 
     std::vector<glm::vec3> ptLghtPs, std::vector<asset> vrtcl, std::vector<asset> hrztl, std::vector<asset> trgt,
@@ -55,6 +56,24 @@ Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  
     //TARGETS
     for(int i = 0; i < trgt.size(); i++)
         targets.push_back(new Target(adjustAssetPos(trgt[i].pos), trgt[i].orientation, outline_color, outline_size));
+
+    //PARTICLE
+    glm::vec4 col = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
+    int r = col.x * 255.0f;
+    int g = col.y * 255.0f;
+    int b = col.z * 255.0f;
+    int a = col.w * 255.0f;
+    unsigned int color = ( a << 24 | b << 16 | g << 8 | r );
+    baseImpactShort = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.2f, color, 0.2f, 0.03f, 180.0f);
+
+    r = col.x * 255.0f;
+    g = col.y * 255.0f;
+    b = col.z * 255.0f;
+    a = col.w * 255.0f;
+    color = ( a << 24 | b << 16 | g << 8 | r );
+    baseImpactLong = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.3f, color, 0.7f, 0.03f, 180.0f);    
+
+
 }
 
 Room::~Room()
@@ -959,7 +978,6 @@ bool Room::bulletCollide(Camera &camera)
 {
     bool hit = false;
     float placeholder;
-    float maxRange = 100.0f; //if do not hit any geometry, cutoff value, max range 
     float targDist = 1000.0f; //always assume target way too far away
     float boxDist = 1000.0f;
     float wallDist = 1000.0f;
@@ -1095,17 +1113,19 @@ void Room::postCollisions()
         //if one target is shot, will be true, need to update shadow map for as long as shot and before deleted 
         //if(Weapon::fire)
          //   std::cout << minBulletDist << std::endl;
+
+        if(targets[i]->IsShot())  //No need keep Target for whole explosion time, just submit to particle system later and delete
+            targets.erase(targets.begin()+i);
+
         if(Weapon::newBullet)
         {   //if tagrget shot that had not been shot before, shadow pass 
-            if(targets[i]->TestDist(minBulletDist) && targets[i]->HitRay() && !targets[i]->IsShot())
+            if(!targets[i]->IsShot() && targets[i]->TestDist(minBulletDist) && targets[i]->HitRay())
             {
                 targets[i]->Shot();
                 shadowPass = true;
             }
         }
 
-        if(targets[i]->Erase())
-            targets.erase(targets.begin()+i);
     }
 }
 
@@ -1146,6 +1166,8 @@ void Room::addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_la
     nNode* TargetsOutline = new nNode();
     nNode* TargetsRender = new nNode();
 
+    bool Shot = false;
+
     for(int i = 0; i < targets.size(); i++)
     {
         nModel* targetModel = targets[i]->GetNodeModel(); 
@@ -1154,6 +1176,7 @@ void Room::addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_la
         {
             if(particle_layer) //&& targetModel->GetShader() == eExplode)
             {
+                Shot = true;
                 TargetsParticle->AddChildren(targetModel);
             }
         }        
@@ -1174,7 +1197,7 @@ void Room::addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_la
         }
     }
 
-    if(particle_layer)
+    if(particle_layer && Shot)
     {
         Group* g_TargetsParticle = new Group(TargetsParticle);
         particle_layer->Add(g_TargetsParticle);
@@ -1198,5 +1221,22 @@ void Room::addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_la
     {
         Group* g_TargetsDepthmap = new Group(TargetsDepthmap);
         depthmap_layer->Add(g_TargetsDepthmap);
+    }
+}
+
+void Room::addBulletImpact(Camera* camera, SceneLayer* layer, ParticleSystem* particle_system)
+{
+    if(minBulletDist <= maxRange)
+    {
+        glm::vec3 bulletImpact = camera->Position + glm::normalize(camera->Front) * minBulletDist;
+
+        layer->AddBulletHole(bulletImpact);
+        
+        Particle* base = new Particle(baseImpactShort, glm::vec4(bulletImpact, 1.0f), -1.0f * camera->Front);
+        particle_system->Add(base, pLine, 10);
+
+        base = new Particle(baseImpactLong, glm::vec4(bulletImpact, 1.0f), -1.0f * camera->Front);
+        particle_system->Add(base, pLine, 10);
+
     }
 }

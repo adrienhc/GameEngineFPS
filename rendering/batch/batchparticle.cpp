@@ -13,13 +13,16 @@ BatchParticle::BatchParticle()
 	glBufferData(GL_ARRAY_BUFFER, PARTICLE_BUFFER_SIZE, NULL, GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(PARTICLE_SHADER_VERTEX_INDEX);
+	glEnableVertexAttribArray(PARTICLE_SHADER_NORMAL_INDEX);
+	glEnableVertexAttribArray(PARTICLE_SHADER_TEXCOORD_INDEX);
+	glEnableVertexAttribArray(PARTICLE_SHADER_PARTICLEDATA_INDEX);
 	glEnableVertexAttribArray(PARTICLE_SHADER_COLOR_INDEX);
-	glEnableVertexAttribArray(PARTICLE_SHADER_SIZE_INDEX);
 
 	glVertexAttribPointer(PARTICLE_SHADER_VERTEX_INDEX, 4, GL_FLOAT, GL_FALSE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::Position));
+	glVertexAttribPointer(PARTICLE_SHADER_NORMAL_INDEX, 3, GL_FLOAT, GL_FALSE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::Normal));
+	glVertexAttribPointer(PARTICLE_SHADER_TEXCOORD_INDEX, 2, GL_FLOAT, GL_FALSE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::TexCoord));
+	glVertexAttribPointer(PARTICLE_SHADER_PARTICLEDATA_INDEX, 4, GL_FLOAT, GL_FALSE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::ParticleData));
 	glVertexAttribPointer(PARTICLE_SHADER_COLOR_INDEX, 4, GL_UNSIGNED_BYTE, GL_TRUE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::Color));
-	glVertexAttribPointer(PARTICLE_SHADER_SIZE_INDEX, 1, GL_FLOAT, GL_FALSE, PARTICLE_VERTEX_SIZE, (void*) offsetof(PARTICLE_VERTEX_TYPE, PARTICLE_VERTEX_TYPE::Size));
-
 
 	glBindVertexArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -49,14 +52,65 @@ void BatchParticle::End()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void BatchParticle::Submit(Particle* particle)
+{
+	// if(m_Keep)
+		// return;
+	m_VertexBuffer->Position = particle->Position; 
+	m_VertexBuffer->Normal = particle->Direction;
+	m_VertexBuffer->TexCoord = particle->RandomDirectionOffset;
+	m_VertexBuffer->ParticleData = particle->ParticleData;
+	m_VertexBuffer->Color = particle->Color;
+	m_VertexBuffer++;
+	m_Offset++;
+}
+
+
+void BatchParticle::Flush()
+{
+	glLineWidth(3.0f);
+	glBindVertexArray(m_VAO);
+	glDrawArrays(GL_POINTS, 0, m_Offset);
+	glBindVertexArray(0);
+	m_Offset = 0;
+	m_Keep = false;
+}
+
+void BatchParticle::FlushKeep() //NOTUSED AT THE MOMENT
+{
+	glLineWidth(3.0f);
+	glBindVertexArray(m_VAO);
+	glDrawArrays(GL_POINTS, 0, m_Offset);
+	glBindVertexArray(0);
+	m_Keep = true; //Not used 
+}
+
+void BatchParticle::Clear()
+{
+	m_Offset = 0;
+	m_Keep = false;
+}
+
+
+/*
 void BatchParticle::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) 
 {
+	if(m_Keep)
+		return;
+
+	srand(123); //GIVE EACH ASSET/MODEL/PARTICLE EMITTER A RANDOM SEED AND THEY KEEP IT!!
+
 	int max_vertex;
+
+	float particle_life = 0.0f;
+	float particle_speed = 2.0f;
 	float particle_size = 0.05f;
-	glm::vec3 particle_offset = glm::vec3(0.0f);
+	float particle_rotation = 180.0f;
+	glm::vec4 particle_data = glm::vec4(particle_life, particle_speed, particle_size, particle_rotation);
 
 	glm::vec3* vPos;
 	glm::vec3* vNorm;
+	glm::vec2* vTexCoord;
 	glm::vec4 col = glm::vec4(0.576f, 0.164f, 0.164f, 1.0f); 
 	int r = col.x * 255.0f;
 	int g = col.y * 255.0f;
@@ -75,28 +129,36 @@ void BatchParticle::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& 
 			max_vertex = 4;
 			vPos = bSquare.Position;
 			vNorm = bSquare.Normal;
+			vTexCoord = bSquare.TexCoord;
 		}
 		else if(asset->getGeometry() == eCube) 
 		{
 			max_vertex = 24;
 			vPos = bCube.Position;
 			vNorm = bCube.Normal;
+			vTexCoord = bCube.TexCoord;
 		}
 		else if(asset->getGeometry() == eInvertedCube) //Cube with Flipped Normals
 		{
 			max_vertex = 24;
 			vPos = bCube.Position;
 			vNorm = bCube.InvertedNormal;
+			vTexCoord = bCube.TexCoord;
 		}
+
+		glm::mat3 normal_transform = glm::mat3(glm::transpose(glm::inverse(model_transforms[a]))); //best place?? 
 
 		//Stream Vertex Data
 		for(int i = 0; i < max_vertex; i++)
 		{
-			// particle_offset = asset->getParticleOffset(vNorm[i]);
-			particle_offset = vNorm[i];
-			m_VertexBuffer->Position = model_transforms[a] * glm::vec4(vPos[i] + particle_offset, 1.0f); //No need divide by .w 
+			float s = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float t = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			m_VertexBuffer->TexCoord = glm::vec2(s, t);
+
+			m_VertexBuffer->Position = model_transforms[a] * glm::vec4(vPos[i], 1.0f); //No need divide by .w 
+			m_VertexBuffer->Normal = normal_transform * vNorm[i];
+			m_VertexBuffer->ParticleData = particle_data;
 			m_VertexBuffer->Color = vColor;
-			m_VertexBuffer->Size = particle_size;
 			m_VertexBuffer++;
 		}
 
@@ -112,8 +174,13 @@ void BatchParticle::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 	if(m_Keep)
 		return;
 
+	srand(123); //GIVE EACH ASSET/MODEL/PARTICLE EMITTER A RANDOM SEED AND THEY KEEP IT!!
+
+	float particle_life = 0.5f;
+	float particle_speed = 2.0f;
 	float particle_size = 0.05f;
-	glm::vec3 particle_offset = glm::vec3(0.0f);
+	float particle_rotation = 180.0f;
+	glm::vec4 particle_data = glm::vec4(particle_life, particle_speed, particle_size, particle_rotation);
 
 	//DEFAULT COLOR
 	//DIFFUSE RED IF NO TEXTURE
@@ -129,6 +196,8 @@ void BatchParticle::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 	for(int a = 0; a < models.size(); a++)
 	{
 		model = models[a];
+		glm::mat3 normal_transform = glm::mat3(glm::transpose(glm::inverse(model_transforms[a]))); //best place?? 
+
 		//Load Each Mesh in Model
 		for(int k = 0; k < model->meshes.size(); k++)
 		{
@@ -136,11 +205,17 @@ void BatchParticle::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 			//Stream Vertex Data
 			for(int i = 0; i < mesh_vertices.size(); i++)
 			{
-				// particle_offset = glm::normalize(mesh_vertices[i].Normal);
-				particle_offset = mesh_vertices[i].Normal;
-				m_VertexBuffer->Position = model_transforms[a] * glm::vec4(mesh_vertices[i].Position + particle_offset, 1.0f); //No need divide by .w
+				//if(mesh_vertices[i].TexCoords.x < 0.0 || mesh_vertices[i].TexCoords.y < 0.0)
+				//{
+				float s = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+				float t = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+				m_VertexBuffer->TexCoord = glm::vec2(s, t);
+				//}
+				
+				m_VertexBuffer->Position = model_transforms[a] * glm::vec4(mesh_vertices[i].Position, 1.0f); //No need divide by .w
+				m_VertexBuffer->Normal = normal_transform * mesh_vertices[i].Normal;
+				m_VertexBuffer->ParticleData = particle_data;
 				m_VertexBuffer->Color = vColor;
-				m_VertexBuffer->Size = particle_size;
 				m_VertexBuffer++;
 			}
 			m_Offset += mesh_vertices.size(); //vertices count
@@ -148,27 +223,4 @@ void BatchParticle::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 	}
 
 }
-
-
-void BatchParticle::Flush()
-{
-	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, m_Offset);
-	glBindVertexArray(0);
-	m_Offset = 0;
-	m_Keep = false;
-}
-
-void BatchParticle::FlushKeep()
-{
-	glBindVertexArray(m_VAO);
-	glDrawArrays(GL_POINTS, 0, m_Offset);
-	glBindVertexArray(0);
-	m_Keep = true;
-}
-
-void BatchParticle::Clear()
-{
-	m_Offset = 0;
-	m_Keep = false;
-}
+*/

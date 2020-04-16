@@ -10,6 +10,7 @@ FILES += material_system/asset.cpp material_system/material.cpp material_system/
 FILES += scene/scene.cpp scene/room.cpp scene/skybox.cpp
 FILES += geometry/geometry.cpp geometry/cluster.cpp geometry/model.cpp geometry/mesh.cpp geometry/weapon.cpp geometry/target.cpp
 FILES += player/player.cpp utils/collision.cpp
+FILES += particle_system/particle_system.cpp particle_system/particle.cpp
 
 # The flags to use for compilation                                    
 FLAGS = -L/usr/local/lib -lglfw3 -lrt -lm -ldl -lXrandr -lXinerama -lXxf86vm -lXext -lXcursor -lXrender -lXfixes -lX11 -lpthread -lxcb -lXau -lXdmcp -lGLU -lGL -lglut -lassimp

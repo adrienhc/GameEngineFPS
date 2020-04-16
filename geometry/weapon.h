@@ -9,6 +9,7 @@
 
 #include "model.h"
 #include "../material_system/asset.h"
+#include "../particle_system/particle.h"
 
 
 //could be an FSM, using design pattern!
@@ -25,9 +26,11 @@ public:
 	glm::mat4 SetModelTransform(glm::mat4 weapon_transform);
 	glm::mat4 GetModelTransform();
 	bool IsFullyADS();
+	bool IsReloading();
 	float GetRecoilOffset();
 	float GetFireOffset();
 	float GetReloadOffset();
+	float GetMagazineCapacity();
 	bool NewBullet();
 	bool IsFiring();
 	bool IsFlashing();
@@ -36,6 +39,10 @@ public:
 	static bool reload;
 	static bool newBullet; //keep static
 	Asset* muzzleFlash = new Asset(eSquare, "muzzleFlash", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f), 32.0f, glm::vec4(0.0f), true, "./textures/muzzleflashtrimmed2.png");
+	Particle* baseBullet;
+	Particle* baseFlash;
+	Particle* baseSmokeFire;
+	Particle* baseSmokeStill;
 
 private:
 	//Weapon Specific

@@ -15,6 +15,40 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	zoom_max = zoom_maximum;
 	recoil_sign = 1.0f;
 	model_transform = glm::mat4(1.0f);
+
+
+	glm::vec4 col = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
+	int r = col.x * 255.0f;
+	int g = col.y * 255.0f;
+	int b = col.z * 255.0f;
+	int a = col.w * 255.0f;
+	unsigned int color = ( a << 24 | b << 16 | g << 8 | r );
+	baseBullet = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.2f, color, 1000.0f, 0.03f, 0.0f);
+
+
+	//col = glm::vec4(0.960f, 0.925f, 0.019f, 0.5f); 
+	col = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	r = col.x * 255.0f;
+	g = col.y * 255.0f;
+	b = col.z * 255.0f;
+	a = col.w * 255.0f;
+	color = ( a << 24 | b << 16 | g << 8 | r );
+	baseFlash = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.0f, color, 20.0f, 0.01f, 5.0f, true);
+
+
+	//col = glm::vec4(0.5f, 0.5f, 0.5f, 0.2f);
+	col = glm::vec4(1.0f, 1.0f, 1.0f, 0.2f); 
+	r = col.x * 255.0f;
+	g = col.y * 255.0f;
+	b = col.z * 255.0f;
+	a = col.w * 255.0f;
+	color = ( a << 24 | b << 16 | g << 8 | r );
+	// baseSmoke = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.2f, color, 100.0f, 0.01f, 7.0f);
+
+	baseSmokeFire = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.5f, color, 10.0f, 0.01f, 10.0f);
+	baseSmokeStill = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.8f, color, 10.0f, 0.01f, 10.0f);
+
+
 }
 
 Weapon::~Weapon()
@@ -124,6 +158,11 @@ glm::vec4 Weapon::GetADSOffset()
 	return glm::vec4(front, right, down, zoom);
 }
 
+bool Weapon::IsReloading()
+{
+	return reload;
+}
+
 bool Weapon::IsFullyADS()
 {
 	return ads_time_offset >= ads_time;
@@ -167,4 +206,9 @@ glm::mat4 Weapon::SetModelTransform(glm::mat4 weapon_transform)
 glm::mat4 Weapon::GetModelTransform()
 {
 	return model_transform;
+}
+
+float Weapon::GetMagazineCapacity()
+{
+	return ((float) bullets / (float)clip_size);
 }

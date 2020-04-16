@@ -20,6 +20,7 @@ class AbstractLayer
 		AbstractLayer(BatchAbstract* renderer, Camera* camera, Shader* shader);
 		Shader* GetShader();
 		Camera* GetCamera();
+		BatchAbstract* GetRenderer();
 		Shader* m_Shader;
 		BatchAbstract* m_Renderer;
 		Camera* m_Camera;

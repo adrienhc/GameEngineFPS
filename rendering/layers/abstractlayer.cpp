@@ -19,8 +19,6 @@ void AbstractLayer::Add(Group* group)
 	m_Groups.push_back(group);
 }
 
-//Function to Add light information and cube maps as well! -- up to derived class to do 
-
 Shader* AbstractLayer::GetShader()
 {
 	return m_Shader;
@@ -29,6 +27,11 @@ Shader* AbstractLayer::GetShader()
 Camera* AbstractLayer::GetCamera()
 {
 	return m_Camera;
+}
+
+BatchAbstract* AbstractLayer::GetRenderer()
+{
+	return m_Renderer;
 }
 
 void AbstractLayer::Render()

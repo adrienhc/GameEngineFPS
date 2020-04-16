@@ -14,7 +14,7 @@ public:
 		Texture(std::string path);
 		void Free();
 		void Bind();
-		void unBind();
+		void Unbind();
 		unsigned int GetID();
 private:
 		unsigned char *data = NULL;

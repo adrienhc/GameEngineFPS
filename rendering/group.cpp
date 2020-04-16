@@ -51,6 +51,12 @@ void Group::Submit(BatchAbstract* renderer)
 	renderer->Submit(m_Models, m_ModelTransforms);
 }
 
+void Group::Submit(ParticleSystem* particle_system, pShape type)
+{
+	particle_system->Add(m_Assets, m_AssetTransforms, type);
+	particle_system->Add(m_Models, m_ModelTransforms, type);
+}
+
 
 void Group::Traverse(nNode* Root, eType type)
 {

@@ -326,26 +326,40 @@ void BatchRenderer::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 
 			if((vTexDiffID > 0 && !foundDiff) || (vTexSpecID > 0 && !foundSpec)) //if missing at least one that was needed
 			{
-				if(m_TextureID.size() >= (MAX_TEXTURE_SLOTS - textureCount)) //check if space for all needed
+				if(m_TextureID.size() < textureCount) //for empty or very small texture buffer 
+				{
+					if(vTexDiffID > 0)
+					{
+						m_TextureID.push_back(vTexDiffID);
+						vTexDiffSlot = (float)(m_TextureID.size() - 1);
+					}
+
+					if(vTexSpecID > 0)
+					{
+						m_TextureID.push_back(vTexSpecID);
+						vTexSpecSlot = (float)(m_TextureID.size() -1);
+					}	
+				}
+				else if(m_TextureID.size() >= (MAX_TEXTURE_SLOTS - textureCount)) //check if space for all needed
 				{
 					//Also do when reached Max Buffer size? 
 					End();
 					Flush();
 					Begin();
 					//issue here? want m_TextureID size to be 0?? 
-				}
 
-				if(vTexDiffID > 0)
-				{
-					m_TextureID.push_back(vTexDiffID);
-					vTexDiffSlot = (float)(m_TextureID.size() - textureCount);
-					textureCount--; //so that next check will have a different offset, next slot in array
-				}
+					if(vTexDiffID > 0)
+					{
+						m_TextureID.push_back(vTexDiffID);
+						vTexDiffSlot = (float)(m_TextureID.size() - textureCount);
+						textureCount--; //so that next check will have a different offset, next slot in array
+					}
 
-				if(vTexSpecID > 0)
-				{
-					m_TextureID.push_back(vTexSpecID);
-					vTexSpecSlot = (float)(m_TextureID.size() - textureCount);
+					if(vTexSpecID > 0)
+					{
+						m_TextureID.push_back(vTexSpecID);
+						vTexSpecSlot = (float)(m_TextureID.size() - textureCount);
+					}
 				}
 			}
 			
@@ -354,8 +368,6 @@ void BatchRenderer::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 				vTexDiffSlot += 1.0f;
 			if(vTexSpecID > 0)
 				vTexSpecSlot += 1.0f;
-
-
 
 
 			std::vector<mVertex>& mesh_vertices = model->meshes[k].vertices;

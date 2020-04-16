@@ -6,6 +6,7 @@
 #include <iostream>
 #include <cmath>
 #include <vector>
+#include <cstdlib>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -45,10 +46,12 @@
 
 #include "player/player.h"
 
+#include "particle_system/particle_system.h"
+
 
 //Window
-const unsigned int WINDOW_WIDTH = 800;//1920; 
-const unsigned int WINDOW_HEIGHT = 600;//1080;
+const unsigned int WINDOW_WIDTH = 1920; 
+const unsigned int WINDOW_HEIGHT = 1080;
 
 //Framebuffer and Input 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);
