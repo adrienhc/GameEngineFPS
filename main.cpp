@@ -16,10 +16,11 @@ int main()
        glfwWindowHint( GLFW_DOUBLEBUFFER, GL_FALSE );
 
    
-    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
+    //
+   GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", NULL, NULL);
                                                                                     //glfwGetPrimaryMonitor()   --for fullscreen app automatically
 
-    //GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
+    GLFWwindow* window = glfwCreateWindow( WINDOW_WIDTH, WINDOW_HEIGHT, "FPS Game", glfwGetPrimaryMonitor(), NULL);
 
     if (window == NULL)
     {

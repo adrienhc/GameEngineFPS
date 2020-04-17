@@ -12,10 +12,12 @@ Essentially, Mad Pit will combine the best of both worlds, a franctic speedrunni
 
 ## Developement Screenshots
 
-![Pic0](Screenshots/Batched0.png)
-![Pic1](Screenshots/Batched1.png)
-![Pic2](Screenshots/Batched2.png)
-![Pic3](Screenshots/Muzzle1.png)
+![Pic0](Screenshots/Particle0.png)
+![Pic1](Screenshots/Particle1.png)
+![Pic2](Screenshots/Particle2.png)
+![Pic3](Screenshots/Batched0.png)
+![Pic4](Screenshots/Batched1.png)
+
 
 ## External Tools
 
