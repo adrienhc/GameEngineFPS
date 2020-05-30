@@ -22,9 +22,9 @@ struct BB
         glm::vec3 temp_max;
 
         //select correct cube corner so that rotated ends up min/max also scale
-        switch(orientation) //Facing W by default
+        switch(orientation) //Facing N by default
         {
-            case 'N':
+            case 'E':
                 temp_min = glm::vec3(-0.5f, -0.5f, 0.5f);
                 temp_min *= scaling;
                 temp_min = glm::rotate(temp_min, glm::radians(-90.0f), Up);
@@ -33,7 +33,7 @@ struct BB
                 temp_max *= scaling;
                 temp_max = glm::rotate(temp_max, glm::radians(-90.0f), Up);                
             break;
-            case 'S':
+            case 'W':
                 temp_min = glm::vec3(0.5f, -0.5f, -0.5f);
                 temp_min *= scaling;
                 temp_min = glm::rotate(temp_min, glm::radians(90.0f), Up);
@@ -42,7 +42,7 @@ struct BB
                 temp_max *= scaling;
                 temp_max = glm::rotate(temp_max, glm::radians(90.0f), Up);
             break;
-            case 'E':
+            case 'S':
                 temp_min = glm::vec3(0.5f, -0.5f, 0.5f);
                 temp_min *= scaling;
                 temp_min = glm::rotate(temp_min, glm::radians(180.0f), Up);
@@ -52,7 +52,7 @@ struct BB
                 temp_max = glm::rotate(temp_max, glm::radians(180.0f), Up);
 
             break;
-            case 'W':
+            case 'N':
                 temp_min = glm::vec3(-0.5f, -0.5f, -0.5f);
                 temp_min *= scaling;
                 
@@ -90,6 +90,15 @@ struct asset
         pos = position;
         orientation = _orientation;
     }
+
+    asset(int _x, int _y, glm::vec3 position, char _orientation)
+    {
+        x = _x;
+        y = _y;
+        pos = position;
+        orientation = _orientation;   
+    }
+
     
     int x, y;
     glm::vec3 pos;
@@ -102,8 +111,7 @@ class Cluster
 public:
 	static BB Vertical(nNode* Root, int width, int height, glm::vec3 position, float y_rotation, Asset* asset);
 	static BB Horizontal(nNode* Root, int width, int length, glm::vec3 position, float y_rotation, Asset* asset);
-
-	static BB Array();
+    static BB Array();
 };
 
 

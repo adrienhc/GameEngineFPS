@@ -32,11 +32,18 @@ std::vector<int>& Group::GetLightsRoomIndex()
 	return m_PointLightsRoomIndex;
 }
 
-
 void Group::Add(Asset* asset, glm::mat4& model_transform)
 {
 	m_Assets.push_back(asset);
 	m_AssetTransforms.push_back(model_transform);
+	m_AssetTextureScalings.push_back(glm::vec2(1.0f));
+}
+
+void Group::Add(Asset* asset, glm::mat4& model_transform, glm::vec2& texture_scaling)
+{
+	m_Assets.push_back(asset);
+	m_AssetTransforms.push_back(model_transform);
+	m_AssetTextureScalings.push_back(texture_scaling);
 }
 
 void Group::Add(Model* model, glm::mat4& model_transform)
@@ -47,7 +54,7 @@ void Group::Add(Model* model, glm::mat4& model_transform)
 
 void Group::Submit(BatchAbstract* renderer)
 {
-	renderer->Submit(m_Assets, m_AssetTransforms);
+	renderer->Submit(m_Assets, m_AssetTransforms, m_AssetTextureScalings);
 	renderer->Submit(m_Models, m_ModelTransforms);
 }
 
@@ -144,7 +151,7 @@ void Group::Traverse(nNode* Root, eType type)
 		else
 			 model_transform = MatrixStack.top();
 
-		Add(Ast->GetAsset(), model_transform);
+		Add(Ast->GetAsset(), model_transform, Ast->GetTextureScaling());
 
 		for(std::list<nNode*>::iterator it = nChildren.begin(); it != nChildren.end(); it++)
 		{
@@ -194,7 +201,7 @@ void Group::Traverse(nNode* Root, eType type)
 		nPointLight* Lt = dynamic_cast<nPointLight*> (Root);
 		PointLight* light = Lt->GetLight();
 		glm::mat4 model_transform = MatrixStack.top();
-		light->setTransform(model_transform);
+		light->setTransform(model_transform, Lt->GetIndex());
 
 		m_PointLights.push_back(light);
 		m_PointLightsRoomIndex.push_back(Lt->GetIndex());

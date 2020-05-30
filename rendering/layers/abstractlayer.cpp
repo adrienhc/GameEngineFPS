@@ -10,8 +10,7 @@ AbstractLayer::AbstractLayer(BatchAbstract* renderer, Camera* camera, Shader* sh
 
 AbstractLayer::~AbstractLayer()
 {
-	//for(int i = 0; i < m_Groups.size(); i++)
-	//	delete m_Groups[i];	
+	delete m_Renderer;
 }
 
 void AbstractLayer::Add(Group* group)

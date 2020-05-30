@@ -28,6 +28,15 @@ Model::Model(char* path, bool gamma)
 	*/
 }
 
+Model::~Model()
+{
+	glBindTexture(GL_TEXTURE_2D, 0);
+	for(int i = 0; i < textures_loaded.size(); i++)
+	{
+		glDeleteTextures(1, &textures_loaded[i].id);
+	}
+}
+
 void Model::Draw(Shader shader)
 {
 	for(unsigned int i = 0; i < meshes.size(); i++)

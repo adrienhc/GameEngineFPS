@@ -23,6 +23,8 @@ uniform vec3 cameraPos;
 struct PointLight
 {
 	vec3 position;	
+	float radius;
+	int active_shadow;
 
 	vec3 ambient;
 	vec3 diffuse;
@@ -34,7 +36,7 @@ struct PointLight
 };
 
 
-#define NUM_POINT_LIGHTS 3
+#define NUM_POINT_LIGHTS 5
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
@@ -49,6 +51,11 @@ uniform float far_plane;
 
 //DEBUG MODE VISUALIZE SHADOW MAP
 #define DEBUG 0
+
+float linstep(float x0, float x1, float xn)
+{
+	return (xn - x0) / (x1 - x0);
+}
 
 float DEBUG_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 {
@@ -140,6 +147,14 @@ float PCF_ShadowCalculation(vec3 fragPos, vec3 lightPos, int i)
 
 vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, vec3 fragSpec, vec3 norm, vec3 fragPos, vec3 viewDir)
 {
+	float distance = length(pointLight.position - fragPos);
+	float factor = (distance/pointLight.radius);
+	if( factor > 1.0f)
+		return vec3(0.0f);
+
+	factor = factor * factor * factor * factor;
+	factor = 1.0f - factor;
+
 	//ambient
 	vec3 ambient = pointLight.ambient * fragAmb;
 
@@ -152,10 +167,9 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, v
 	//specular
 	vec3 reflectDir = reflect(-lightDir, norm);
 	float spec = pow(max(dot(viewDir, reflectDir), 0.0), fragLighting.w);
-	vec3 specular = pointLight.specular * (fragSpec * spec);
+	vec3 specular = pointLight.diffuse * (fragSpec * spec);
 
 	//attenuation
-	float distance = length(pointLight.position - fragPos);
 	float attenuation = 1.0 / ( pointLight.constant + pointLight.linear * distance + pointLight.quadratic * (distance * distance) );
 
 	ambient *= attenuation;
@@ -163,17 +177,19 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, v
 	diffuse *= attenuation;
 	specular *= attenuation;
 
-	float cutoffDistance = 15; //Distance at which Light has no effect and assume shadow? 
-	float shadow = 0.0f;
-	if(abs(pointLight.position.z - fragPos.z) < cutoffDistance && abs(pointLight.position.x - fragPos.x) < cutoffDistance)
-	{	
-		if(DEBUG == 1)
-			shadow = DEBUG_ShadowCalculation(fragPos, pointLight.position, i);
-		else
-			shadow = VSM_ShadowCalculation(fragPos, pointLight.position, i);
-	}
-	
-	return (ambient + (shadow)*(diffuse + specular));
+	//float cutoffDistance = 25; //Distance at which Light has no effect and assume shadow? 
+	float shadow = 1.0f;
+	//if(abs(pointLight.position.z - fragPos.z) < cutoffDistance && abs(pointLight.position.x - fragPos.x) < cutoffDistance)
+	//if(length(pointLight.position - fragPos) < cutoffDistance)
+	//{	
+		//if(DEBUG == 1)
+		//	shadow = DEBUG_ShadowCalculation(fragPos, pointLight.position, i);
+		//else
+	shadow = pointLight.active_shadow * VSM_ShadowCalculation(fragPos, pointLight.position, i);
+	//}
+
+
+	return factor * (ambient + (shadow)*(diffuse + specular));
 }
 
 void main()
@@ -216,7 +232,8 @@ void main()
 	vec3 result = vec3(0.0f);
 	
 	for(int i = 0; i < numLights; i++)
-	{	
+	{	 
+		
 	 	result += CalcPointLight(pointLight[i], i, fragAmb, fragDiff, fragSpec, norm, fragPos.xyz, viewDir);
 	}
 

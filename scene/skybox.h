@@ -12,6 +12,7 @@ class Skybox
 {
 	public:
 		Skybox(std::string right, std::string left, std::string top, std::string bottom, std::string back, std::string front);
+		~Skybox();
 		void Draw();
 
 	private:

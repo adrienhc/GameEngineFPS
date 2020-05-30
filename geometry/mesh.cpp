@@ -10,6 +10,17 @@ Mesh::Mesh(std::vector<mVertex> vert, std::vector<unsigned int> ind, std::vector
 	setupMesh();
 }
 
+Mesh::~Mesh()
+{
+
+	glBindVertexArray(VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
+
+	//mesh is just a temporary holder, textures deleted in model
+}
 
 void Mesh::setupMesh()
 {

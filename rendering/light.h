@@ -14,10 +14,12 @@
 #include "shader.h"
 #include <glm/gtx/string_cast.hpp>
 
+#include "../config.h"
+
 #define RENDERER_TEXTURE_OFFSET 20
 
-extern const unsigned int WINDOW_WIDTH; //defined in main.h 
-extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
+// extern const unsigned int WINDOW_WIDTH; //defined in config.h 
+// extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
 
 class Shader; //since shader also includes PointLight
 
@@ -25,7 +27,9 @@ class PointLight
 {
 public:
 	PointLight(int num_lights, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular, float constant, float linear, float quadratic);
-	void setTransform(glm::mat4 transform);
+	~PointLight();
+	void setTransform(glm::mat4 transform, int room_index = 0);
+	void setRadius(float radius, int room_index = 0);
 
 	static const unsigned int MAX_LIGHTS; 
 	
@@ -33,7 +37,8 @@ public:
 	glm::vec3 ambient;
 	glm::vec3 diffuse;
 	glm::vec3 specular;	
-	glm::vec3 position;
+	std::vector<glm::vec3> position;
+	std::vector<float> radius;
 	
 	//Attenuation
 	float constant;
@@ -68,7 +73,7 @@ private:
 	float near;
 	float far;
 	glm::mat4 shadowProj;
-	std::vector<glm::mat4> shadowTransform;
+	std::vector<std::vector<glm::mat4>> shadowTransform;
 
 };
 

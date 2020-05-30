@@ -32,10 +32,14 @@ BatchParticle::BatchParticle()
 BatchParticle::~BatchParticle()
 {
 	//delete [] m_IndexBuffer;
+	delete m_VertexBuffer;
+	delete m_IndexBuffer;
 
-    //glDeleteBuffers(1, &m_VBO);
-    //glDeleteBuffers(1, &m_IBO);
-    //glDeleteVertexArrays(1, &m_VAO);
+	glBindVertexArray(m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_IBO);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &m_VAO);
 }
 
 void BatchParticle::Begin()

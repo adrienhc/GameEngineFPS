@@ -13,15 +13,15 @@ Target::Target(glm::vec3 position, char orientation) //'N' 'S' 'E' 'W'
 	transform = glm::mat4(1.0f);
 	transform = glm::translate(transform, position);
 	
-	switch (orientation) // LOADED ALIGNED WITH W
+	switch (orientation) // LOADED ALIGNED WITH N
 	{
-		case 'N':
+		case 'E':
 			transform = glm::rotate(transform, glm::radians(-90.0f), Up);
 		break;
-		case 'S':
+		case 'W':
 			transform = glm::rotate(transform, glm::radians(90.0f), Up);
 		break;
-		case 'E':
+		case 'S':
 			transform = glm::rotate(transform, glm::radians(180.0f), Up);
 		break;
 		default:
@@ -50,15 +50,15 @@ Target::Target(glm::vec3 position, char orientation, glm::vec4 outline_color, fl
 	transform = glm::mat4(1.0f);
 	transform = glm::translate(transform, position);
 	
-	switch (orientation) // LOADED ALIGNED WITH W
+	switch (orientation) // LOADED ALIGNED WITH N
 	{
-		case 'N':
+		case 'E':
 			transform = glm::rotate(transform, glm::radians(-90.0f), Up);
 		break;
-		case 'S':
+		case 'W':
 			transform = glm::rotate(transform, glm::radians(90.0f), Up);
 		break;
-		case 'E':
+		case 'S':
 			transform = glm::rotate(transform, glm::radians(180.0f), Up);
 		default:
 		break;
@@ -84,8 +84,9 @@ Target::Target(glm::vec3 position, char orientation, glm::vec4 outline_color, fl
 
 Target::~Target()
 {
-	if ( count <= 0)
-		delete model;
+	//count--;
+	//if ( count <= 0)
+		//delete model;
 	delete outline;
 	delete nodeModel;
 }

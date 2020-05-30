@@ -72,7 +72,7 @@ void Player::addLayer(AbstractLayer* layer, bool flash)
 		float time = weapon->GetFireOffset(); //glfwGetTime();
 		float spinSpeed = 1000.0f;
 		float rotationMuzzle = time * spinSpeed;
-		float scaleMuzzle = 1.0f;
+		float scaleMuzzle = 10.0f * weapon->GetScaling().x;
 		float frontOffsetMuzzle = 6.0f;
 
 		//Muzzle Flash 
@@ -105,7 +105,7 @@ void Player::addLayer(AbstractLayer* layer, bool flash)
 
 void Player::addParticle(ParticleSystem* particle_system)
 {
-	float frontOffsetMuzzle = 4.0f;
+	float frontOffsetMuzzle = 4.5f;
 	float heightOffsetMuzzle = 0.6f;
 	glm::vec4 muzzleFront = glm::vec4(0.0f, heightOffsetMuzzle, frontOffsetMuzzle, 1.0f); //Weapon Loaded Facing Z axis
 	glm::vec4 muzzleBack = glm::vec4(0.0f, heightOffsetMuzzle, 0.8f * frontOffsetMuzzle, 1.0f);
@@ -129,13 +129,13 @@ void Player::addParticle(ParticleSystem* particle_system)
 	{
 		Particle* base = new Particle(weapon->baseSmokeStill, emissionPoint, emissionDirection);
 		// float smokeFactor = 1.0f - ();
-		particle_system->Add(base, pCube, 16);
+		particle_system->Add(base, pPoint, 16); 
 	}
-	else if(weapon->IsFlashing())
+	/*else if(weapon->IsFlashing())
 	{
 		Particle* base = new Particle(weapon->baseSmokeFire, emissionPoint, emissionDirection);
-		particle_system->Add(base, pCube, 8);
-	}
+		particle_system->Add(base, pPoint, 4); 
+	}*/
 
 	if(weapon->NewBullet())
 	{

@@ -28,10 +28,11 @@
 #define INSTANCED_SHADER_MODTR_INDEX_1 (INSTANCED_SHADER_MODTR_INDEX_0+1)
 #define INSTANCED_SHADER_MODTR_INDEX_2 (INSTANCED_SHADER_MODTR_INDEX_0+2)
 #define INSTANCED_SHADER_MODTR_INDEX_3 (INSTANCED_SHADER_MODTR_INDEX_0+3)
-#define INSTANCED_SHADER_TEXDIFFID_INDEX 7
-#define INSTANCED_SHADER_TEXSPECID_INDEX 8
-#define INSTANCED_SHADER_LIGHTING_INDEX 9
-#define INSTANCED_SHADER_COLOR_INDEX 10
+#define INSTANCED_SHADER_TEXSCALE_INDEX 7
+#define INSTANCED_SHADER_TEXDIFFID_INDEX 8
+#define INSTANCED_SHADER_TEXSPECID_INDEX 9
+#define INSTANCED_SHADER_LIGHTING_INDEX 10
+#define INSTANCED_SHADER_COLOR_INDEX 11
 
 class BatchInstanced: public BatchAbstract
 {
@@ -40,7 +41,7 @@ class BatchInstanced: public BatchAbstract
 		~BatchInstanced();
 		void Begin();
 		void End();
-		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms);
+		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings);
 		void Submit(std::vector<Model*>& models, std::vector<glm::mat4>& model_transforms);
 		void Flush();
 		void FlushKeep();

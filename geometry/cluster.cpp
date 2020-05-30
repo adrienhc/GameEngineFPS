@@ -74,8 +74,5 @@ BB Cluster::Horizontal(nNode* Root, int width, int length, glm::vec3 position, f
     return BoundBox;
 }
 
-
-
-
 BB Cluster::Array()
 {}

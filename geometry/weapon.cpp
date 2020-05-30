@@ -14,8 +14,10 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	zoom_min = zoom_minimum;
 	zoom_max = zoom_maximum;
 	recoil_sign = 1.0f;
+	recoil_strength = 200.0f * scale_factor; 
 	model_transform = glm::mat4(1.0f);
 
+	muzzleFlash = new Asset(eSquare, "muzzleFlash", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f), 32.0f, glm::vec4(0.0f), true, "./textures/muzzleflashtrimmed2.png");
 
 	glm::vec4 col = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f); 
 	int r = col.x * 255.0f;
@@ -23,7 +25,7 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	int b = col.z * 255.0f;
 	int a = col.w * 255.0f;
 	unsigned int color = ( a << 24 | b << 16 | g << 8 | r );
-	baseBullet = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.2f, color, 1000.0f, 0.03f, 0.0f);
+	baseBullet = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.1f, color, scale_factor * 10000.0f, scale_factor * 0.3f, 0.0f, true);
 
 
 	//col = glm::vec4(0.960f, 0.925f, 0.019f, 0.5f); 
@@ -33,7 +35,7 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	b = col.z * 255.0f;
 	a = col.w * 255.0f;
 	color = ( a << 24 | b << 16 | g << 8 | r );
-	baseFlash = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.0f, color, 20.0f, 0.01f, 5.0f, true);
+	baseFlash = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.0f, color, 20.0f, scale_factor * 0.1f, 5.0f, true);
 
 
 	//col = glm::vec4(0.5f, 0.5f, 0.5f, 0.2f);
@@ -45,8 +47,8 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 	color = ( a << 24 | b << 16 | g << 8 | r );
 	// baseSmoke = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.2f, color, 100.0f, 0.01f, 7.0f);
 
-	baseSmokeFire = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.5f, color, 10.0f, 0.01f, 10.0f);
-	baseSmokeStill = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.8f, color, 10.0f, 0.01f, 10.0f);
+	baseSmokeFire = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 0.5f, color, 20.0f, scale_factor * 0.1f, 10.0f);
+	baseSmokeStill = new Particle(glm::vec4(0.0f), glm::vec3(0.0f), 1.0f, color, scale_factor * 1000.0f, scale_factor * 0.1f, 5.0f);
 
 
 }
@@ -54,6 +56,11 @@ Weapon::Weapon(char* path, glm::vec3 hip_ofst, glm::vec3 ads_ofst, float scale_f
 Weapon::~Weapon()
 {
 	delete model;
+	delete muzzleFlash;
+	delete baseBullet;
+	delete baseFlash;
+	delete baseSmokeFire;
+	delete baseSmokeStill;
 }
 
 void Weapon::Update(float delta_time)
@@ -190,7 +197,7 @@ float Weapon::GetFireOffset()
 
 float Weapon::GetRecoilOffset()
 {
-	return 20.0f * fire_time_offset;
+	return recoil_strength * fire_time_offset;
 }
 
 float Weapon::GetReloadOffset()

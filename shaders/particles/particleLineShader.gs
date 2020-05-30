@@ -14,6 +14,8 @@ in VS_OUT
 } gs_in[];
 
 out vec4 fragColor;
+out vec2 fragTex;
+flat out int fragHasTex;
 
 /// MATH ///
 const float PI = 3.1415926535897932384626433832795;
@@ -78,6 +80,7 @@ vec4 RandTextureOffset()
 
 void main() 
 {    
+    fragHasTex = 0;
 
     vec4 center = gs_in[0].fragPos;
     vec4 offset = gs_in[0].fragParticleData.x * gs_in[0].fragParticleData.y * vec4(RandRotation(gs_in[0].fragNorm, gs_in[0].fragParticleData.w), 0.0f);

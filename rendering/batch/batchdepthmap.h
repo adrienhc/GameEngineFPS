@@ -22,7 +22,7 @@ class BatchDepthmap: public BatchAbstract
 		~BatchDepthmap();
 		void Begin();
 		void End();
-		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms);//, glm::mat4 model_tr);
+		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings);//, glm::mat4 model_tr);
 		void Submit(std::vector<Model*>& models, std::vector<glm::mat4>& model_transforms);
 		void Flush();
 		void FlushKeep();

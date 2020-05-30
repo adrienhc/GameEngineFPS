@@ -5,23 +5,45 @@ ParticleLayer::ParticleLayer(Camera* camera, Shader* shader, ParticleSystem* par
 {
 	shader->use();
 	shader->setInt("noiseRGB", 0);
-
+	shader->setInt("smokeTexture", 1);
 	m_ParticleSystem = particle_system;
 	m_type = type;
 }
 
 ParticleLayer::~ParticleLayer()
-{}
+{
+	delete noiseRGB;
+	delete smokeTexture;
+}
 
 
 void ParticleLayer::Render()
 {
+   glEnable(GL_BLEND);
+   switch(m_type)
+   {
+   		case pPoint:
+   			glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+   		break;
+   		default:
+   			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   		break;
+   }
+   
+   glDepthMask(0);
+
 	//Setup Shader
 	Shader* m_Shader = GetShader();
 	m_Shader->use();
-	m_Shader->setCamera(GetCamera());
+	Camera* m_Camera = GetCamera();
+	m_Shader->setCamera(m_Camera);
+	// if(m_type == pPoint)
+	m_Shader->setVec3("cameraRight", m_Camera->Right);
+	m_Shader->setVec3("cameraUp", m_Camera->Up);
 	m_Shader->setFloat("Time", glfwGetTime());
-	noiseRGB->Bind();
+	noiseRGB->Bind(0);
+	smokeTexture->Bind(1);
+
 
 	if(m_type == pCube)
 		ShaderSetup(); //SETUP LIGHTS
@@ -43,7 +65,11 @@ void ParticleLayer::Render()
 	m_Renderer->End();
 	m_Renderer->Flush();
 
-	noiseRGB->Unbind();
+	noiseRGB->Unbind(0);
+	smokeTexture->Unbind(1);
+
+   glDepthMask(1);   
+   glDisable(GL_BLEND); 
 }
 
 void ParticleLayer::RenderKeep()

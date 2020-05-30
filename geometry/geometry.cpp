@@ -143,6 +143,12 @@ void cTriangle::unBind()
 
 cTriangle::~cTriangle()
 {
+
+	glBindVertexArray(VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
 	//glDeleteVertexArrays(1, &VAO);
     //glDeleteBuffers(1, &VBO);
     //glDeleteBuffers(1, &EBO);
@@ -295,6 +301,11 @@ void cSquare::unBind()
 
 cSquare::~cSquare()
 {
+	glBindVertexArray(VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
 	//glDeleteVertexArrays(1, &VAO);
     //glDeleteBuffers(1, &VBO);
     //glDeleteBuffers(1, &EBO);
@@ -452,6 +463,11 @@ void cCube::unBind()
 
 cCube::~cCube()
 {
+	glBindVertexArray(VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
 	//glDeleteVertexArrays(1, &VAO);
     //glDeleteBuffers(1, &VBO);
     //glDeleteBuffers(1, &EBO);

@@ -202,6 +202,14 @@ public:
 		render = true;
 	}
 
+	nAsset(Asset* pAsset, glm::vec2 texture_scaling, eShader type)
+	{
+		asset = pAsset;
+		this->texture_scaling = texture_scaling;
+		shader_type = type; 
+		render = true;
+	}
+
 	Asset* GetAsset()
 	{
 		return asset;
@@ -223,6 +231,11 @@ public:
 		return transform_set;
 	}
 
+	glm::vec2& GetTextureScaling()
+	{
+		return texture_scaling;
+	}	
+
 	eShader GetShader()
 	{
 		return shader_type;
@@ -242,6 +255,7 @@ private:
 	Asset* asset;
 	bool transform_set = false;
 	glm::mat4 model_transform;
+	glm::vec2 texture_scaling = glm::vec2(1.0f);
 	eShader shader_type;
 };
 
@@ -389,7 +403,11 @@ public:
 		render = false;
 	}
 
-
+	~nPointLight()
+	{
+		delete asset;
+		Destroy();
+	}
 private:
 	PointLight* light;
 	int index;

@@ -304,13 +304,16 @@ void Shader::setLightInfo(int numLights)
 	setInt("numLights", numLights);
 }
 
-void Shader::setPointLight(PointLight* light, int index) //of object in shader! (not class itself)
+void Shader::setPointLight(PointLight* light, int index, int room_index, bool active_shadow) //of object in shader! (not class itself)
 {
 	use();
 	std::string str_index = std::to_string(index);
 	//std::cout << "Light " << str_index << " at pos " << light->position.x << " " << light->position.y << " " << light->position.z << std::endl;
 	//set Light Properties
-	setVec3("pointLight[" + str_index + "].position", light->position);
+	setVec3("pointLight[" + str_index + "].position", light->position[room_index]);
+	setFloat("pointLight[" + str_index + "].radius", light->radius[room_index]);
+	setBool("pointLight[" + str_index + "].active_shadow", (int) active_shadow);
+
     setVec3("pointLight[" + str_index + "].ambient", light->ambient);
     setVec3("pointLight[" + str_index + "].diffuse", light->diffuse);
     setVec3("pointLight[" + str_index + "].specular", light->specular);

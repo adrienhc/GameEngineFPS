@@ -34,7 +34,7 @@ class BatchParticle: public BatchAbstract
 		PARTICLE_VERTEX_TYPE* m_VertexBuffer;
 
 		//CANNOT CALL, ONLY TO RESPECT INHERITANCE CONSTRAINT
-		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) {};
+		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings) {};
 		void Submit(std::vector<Model*>& models, std::vector<glm::mat4>& model_transforms) {};
 
 		//DEBUG

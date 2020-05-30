@@ -45,6 +45,7 @@ struct VertexDataInstancedFixed
 struct VertexDataInstancedVariable
 {
 	glm::mat4 ModelTransform;
+	glm::vec2 TexScale;
 	float TexDiffID;
 	float TexSpecID; 
 	unsigned int Lighting;

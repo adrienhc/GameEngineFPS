@@ -37,7 +37,11 @@ Particle::Particle(Particle* other)
 	this->OneFrame = other->OneFrame;
 	this->StartTime = other->StartTime;
 	this->Time = other->StartTime;
-	this->LifeTime = other->LifeTime;
+
+	float low = 0.5f;
+	float high = 1.0f;
+	float life = low + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(high-low)));
+	this->LifeTime = other->LifeTime * life;
 
 	if(this->OneFrame)
 		this->ParticleData.x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -59,7 +63,11 @@ Particle::Particle(Particle* other, glm::vec4 Position, glm::vec3 Direction)
 	this->OneFrame = other->OneFrame;
 	this->StartTime = other->StartTime;
 	this->Time = other->StartTime;
-	this->LifeTime = other->LifeTime;
+
+	float low = 0.5f;
+	float high = 1.0f;
+	float life = low + static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/(high-low)));
+	this->LifeTime = other->LifeTime * life;
 
 	if(this->OneFrame)
 		this->ParticleData.x = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);

@@ -31,6 +31,7 @@ BatchInstanced::BatchInstanced()
 	glEnableVertexAttribArray(INSTANCED_SHADER_MODTR_INDEX_1);
 	glEnableVertexAttribArray(INSTANCED_SHADER_MODTR_INDEX_2);
 	glEnableVertexAttribArray(INSTANCED_SHADER_MODTR_INDEX_3);
+	glEnableVertexAttribArray(INSTANCED_SHADER_TEXSCALE_INDEX);
 	glEnableVertexAttribArray(INSTANCED_SHADER_TEXDIFFID_INDEX);
 	glEnableVertexAttribArray(INSTANCED_SHADER_TEXSPECID_INDEX);
 	glEnableVertexAttribArray(INSTANCED_SHADER_LIGHTING_INDEX);
@@ -40,6 +41,7 @@ BatchInstanced::BatchInstanced()
 	glVertexAttribPointer(INSTANCED_SHADER_MODTR_INDEX_1, 4, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) (offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::ModelTransform) + sizeof(glm::vec4)));
 	glVertexAttribPointer(INSTANCED_SHADER_MODTR_INDEX_2, 4, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) (offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::ModelTransform) + 2 * sizeof(glm::vec4)));
 	glVertexAttribPointer(INSTANCED_SHADER_MODTR_INDEX_3, 4, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) (offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::ModelTransform) + 3 * sizeof(glm::vec4)));
+	glVertexAttribPointer(INSTANCED_SHADER_TEXSCALE_INDEX, 2, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::TexScale));
 	glVertexAttribPointer(INSTANCED_SHADER_TEXDIFFID_INDEX, 1, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::TexDiffID));
 	glVertexAttribPointer(INSTANCED_SHADER_TEXSPECID_INDEX, 1, GL_FLOAT, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::TexSpecID));
 	glVertexAttribPointer(INSTANCED_SHADER_LIGHTING_INDEX, 4, GL_UNSIGNED_BYTE, GL_FALSE, INSTANCED_VERTEX_SIZE_VARIABLE, (void*) offsetof(INSTANCED_VERTEX_TYPE_VARIABLE, INSTANCED_VERTEX_TYPE_VARIABLE::Lighting));
@@ -49,6 +51,7 @@ BatchInstanced::BatchInstanced()
 	glVertexAttribDivisor(INSTANCED_SHADER_MODTR_INDEX_1, 1);
 	glVertexAttribDivisor(INSTANCED_SHADER_MODTR_INDEX_2, 1);
 	glVertexAttribDivisor(INSTANCED_SHADER_MODTR_INDEX_3, 1);
+	glVertexAttribDivisor(INSTANCED_SHADER_TEXSCALE_INDEX, 1);
 	glVertexAttribDivisor(INSTANCED_SHADER_TEXDIFFID_INDEX, 1);
 	glVertexAttribDivisor(INSTANCED_SHADER_TEXSPECID_INDEX, 1);
 	glVertexAttribDivisor(INSTANCED_SHADER_LIGHTING_INDEX, 1);
@@ -69,9 +72,15 @@ BatchInstanced::~BatchInstanced()
 {
 	//delete [] m_IndexBuffer;
 
-    //glDeleteBuffers(1, &m_VBO);
-    //glDeleteBuffers(1, &m_IBO);
-    //glDeleteVertexArrays(1, &m_VAO);
+    delete m_VertexBufferFixed;
+    delete m_VertexBufferVariable;
+	delete m_IndexBuffer;
+
+	glBindVertexArray(m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_IBO);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &m_VAO);
 }
 
 void BatchInstanced::Begin()
@@ -102,7 +111,7 @@ void BatchInstanced::End()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void BatchInstanced::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) 
+void BatchInstanced::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings) 
 {
 	if(m_Keep)
 		return;
@@ -151,7 +160,7 @@ void BatchInstanced::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>&
 			{
 				m_VertexBufferFixed->Position = vPos[i]; //No need divide by .w 
 				m_VertexBufferFixed->Normal = vNorm[i];
-				m_VertexBufferFixed->TexCoord = vTexCoord[i];
+				m_VertexBufferFixed->TexCoord = vTexCoord[i]; //TO DO: EITHER MOVE TO VARIABLE (PREFERABLE) OR CREATE NEW VERTEX SHADER THAT TAKES IN TEXTURE SCALING (EASIER)
 				m_VertexBufferFixed++;
 			}
 
@@ -217,6 +226,7 @@ void BatchInstanced::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>&
 
 		//Stream Vertex Variable Data ONCE PER ASSET
 		m_VertexBufferVariable->ModelTransform = model_transforms[a];
+		m_VertexBufferVariable->TexScale = texture_scalings[a];
 		m_VertexBufferVariable->TexDiffID = vTexSlot;
 		m_VertexBufferVariable->TexSpecID = 0.0f;
 		m_VertexBufferVariable->Lighting = vLighting;

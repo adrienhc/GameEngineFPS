@@ -30,6 +30,7 @@ class Model
 		bool gammaCorrection;
 
 		Model(char* path, bool gamma = false);
+		~Model();
 		void Draw(Shader shader);
 
 	private:

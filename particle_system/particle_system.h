@@ -6,12 +6,13 @@
 #include "../geometry/geometry.h"
 #include <vector>
 
-enum pShape {pLine, pCube, pNone};
+enum pShape {pLine, pPoint, pCube, pNone};
 
 class ParticleSystem
 {
 	public:
 		ParticleSystem();
+		~ParticleSystem();
 		void Submit(BatchParticle* renderer, pShape type);
 		void Add(Particle* base, pShape type, unsigned short count = 1);
 		void Add(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, pShape type);
@@ -29,6 +30,8 @@ class ParticleSystem
 		
 		std::vector<Particle*> m_Cubes;
 		unsigned short m_OffsetCubes;
+		std::vector<Particle*> m_Points;
+		unsigned short m_OffsetPoints;
 		std::vector<Particle*> m_Lines;
 		unsigned short m_OffsetLines;
 		

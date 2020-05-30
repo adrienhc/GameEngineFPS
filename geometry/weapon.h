@@ -38,7 +38,7 @@ public:
 	static bool fire;//pulled the trigger -- keep static
 	static bool reload;
 	static bool newBullet; //keep static
-	Asset* muzzleFlash = new Asset(eSquare, "muzzleFlash", glm::vec3(1.0f), glm::vec3(0.0f), glm::vec3(0.0f), 32.0f, glm::vec4(0.0f), true, "./textures/muzzleflashtrimmed2.png");
+	Asset* muzzleFlash;
 	Particle* baseBullet;
 	Particle* baseFlash;
 	Particle* baseSmokeFire;
@@ -55,10 +55,11 @@ private:
 	float zoom_max;
 	unsigned int clip_size = 30; //MAKE VARY PER WEAPON
 	unsigned int bullets = clip_size; //MAKE VARY PER WEAPON
-	float ads_time = 0.2f; //MAKE VARY PER WEAPON
-	float fire_time = 0.03f; //HALF OF TIME BETWEEN TWO BULLETS //MAKE VARY PER WEAPON 
-	float reload_time = 1.0f; //MAKE VARY PER WEAPON
-
+	float ads_time = 0.1f; //MAKE VARY PER WEAPON
+	float fire_time = 0.08f; //HALF OF TIME BETWEEN TWO BULLETS //MAKE VARY PER WEAPON 
+	float reload_time = 0.8f; //MAKE VARY PER WEAPON
+	float recoil_strength;
+	
 	//Shared for all weapons
 	float ads_time_offset = 0.0f;
 	float fire_time_offset = 0.0f;

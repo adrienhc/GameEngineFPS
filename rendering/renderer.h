@@ -27,9 +27,9 @@
 #include "../scene/room.h"
 #include "../scene/skybox.h"
 
-
-extern const unsigned int WINDOW_WIDTH; //defined in main.h 
-extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
+#include "../config.h"
+// extern const unsigned int WINDOW_WIDTH; //defined in main.h 
+// extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass
 
 class Room;
 

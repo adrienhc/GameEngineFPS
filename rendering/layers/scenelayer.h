@@ -4,8 +4,9 @@
 #include "abstractlayer.h"
 #include "../batch/batchrenderer.h"
 #include "../light.h"
+#include <cmath>
 
-#define SHADER_MAX_LIGHTS 3
+#define SHADER_MAX_LIGHTS 5
 #define SHADER_MAX_BULLET_HOLES 5
 
 class SceneLayer: public AbstractLayer

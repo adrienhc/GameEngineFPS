@@ -32,7 +32,7 @@ Material::Material(glm::vec3 amb, glm::vec3 diff, glm::vec3 spec,
 
 Material::~Material()
 {
-	if(has_texture)
+	if(has_texture && texture != NULL)
 		delete texture;
 }
 

@@ -1,8 +1,8 @@
 #include "light.h"
 
 const unsigned int PointLight::MAX_LIGHTS = 3;
-const unsigned int PointLight::SHADOW_WIDTH = 1024;
-const unsigned int PointLight::SHADOW_HEIGHT = 1024;
+const unsigned int PointLight::SHADOW_WIDTH = 256;
+const unsigned int PointLight::SHADOW_HEIGHT = 256;
 unsigned int PointLight::tempBlurCubemap = 0;
 unsigned int PointLight::tempDepthCubemap = 0;
 unsigned int PointLight::tempBlurFBO = 0; 
@@ -14,7 +14,11 @@ PointLight::PointLight(int num_lights, glm::vec3 amb, glm::vec3 diff, glm::vec3 
 	ambient = amb;
 	diffuse = diff;
 	specular = spec;
-	position = glm::vec3(0.0f, 0.0f, 0.0f);
+
+	position.resize(NUM_LIGHTS);
+	radius.resize(NUM_LIGHTS);
+	shadowTransform.resize(NUM_LIGHTS);
+
 
 	constant = cst;
 	linear = lin;
@@ -139,21 +143,48 @@ PointLight::PointLight(int num_lights, glm::vec3 amb, glm::vec3 diff, glm::vec3 
 	
 }
 
+PointLight::~PointLight()
+{	
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-void PointLight::setTransform(glm::mat4 trsf)
+	for (int i = 0; i < shadowFBO.size(); i++) //[NUM_LIGHTS];
+	{
+		glDeleteFramebuffers(1, &shadowFBO[i]);
+	}
+	for (int i = 0; i < shadowCubemap.size(); i++) //SHADOW MAP FOR PCF
+	{
+		glDeleteTextures(1, &shadowCubemap[i]);
+	}
+	for (int i = 0; i < vsmCubemap.size(); i++) //SHADOW MAP FOR PCF
+	{
+		glDeleteTextures(1, &vsmCubemap[i]);
+	}
+	
+	glDeleteTextures(1, &tempBlurCubemap);
+	glDeleteTextures(1, &tempDepthCubemap);
+	glDeleteFramebuffers(1, &tempBlurFBO);
+}
+
+void PointLight::setTransform(glm::mat4 trsf, int room_index)
 {
 	glm::vec4 pos = trsf * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);  //Apply current scene graph transform
-	position =  glm::vec3(pos.x, pos.y, pos.z);
+	position[room_index] =  glm::vec3(pos.x, pos.y, pos.z);
 
 	//Build shadowTransform Matrixes vector -- look along all axes
-	shadowTransform.clear(); //remove all transforms for previous frame's position
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
-	shadowTransform.push_back(shadowProj * glm::lookAt(position, position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
+	shadowTransform[room_index].clear(); //remove all transforms for previous frame's position
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0)));
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0)));
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0)));
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0)));
+	shadowTransform[room_index].push_back(shadowProj * glm::lookAt(position[room_index], position[room_index] + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0)));
 }	
+
+void PointLight::setRadius(float radius, int room_index)
+{
+	this->radius[room_index] = radius;
+}
 
 void PointLight::shadowPassSetup(Shader* depthShader, int room_index)
 {
@@ -165,12 +196,12 @@ void PointLight::shadowPassSetup(Shader* depthShader, int room_index)
 
 	//setup depthShader's values
 	depthShader->use();
-	for(int i = 0; i < shadowTransform.size(); i++)
+	for(int i = 0; i < shadowTransform[room_index].size(); i++)
 	{
 		std::string index = std::to_string(i);
-		depthShader->setMat4("shadowMatrices[" + index + "]", shadowTransform[i]);
+		depthShader->setMat4("shadowMatrices[" + index + "]", shadowTransform[room_index][i]);
 	}
-	depthShader->setVec3("lightPosition", position);
+	depthShader->setVec3("lightPosition", position[room_index]);
 	depthShader->setFloat("far_plane", far);
 }
 
@@ -266,5 +297,7 @@ void PointLight::blurVsmCubemap(Shader* blurCubemapShader, int room_index)
 	glEnable(GL_BLEND);
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	blurVsmStatus[room_index] = false;
 	// glEnable(GL_DEPTH_TEST); //???????????
 }

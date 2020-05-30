@@ -22,7 +22,7 @@ class BatchAbstract
 	public:
 		virtual void Begin() = 0;
 		virtual void End() = 0;
-		virtual void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) = 0;
+		virtual void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings) = 0;
 		virtual void Submit(std::vector<Model*>& models, std::vector<glm::mat4>& model_transforms) = 0;
 		//virtual void Submit(Asset* asset, glm::mat4* model_transform) = 0;
 		//virtual void Submit(Model* model, glm::mat4* model_transform) = 0;
@@ -38,6 +38,7 @@ class BatchAbstract
 		unsigned int* m_IndexBuffer = NULL;
 		unsigned int m_Offset = 0;
 		unsigned int m_IndexCount = 0;
+		unsigned int m_VertexCount = 0;
 
 		bool m_Keep = false;
 

@@ -36,7 +36,7 @@ public:
 	void setCamera(Camera* camera);
 	void setMaterial(Material* material); //WHAT DO I NEED TO SET MATERIAL/TEXTURE
 	void setLightInfo(int numLights);
-	void setPointLight(PointLight* light, int index);
+	void setPointLight(PointLight* light, int index, int room_index = 0, bool active_shadow = true);
 
 	void setTransform(glm::mat4 transform);
 

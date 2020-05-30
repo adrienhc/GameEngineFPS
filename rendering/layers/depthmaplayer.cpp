@@ -5,7 +5,11 @@ DepthmapLayer::DepthmapLayer(Camera* camera, Shader* shader)
 {}
 
 DepthmapLayer::~DepthmapLayer()
-{}
+{
+	delete m_CopyCubemap;
+	delete m_GausBlurCubemap;
+	delete m_BilateralFilterCubemap;
+}
 
 void DepthmapLayer::Render()
 {

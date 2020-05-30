@@ -32,6 +32,15 @@ BatchOutline::~BatchOutline()
 {
 	//delete [] m_IndexBuffer;
 
+	delete m_VertexBuffer;
+	delete m_IndexBuffer;
+
+	glBindVertexArray(m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_IBO);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &m_VAO);
+    
     //glDeleteBuffers(1, &m_VBO);
     //glDeleteBuffers(1, &m_IBO);
     //glDeleteVertexArrays(1, &m_VAO);
@@ -57,7 +66,7 @@ void BatchOutline::End()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void BatchOutline::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) 
+void BatchOutline::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings) 
 {
 	if(m_Keep)
 		return;

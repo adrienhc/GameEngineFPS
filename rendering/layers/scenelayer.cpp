@@ -53,20 +53,38 @@ void SceneLayer::ShaderSetup()
 
 	Shader* m_Shader = GetShader();
 	m_Shader->use();
+	
+	glm::vec3 playerPosition = GetCamera()->Position;
 	int lightCount = 0;
+	bool max_reached = false;
+
+
+	//std::vector<PointLight*> m_ShadowBoundPointLights;
 
 	for(int i = 0; i < m_SceneLights.size(); i++)
 	{
+		if(max_reached)
+			break;
 		//Light Shader Setup
 		std::vector<PointLight*> m_PointLights = m_SceneLights[i]->GetLights();
 		std::vector<int> m_PointLightsRoomIndex = m_SceneLights[i]->GetLightsRoomIndex();
+
 		for(int j = 0; j < m_PointLights.size(); j++)
-		{
-			m_Shader->setPointLight(m_PointLights[j], lightCount); //Set Light information
+		{	
+			bool active_shadow = ( glm::distance(playerPosition, m_PointLights[j]->position[m_PointLightsRoomIndex[j]]) < 30.0f);
+			m_Shader->setPointLight(m_PointLights[j], lightCount, m_PointLightsRoomIndex[j], active_shadow); //Set Light information
 			m_PointLights[j]->bindShadowMapBatch(m_Shader, m_PointLightsRoomIndex[j], lightCount); //Set Light Depth Map
 			lightCount++;
+
+			if(lightCount >= SHADER_MAX_LIGHTS)
+			{
+				max_reached = true;
+				break;
+			}
 		}	
+
 	}
+
 	m_Shader->setLightInfo(lightCount);
 
 	//Bind Unused Depth Map with first one

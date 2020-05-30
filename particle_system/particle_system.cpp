@@ -4,8 +4,17 @@ ParticleSystem::ParticleSystem()
 {
 	m_Cubes.reserve(PARTICLE_MAX_VERTICES); //Defined in BatchParticle header
 	m_OffsetCubes = 0;
+	m_Points.reserve(PARTICLE_MAX_VERTICES);
+	m_OffsetPoints = 0;
 	m_Lines.reserve(PARTICLE_MAX_VERTICES);
 	m_OffsetLines = 0;
+}
+
+ParticleSystem::~ParticleSystem()
+{
+	Clear(pLine);
+	Clear(pPoint);
+	Clear(pCube);
 }
 
 void ParticleSystem::Bind(pShape type)
@@ -19,6 +28,12 @@ void ParticleSystem::Bind(pShape type)
 			m_Particles = &m_Lines;
 			m_Offset = m_OffsetLines;
 			m_CurrentlyBound = pLine;
+		break;
+
+		case pPoint:
+			m_Particles = &m_Points;
+			m_Offset = m_OffsetPoints;
+			m_CurrentlyBound = pPoint;
 		break;
 
 		case pCube:
@@ -44,6 +59,12 @@ void ParticleSystem::UnBind(pShape type)
 		case pLine:
 			m_Particles = NULL;
 			m_OffsetLines = m_Offset;
+			m_CurrentlyBound = pNone;
+		break;
+
+		case pPoint:
+			m_Particles = NULL;
+			m_OffsetPoints = m_Offset;
 			m_CurrentlyBound = pNone;
 		break;
 
@@ -90,6 +111,20 @@ void ParticleSystem::Update(float delta_time)
 	}
 
 	UnBind(pLine);
+
+	
+	Bind(pPoint);
+
+	for(unsigned short i = 0; i < m_Offset; i++)
+	{
+		if((*m_Particles)[i]->IsActive())
+		{
+			(*m_Particles)[i]->Update(delta_time);
+		}
+	}
+
+	UnBind(pPoint);
+
 
 	Bind(pCube);
 	

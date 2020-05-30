@@ -34,19 +34,26 @@ Texture::Texture(std::string path)
     {
         std::cout << "Material_System: Failed to load texture" << std::endl;
     }
-
+    
     stbi_image_free(data);
 }
 
-void Texture::Bind()
+Texture::~Texture()
 {
-	glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glDeleteTextures(1, &texture);
+}
+
+void Texture::Bind(int offset)
+{
+	glActiveTexture(GL_TEXTURE0 + offset);
     glBindTexture(GL_TEXTURE_2D, texture);
 }
 
-void Texture::Unbind()
+void Texture::Unbind(int offset)
 {
-	 glBindTexture(GL_TEXTURE_2D, 0);
+    glActiveTexture(GL_TEXTURE0 + offset);
+	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 unsigned int Texture::GetID()

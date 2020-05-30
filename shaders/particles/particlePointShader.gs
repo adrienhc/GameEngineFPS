@@ -1,7 +1,7 @@
 #version 450 core
 layout (points) in;
-layout (points, max_vertices = 1) out;
-
+layout (triangle_strip, max_vertices = 4) out;
+// layout (points, max_vertices=1) out;
 /// INPUT OUTPUT ///
 in VS_OUT
 {
@@ -14,6 +14,8 @@ in VS_OUT
 } gs_in[];
 
 out vec4 fragColor;
+out vec2 fragTex;
+flat out int fragHasTex;
 
 /// MATH ///
 const float PI = 3.1415926535897932384626433832795;
@@ -22,31 +24,15 @@ const float PI = 3.1415926535897932384626433832795;
 uniform mat4 viewing;
 uniform mat4 projection;
 
+/// CAMERA ///
+uniform vec3 cameraRight;
+uniform vec3 cameraUp;
+
 /// NOISE ///
 uniform sampler2D noiseRGB;
 
 // TIME ///
 uniform float Time;
-
-/// LIGHTNING ///
-struct PointLight
-{
-    vec3 position;  
-
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-
-    float constant;
-    float linear;
-    float quadratic;
-};
-
-#define NUM_POINT_LIGHTS 3
-uniform int numLights;
-uniform PointLight pointLight[NUM_POINT_LIGHTS];
-
-#define LIGHTING 0
 
 /// FUNCTIONS ///
 mat4 RotationMatrix(vec3 axis, float angle)
@@ -98,12 +84,42 @@ vec4 RandTextureOffset()
 void main() 
 {    
 
+    fragHasTex = 1;
+
     vec4 center = gs_in[0].fragPos;
     center += gs_in[0].fragParticleData.x * gs_in[0].fragParticleData.y * vec4(RandRotation(gs_in[0].fragNorm, gs_in[0].fragParticleData.w), 0.0f);
-    gl_Position = projection * viewing * center;
-    gl_PointSize = 20.0f/gl_Position.z;
-    fragColor = vec4(gs_in[0].fragCol.xyz, (1.0f - gs_in[0].fragParticleData.x) * gs_in[0].fragCol.w);
+    
+
+    float size = 3.0f * gs_in[0].fragParticleData.z;
+    size *= (1.0f + 2.0f * gs_in[0].fragParticleData.x); //Increase over life time
+    vec4 top_right = vec4(center.xyz + size * (cameraUp + cameraRight), center.w);
+    gl_Position = projection * viewing * top_right;
+    gl_PointSize = 20.0f;
+    float alpha = (1.0f - gs_in[0].fragParticleData.x);
+    alpha = alpha * alpha * alpha;
+    fragColor = vec4(gs_in[0].fragCol.xyz, alpha * gs_in[0].fragCol.w);
+    fragTex = vec2(1.0f, 1.0f);
+    EmitVertex(); 
+
+    vec4 top_left = vec4(center.xyz + size * (cameraUp - cameraRight), center.w);
+    gl_Position = projection * viewing * top_left;
+    fragColor = vec4(gs_in[0].fragCol.xyz, alpha * gs_in[0].fragCol.w);
+    fragTex = vec2(0.0f, 1.0f);
+    EmitVertex(); 
+
+
+    vec4 bottom_right = vec4(center.xyz + size * (- cameraUp + cameraRight), center.w);
+    gl_Position = projection * viewing * bottom_right;
+    fragColor = vec4(gs_in[0].fragCol.xyz, alpha * gs_in[0].fragCol.w);
+    fragTex = vec2(1.0f, 0.0f);
     EmitVertex();
+
+    vec4 bottom_left = vec4(center.xyz + size * (- cameraUp - cameraRight), center.w);
+    gl_Position = projection * viewing * bottom_left;
+    fragColor = vec4(gs_in[0].fragCol.xyz, alpha * gs_in[0].fragCol.w);
+    fragTex = vec2(0.0f, 0.0f);
+    EmitVertex();
+    
     EndPrimitive();
 }
   

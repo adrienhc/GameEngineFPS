@@ -7,7 +7,7 @@
 #define RENDERER_INDICES_TYPE unsigned short
 #define RENDERER_GL_INDICES_TYPE GL_UNSIGNED_SHORT
 
-#define RENDERER_MAX_VERTICES 25000 
+#define RENDERER_MAX_VERTICES 20000 
 #define RENDERER_VERTEX_SIZE sizeof(RENDERER_VERTEX_TYPE)
 #define RENDERER_BUFFER_SIZE (RENDERER_MAX_VERTICES * RENDERER_VERTEX_SIZE)
 #define RENDERER_INDICES_SIZE sizeof(RENDERER_INDICES_TYPE)
@@ -32,7 +32,7 @@ class BatchRenderer: public BatchAbstract
 		~BatchRenderer();
 		void Begin();
 		void End();
-		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms);
+		void Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings);
 		void Submit(std::vector<Model*>& models, std::vector<glm::mat4>& model_transforms);
 		void Flush();
 		void FlushKeep();

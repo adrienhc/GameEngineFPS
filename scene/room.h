@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <algorithm>
 #include <string>
 
 #include <glm/glm.hpp>
@@ -10,6 +11,7 @@
 
 #include "../geometry/cluster.h"
 #include "../geometry/target.h"
+#include "../geometry/stairs.h"
 #include "../geometry/weapon.h"
 
 #include "../scene/scenegraph.h"
@@ -39,10 +41,10 @@ friend class Renderer; // Let Renderer access private data, no accessor needed
 
 public:
 	Room(int length, int width, int height, glm::vec3 ofst, std::vector<int> DN,  std::vector<int> DS, std::vector<int> DE, std::vector<int> DW, 
-		std::vector<glm::vec3> ptLghtPs, std::vector<asset> vertical, std::vector<asset> horizontal, std::vector<asset> target,
+		std::vector<glm::vec3> ptLghtPs, std::vector<float> ptLghtRad, std::vector<asset> vertical, std::vector<asset> horizontal, std::vector<asset> target, std::vector<asset> stairs,
 		Asset* floor, Asset* wall, Asset* door, Asset* beam, Asset* ceiling, Asset* crate, PointLight* ptLght);
 	~Room();
-	void makeRoom(Renderer renderer);	
+	void makeRoom();//Renderer renderer);	
 	bool collisionChecks(Camera &camera);
 	void getLights(Renderer renderer);
 	void addLayoutLayer(AbstractLayer* layer);
@@ -103,6 +105,9 @@ private:
 	//TARGETS -- NON INSTANCED, Only a few
 	std::vector<Target*> targets;
 
+	//STAIRS
+	std::vector<Stairs*> stairs;
+
 	//MATERIALS
 	Asset* floor; 
 	Asset* wall; 
@@ -112,12 +117,14 @@ private:
 	Asset* crate;
 
 	//INSTANTIATED GEOMETRY PLACEHOLDERS
+	
 	cSquare* i_floor = NULL;
 	cSquare* i_wall = NULL;
 	cSquare* i_door = NULL;
 	cCube* i_beam = NULL;
 	cSquare* i_ceiling = NULL;
 	cCube* i_crate = NULL;
+	
 
 	//GEOMETRY GROUP
 	Group* g_layout = NULL; //ALL ROOM GEOMETRY
@@ -127,6 +134,7 @@ private:
 	
 	//LIGHT INFO
 	std::vector<glm::vec3> pointLightPos;
+	std::vector<float> pointLightRad;
 	PointLight* pointLight;
 
 	//LIGHT GROUP
@@ -142,14 +150,24 @@ private:
 
 	//METHODS
 	glm::vec3 adjustAssetPos(glm::vec3 Pos);
+	//OLD ROOM TILES, ONE SQUARE PER TILE
 	nNode* horizontalPlane(nNode* Root, Asset* asset);
 	nNode* verticalPlaneNS(nNode* Root, std::vector<int> Door, bool justBeams);
 	nNode* verticalPlaneEW(nNode* Root, std::vector<int> Door, bool justBeams);
+	//NEW ROOM TILES, LEAST SQUARE PER WALL
+	nNode* horizontalPlaneLowpoly(nNode* Root, Asset* asset);
+	//Recursive approach,  Divide and Conquer, fit largest pannel within constraints
+	nNode* verticalPlaneNSLowpoly(nNode* Root, float min_w, float max_w, float min_h, float max_h, std::vector<int> Door); 
+	nNode* verticalWallNSLowpoly(nNode* Root, float min_w, float max_w, float min_h, float max_h, std::vector<glm::vec4> dim);
+	nNode* verticalPlaneEWLowpoly(nNode* Root, float min_w, float max_w, float min_h, float max_h, std::vector<int> Door); 
+	nNode* verticalWallEWLowpoly(nNode* Root, float min_w, float max_w, float min_h, float max_h, std::vector<glm::vec4> dim);
+	nNode* verticalDoorNSLowpoly(nNode* Root, std::vector<int> Door);
+	nNode* verticalDoorEWLowpoly(nNode* Root, std::vector<int> Door);
 	nNode* addBeamNS(nNode* Root, std::vector<int> Door);
 	nNode* addBeamEW(nNode* Root, std::vector<int> Door); 
 
 	bool isDoor(int height, int width, std::vector<int> Door);
-	bool pointOpeningDoor(int height, int width, std::vector<int> Door);
+	bool pointOpeningDoor(int height, int width, std::vector<int> Door, bool construction = false);
 	bool boxOpeningDoor(int ref_height, int ref_width, int other_height, int other_width, std::vector<int> Door);
 	bool hasBeam(int ibool);
 
@@ -157,10 +175,19 @@ private:
 	bool bulletCollide(Camera &camera);
 
 	bool pointCollide(glm::vec3 &playerPos, glm::vec3 min_bb, glm::vec3 max_bb);
-	bool boxCollide(glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
+	bool boxCollide(glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb, bool ignore_top = false);
 	void handlePointWall(glm::vec3 &playerPos, glm::vec3 min_bb, glm::vec3 max_bb);
 	void handleBoxWall(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
 	std::string handleBoxObject(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
+
+	//MATH UTILS
+	static bool Vec4ComparisonFunction(const glm::vec4 &vecA, const glm::vec4 &vecB)
+	{
+	 return vecA[0]<vecB[0]
+	        || vecA[1]>vecB[1]
+	        || vecA[2]<vecB[2]
+	        || vecA[3]>vecB[3];
+	}
 
 };
 

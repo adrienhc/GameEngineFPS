@@ -14,6 +14,8 @@ in VS_OUT
 } gs_in[];
 
 out vec4 fragColor;
+out vec2 fragTex;
+flat out int fragHasTex;
 
 /// MATH ///
 const float PI = 3.1415926535897932384626433832795;
@@ -42,7 +44,7 @@ struct PointLight
     float quadratic;
 };
 
-#define NUM_POINT_LIGHTS 3
+#define NUM_POINT_LIGHTS 5
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
@@ -145,6 +147,8 @@ void createVertex(vec3 offset, vec4 center, vec3 faceNormal)
 }
 
 void main() {    
+
+    fragHasTex = 0;
 
     vec4 center = gs_in[0].fragPos;
     center += gs_in[0].fragParticleData.x * gs_in[0].fragParticleData.y * vec4(RandRotation(gs_in[0].fragNorm, gs_in[0].fragParticleData.w), 0.0f);

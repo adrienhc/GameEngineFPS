@@ -31,8 +31,10 @@ class Group
 		
 		//GEOMETRY
 		void Add(Asset* asset, glm::mat4& model_transform);
+		void Add(Asset* asset, glm::mat4& model_transform, glm::vec2& texture_scaling);
 		std::vector<Asset*> m_Assets;
 		std::vector<glm::mat4> m_AssetTransforms;
+		std::vector<glm::vec2> m_AssetTextureScalings;
 
 		void Add(Model* model, glm::mat4& model_transform);
 		std::vector<Model*> m_Models;

@@ -60,6 +60,18 @@ Skybox::Skybox(std::string right, std::string left, std::string top, std::string
 	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 }
 
+Skybox::~Skybox()
+{
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	glDeleteTextures(1, &cubemap);
+
+	glBindVertexArray(VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
+	glBindVertexArray(0);
+	glDeleteVertexArrays(1, &VAO);
+}
+
 void Skybox::Draw()
 {
 	glDepthMask(GL_FALSE);

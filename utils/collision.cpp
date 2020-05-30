@@ -24,6 +24,13 @@ bool Collision::boxCollide(glm::vec3 self_min_bb, glm::vec3 self_max_bb, glm::ve
 			 self_max_bb.z > min_bb.z && self_min_bb.z < max_bb.z );
 }
 
+bool Collision::boxCollide(glm::vec2 self_min_bb, glm::vec2 self_max_bb, glm::vec2 min_bb, glm::vec2 max_bb)
+{
+
+	return ( self_max_bb.x > min_bb.x && self_min_bb.x < max_bb.x &&
+			 self_max_bb.y > min_bb.y && self_min_bb.y < max_bb.y);
+}
+
 bool Collision::boxContained(glm::vec3 self_min_bb, glm::vec3 self_max_bb, glm::vec3 min_bb, glm::vec3 max_bb)
 {
 	return pointContained(self_min_bb, min_bb, max_bb) && pointContained(self_max_bb, min_bb, max_bb);

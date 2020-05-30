@@ -76,9 +76,14 @@ BatchRenderer::~BatchRenderer()
 {
 	//delete [] m_IndexBuffer;
 
-    //glDeleteBuffers(1, &m_VBO);
-    //glDeleteBuffers(1, &m_IBO);
-    //glDeleteVertexArrays(1, &m_VAO);
+	delete m_VertexBuffer;
+	delete m_IndexBuffer;
+
+	glBindVertexArray(m_VAO);
+    glDeleteBuffers(1, &m_VBO);
+    glDeleteBuffers(1, &m_IBO);
+    glBindVertexArray(0);
+    glDeleteVertexArrays(1, &m_VAO);
 }
 
 void BatchRenderer::Begin()
@@ -106,7 +111,7 @@ void BatchRenderer::End()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void BatchRenderer::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms) 
+void BatchRenderer::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& model_transforms, std::vector<glm::vec2>& texture_scalings) 
 {
 	if(m_Keep)
 		return;
@@ -146,6 +151,7 @@ void BatchRenderer::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& 
 			{
 				if(m_TextureID.size() >= MAX_TEXTURE_SLOTS)
 				{
+					//std::cout << "Asset Texture Limit" << std::endl;
 					//Also do when reached Max Buffer size? 
 					End();
 					Flush();
@@ -192,13 +198,24 @@ void BatchRenderer::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& 
 			vTexCoord = bCube.TexCoord;
 		}
 
+		if(m_VertexCount + max_vertex > RENDERER_MAX_VERTICES)
+		{
+			//std::cout << "Asset Vertex Limit" << std::endl;
+			End();
+			Flush();
+			Begin();
+			//std::cout << m_VertexCount << std::endl;
+		}
+
+		m_VertexCount += max_vertex;
+
 		//Stream Vertex Data
 		for(int i = 0; i < max_vertex; i++)
 		{
 			m_VertexBuffer->Position = /*model_transform */ vPos[i]; //No need divide by .w 
 			m_VertexBuffer->Normal = /*normal_transform */ vNorm[i];
 			m_VertexBuffer->ModelTransform = model_transforms[a];
-			m_VertexBuffer->TexCoord = vTexCoord[i];
+			m_VertexBuffer->TexCoord = texture_scalings[a] * vTexCoord[i];
 			m_VertexBuffer->TexDiffID = vTexSlot;
 			m_VertexBuffer->TexSpecID = 0.0f;
 			m_VertexBuffer->Lighting = vLighting;
@@ -342,6 +359,7 @@ void BatchRenderer::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 				}
 				else if(m_TextureID.size() >= (MAX_TEXTURE_SLOTS - textureCount)) //check if space for all needed
 				{
+					//std::cout << "Model Texture Limit" << std::endl;
 					//Also do when reached Max Buffer size? 
 					End();
 					Flush();
@@ -371,6 +389,18 @@ void BatchRenderer::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 
 
 			std::vector<mVertex>& mesh_vertices = model->meshes[k].vertices;
+
+			if(m_VertexCount + mesh_vertices.size() > RENDERER_MAX_VERTICES)
+			{
+				//std::cout << "Model Vertex Limit " << std::endl;
+				End();
+				Flush();
+				Begin();
+				std::cout << m_VertexCount << std::endl;
+			}
+
+			m_VertexCount += mesh_vertices.size();
+			
 			//Stream Vertex Data
 			for(int i = 0; i < mesh_vertices.size(); i++)
 			{
@@ -425,6 +455,7 @@ void BatchRenderer::Flush()
 	glBindVertexArray(0);
 
 	m_IndexCount = 0;
+	m_VertexCount = 0;
 	m_Offset = 0;
 	m_Keep = false;
 }

@@ -18,6 +18,7 @@ class ParticleLayer: public SceneLayer
 		ParticleSystem* m_ParticleSystem;
 		pShape m_type;
 		Texture* noiseRGB = new Texture("./textures/noiseRGB-2.png");
+		Texture* smokeTexture = new Texture("./textures/smoke.png");
 };
 
 #endif //PARTICLE_LAYER_H
