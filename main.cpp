@@ -136,7 +136,6 @@ int main()
     SceneLayer weapon = SceneLayer(&camera, &batchShader);
     SceneLayer targets = SceneLayer(&camera, &batchShader);
     SceneLayer scene = SceneLayer(&camera, &batchShader);
-    //InstancedLayer instanced = InstancedLayer(&camera, &batchShader);
 
     Shader outlineShader = Shader("shaders/batch/outlineShader.vs", "shaders/batch/outlineShader.fs"); 
     OutlineLayer outline = OutlineLayer(&camera, &outlineShader);
