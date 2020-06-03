@@ -8,6 +8,8 @@ Camera::Camera(float posX, float posY, float posZ, float upX, float upY, float u
 	Yaw = yaw;
 	Pitch = pitch;
 	UpdateCameraVectors();
+
+	frustum = new Frustum(GetViewMatrix(), GetProjectionMatrix());
 }
 
 
@@ -21,6 +23,11 @@ void Camera::SetView(float near, float far, float ratio)
 glm::mat4 Camera::GetViewMatrix()
 {
 	return glm::lookAt(Position, Position + Front, Up); 
+}
+
+glm::mat4 Camera::GetProjectionMatrix()
+{
+	return glm::perspective(glm::radians(Zoom), ViewRatio, NearPlane, FarPlane);
 }
 
 void Camera::ProcessKeyboard(CameraMovements direction, float deltaTime)
@@ -47,14 +54,31 @@ void Camera::ProcessKeyboard(CameraMovements direction, float deltaTime)
 		Position += glm::vec3(Right.x * velocity.x, 0.0f, Right.z * velocity.z);
 	if(direction == UP)
 		Position += WorldUp * velocity.y;
+
+	frustum = new Frustum(GetViewMatrix(), GetProjectionMatrix());
 }
 
-void Camera::Gravity(float deltaTime)
+void Camera::ProcessMouseMovements(float xoffset, float yoffset, GLboolean constraiPitch)
 {
-	//GRAVITY
-	glm::vec3 velocity = glm::vec3(MovementSpeed.x * deltaTime, MovementSpeed.y * deltaTime, MovementSpeed.z * deltaTime);
-	Position -= WorldUp * 0.5f * velocity.y; //ALWAYS
-}
+		xoffset *= MouseSensitivity;
+		yoffset *= MouseSensitivity;
+
+		Yaw += xoffset;
+		Pitch += yoffset;
+
+		float Pitch_Limit = 80.0f; // [0,89]
+		if (constraiPitch)
+		{
+			if(Pitch > Pitch_Limit)
+				Pitch = Pitch_Limit;
+			if(Pitch < -Pitch_Limit)
+				Pitch = -Pitch_Limit;
+		}
+
+		UpdateCameraVectors();
+
+		frustum = new Frustum(GetViewMatrix(), GetProjectionMatrix());
+	}
 
 void Camera::ProcessMouseScroll(float yoffset)
 {
@@ -64,6 +88,8 @@ void Camera::ProcessMouseScroll(float yoffset)
 		Zoom = 10.0f;
 	if(Zoom > 75.0f)
 		Zoom = 75.0f;
+
+	frustum = new Frustum(GetViewMatrix(), GetProjectionMatrix());
 }
 
 void Camera::UpdateCameraVectors()
@@ -78,7 +104,12 @@ void Camera::UpdateCameraVectors()
 	Up = glm::normalize(glm::cross(Right, Front));
 }
 
-
+void Camera::Gravity(float deltaTime)
+{
+	//GRAVITY
+	glm::vec3 velocity = glm::vec3(MovementSpeed.x * deltaTime, MovementSpeed.y * deltaTime, MovementSpeed.z * deltaTime);
+	Position -= WorldUp * 0.5f * velocity.y; //ALWAYS
+}
 
 glm::vec3 Camera::GetMinBB()
 {
@@ -106,4 +137,12 @@ void Camera::PosFromBB(glm::vec3 min_bb, glm::vec3 max_bb)
 
 	Position = glm::vec3(x, y, z);
 	UpdateCameraVectors();
+}
+
+bool Camera::IsCulled(BB &bounding_box)
+{
+	if(frustum == NULL)
+		return false;
+
+	return !frustum->boxCollide(bounding_box);
 }

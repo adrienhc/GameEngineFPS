@@ -1,10 +1,10 @@
 EXEC = main
 OBJECTS = main.o
-OPTI = -O2
+OPTI = -O3
 
 FILES = main.cpp  GLAD/glad.c 
 # FILES += config.cpp                                            
-FILES += rendering/shader.cpp rendering/camera.cpp rendering/renderer.cpp rendering/light.cpp rendering/group.cpp
+FILES += rendering/shader.cpp rendering/camera.cpp rendering/frustum.cpp rendering/renderer.cpp rendering/light.cpp rendering/group.cpp
 FILES += rendering/batch/batchrenderer.cpp rendering/batch/batchoutline.cpp rendering/batch/batchparticle.cpp rendering/batch/batchdepthmap.cpp rendering/batch/batchinstanced.cpp
 FILES += rendering/layers/abstractlayer.cpp rendering/layers/scenelayer.cpp rendering/layers/outlinelayer.cpp rendering/layers/particlelayer.cpp rendering/layers/depthmaplayer.cpp rendering/layers/instancedlayer.cpp
 FILES += material_system/asset.cpp material_system/material.cpp material_system/texture.cpp 

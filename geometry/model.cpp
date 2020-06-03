@@ -6,26 +6,33 @@
 Model::Model(char* path, bool gamma)
 {
 	gammaCorrection = gamma;
+	culling = true;
 	loadModel(path);
+
+	min_bb = glm::vec4(10000.0f, 10000.0f, 10000.0f, 1.0f);
+	max_bb = glm::vec4(-10000.0f, -10000.0f, -10000.0f, 1.0f);
 
 	for (int i =0; i < textures_loaded.size(); i++)
 		std::cout << textures_loaded[i].path << " " << textures_loaded[i].type << std::endl;
 
-	/*for(int i = 0; i < meshes.size(); i++)
+	//Compute Minimum and Maximum possible vertices, for BB
+	for(int i = 0; i < meshes.size(); i++)
 	{
-		int max = 0;
-
-		for(int j = 0; j < meshes[i].indices.size(); j++)
+		for(int j = 0; j < meshes[i].vertices.size(); j++)
 		{
-			//std::cout << meshes[i].indices[j] << " ";
-			//if(meshes[i].indices[j] > max)
-			//	max = meshes[i].indices[j];	
+			glm::vec3 p = meshes[i].vertices[j].Position;
+			
+			min_bb.x = min_bb.x < p.x ? min_bb.x : p.x;
+			min_bb.y = min_bb.y < p.y ? min_bb.y : p.y;
+ 			min_bb.z = min_bb.z < p.z ? min_bb.z : p.z;
+
+			max_bb.x = max_bb.x < p.x ? p.x : max_bb.x;
+			max_bb.y = max_bb.y < p.y ? p.y : max_bb.y;
+			max_bb.z = max_bb.z < p.z ?	p.z	: max_bb.z;
+
 		}
-		//std::cout << "Max I Mesh = " << max << std::endl;
-		//std::cout << "Last = " << meshes[i].indices[meshes[i].indices.size()-1] << std::endl;
-		std::cout << std::endl << std::endl;
 	}
-	*/
+	
 }
 
 Model::~Model()
@@ -216,4 +223,33 @@ unsigned int Model::loadTextureFromFile(const char* path, const std::string &dir
 
 	stbi_image_free(data);
 	return textureID;
+}
+
+BB Model::getBoundingBox(glm::mat4 &model_transform)
+{
+	glm::vec4 min = model_transform * min_bb;; 
+	glm::vec4 max = model_transform * max_bb;;
+
+	glm::vec3 tr_min = glm::vec3(min.x, min.y, min.z) / min.w;
+	glm::vec3 tr_max = glm::vec3(max.x, max.y, max.z) / max.w;
+
+	BB BoundingBox;
+	BoundingBox.InitFromMinMax(tr_min, tr_max);
+
+	return BoundingBox;
+}
+
+void Model::cullingON()
+{
+	culling = true;
+}
+
+void Model::cullingOFF()
+{
+	culling = false;
+}
+
+bool Model::getCullingStatus()
+{
+	return culling;
 }

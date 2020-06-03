@@ -164,9 +164,14 @@ vec3 CalcPointLight(PointLight pointLight, int i, vec3 fragAmb, vec3 fragDiff, v
 	vec3 diffuse = pointLight.diffuse * (fragDiff * diff);
 
 
+	//PHONG
 	//specular
-	vec3 reflectDir = reflect(-lightDir, norm);
-	float spec = pow(max(dot(viewDir, reflectDir), 0.0), fragLighting.w);
+	//vec3 reflectDir = reflect(-lightDir, norm);
+	//float spec = pow(max(dot(viewDir, reflectDir), 0.0), fragLighting.w);
+
+	//BLINN PHONG
+	vec3 halfwayDir = normalize(lightDir + viewDir);
+	float spec = pow(max(dot(norm, halfwayDir), 0.0), 2.0f* fragLighting.w);
 	vec3 specular = pointLight.diffuse * (fragSpec * spec);
 
 	//attenuation
@@ -216,7 +221,7 @@ void main()
 	{
 		int tid = int(fragTexDiffID - 0.5f);
 		fragCol = texture(textures[tid], fragTex);
-		
+
 		if(fragLighting.x == 0.0)
 			fragAmb = vec3(fragCol.rgb);
 		if(fragLighting.y == 0.0)
@@ -231,15 +236,22 @@ void main()
 
 	vec3 result = vec3(0.0f);
 	
+	//vec3 offset = 0.8f * norm * (1.0f-fragCol.x);
+	//float factor = length(fragPos.xyz - cameraPos) / 50.0f;
+	//offset *= (1.0f - factor);
+
 	for(int i = 0; i < numLights; i++)
 	{	 
-		
+																					//fragPos.xyz + offset
 	 	result += CalcPointLight(pointLight[i], i, fragAmb, fragDiff, fragSpec, norm, fragPos.xyz, viewDir);
 	}
 
 	if(DEBUG == 0)
 	{
-		FragColor = vec4(result, 1.0f) * fragCol;
+		
+		FragColor = vec4(result, 1.1f) * fragCol;
+		float gamma = 1.0f;//2.0f; //Default 2.2
+		FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
 		//FragColor = vec4(fragTexDiffID/TEXTURE_SLOTS, 0.0f, 0.0f, 1.0f);
 	}
 	

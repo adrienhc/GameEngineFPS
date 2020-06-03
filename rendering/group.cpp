@@ -37,6 +37,7 @@ void Group::Add(Asset* asset, glm::mat4& model_transform)
 	m_Assets.push_back(asset);
 	m_AssetTransforms.push_back(model_transform);
 	m_AssetTextureScalings.push_back(glm::vec2(1.0f));
+	m_AssetBoundingBoxes.push_back(asset->getBoundingBox(model_transform));
 }
 
 void Group::Add(Asset* asset, glm::mat4& model_transform, glm::vec2& texture_scaling)
@@ -44,18 +45,51 @@ void Group::Add(Asset* asset, glm::mat4& model_transform, glm::vec2& texture_sca
 	m_Assets.push_back(asset);
 	m_AssetTransforms.push_back(model_transform);
 	m_AssetTextureScalings.push_back(texture_scaling);
+	m_AssetBoundingBoxes.push_back(asset->getBoundingBox(model_transform));
 }
 
 void Group::Add(Model* model, glm::mat4& model_transform)
 {
 	m_Models.push_back(model);
 	m_ModelTransforms.push_back(model_transform);
+	m_ModelBoundingBoxes.push_back(model->getBoundingBox(model_transform));
 }
 
 void Group::Submit(BatchAbstract* renderer)
 {
 	renderer->Submit(m_Assets, m_AssetTransforms, m_AssetTextureScalings);
 	renderer->Submit(m_Models, m_ModelTransforms);
+}
+
+void Group::Submit(BatchAbstract* renderer, Camera* camera) //Culling Version
+{
+	//BARE IMPLEMENTATION, TOO MUCH COPYING??, DO MARKING INSTEAD??, CHECK IN RENDERER?? TOO ANNOYING, NEED CHANGE ALL RENDERERS, CHECK AND SEE ...
+	std::vector<Asset*> NonCulled_Assets;
+	std::vector<glm::mat4> NonCulled_AssetTransforms;
+	std::vector<glm::vec2> NonCulled_AssetTextureScalings;
+	for(int i = 0; i < m_Assets.size(); i++)
+	{
+		if(!camera->IsCulled(m_AssetBoundingBoxes[i]))
+		{
+			NonCulled_Assets.push_back(m_Assets[i]);
+			NonCulled_AssetTransforms.push_back(m_AssetTransforms[i]);
+			NonCulled_AssetTextureScalings.push_back(m_AssetTextureScalings[i]);
+		}
+	}
+	renderer->Submit(NonCulled_Assets, NonCulled_AssetTransforms, NonCulled_AssetTextureScalings);
+
+
+	std::vector<Model*> NonCulled_Models;
+	std::vector<glm::mat4> NonCulled_ModelTransforms;
+	for(int i = 0; i < m_Models.size(); i++)
+	{
+		if(!m_Models[i]->getCullingStatus() || !camera->IsCulled(m_ModelBoundingBoxes[i]) )
+		{
+			NonCulled_Models.push_back(m_Models[i]);
+			NonCulled_ModelTransforms.push_back(m_ModelTransforms[i]);
+		}
+	}
+	renderer->Submit(NonCulled_Models, NonCulled_ModelTransforms);
 }
 
 void Group::Submit(ParticleSystem* particle_system, pShape type)

@@ -31,6 +31,8 @@
 #include "../rendering/layers/scenelayer.h"
 #include "../rendering/layers/instancedlayer.h"
 
+#include "../geometry/bounding_box.h"
+
 
 class Renderer;
 
@@ -48,12 +50,14 @@ public:
 	bool collisionChecks(Camera &camera);
 	void getLights(Renderer renderer);
 	void addLayoutLayer(AbstractLayer* layer);
+	void addLayoutLayerCull(AbstractLayer* layer);
 	void addCubesLayer(InstancedLayer* instanced_layer);
 	void addTilesLayer(InstancedLayer* instanced_layer);
 	void addLightsLayer(SceneLayer* layer, bool renderable = false);
+	void addLightsLayerCull(SceneLayer* layer, bool renderable = false);
 	void addTargetsLayer(AbstractLayer* model_layer, AbstractLayer* outline_layer, AbstractLayer* particle_layer, AbstractLayer* depthmap_layer);
 	void addBulletImpact(Camera* camera, SceneLayer* layer, ParticleSystem* particle_system);
-	
+	BB getBoundingBox();
 	static bool collideOn()
 	{
 		return !active;
@@ -88,6 +92,7 @@ private:
 	//COLLISION BOX
 	glm::vec3 room_min_bb; // bb = bounding box
 	glm::vec3 room_max_bb;
+	BB bounding_box;
 	float buffer = 0.25f; //collision buffer for point only
 
 	//offset X, offset Y, dim X, dim Y    ,Opening Height (-1 No window), Beam (0/-1 No, 1 Yes) 

@@ -27,6 +27,8 @@ Room::Room(int lgth, int wdth, int hght, glm::vec3 ofst,  std::vector<int> DN,  
     //ROOM BOUNDING BOX
     room_min_bb = glm::vec3(offset.x - 0.5f, offset.y, offset.z - 0.5f );
     room_max_bb = glm::vec3(room_min_bb.x + width, room_min_bb.y + height, room_min_bb.z + length);
+    bounding_box.min = room_min_bb;
+    bounding_box.max = room_max_bb;
 
     //ROOM DOORS
 	DoorN = DN;
@@ -112,6 +114,11 @@ glm::vec3 Room::adjustAssetPos(glm::vec3 Pos)
     return glm::vec3(offset.x + Pos.x, offset.y + 0.5f + Pos.y, offset.z + Pos.z);
 } 
 
+BB Room::getBoundingBox()
+{
+    return bounding_box;
+}
+
 void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
 {
     std::vector<nNode*> Roots;
@@ -142,10 +149,12 @@ void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
     nNode* Instanciated = new nNode();
     Ref = Instanciated->AddChildrenRecursive(new nRotate(glm::radians(270.0f), glm::vec3(1.0f, 0.0f, 0.0f), true)); //FLOOR
     Ref = horizontalPlaneLowpoly(Ref, floor);
+    //Ref = horizontalPlane(Ref, floor);
     Ref = Instanciated;
     Ref = Ref->AddChildrenRecursive(new nRotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f), true));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, (float) height, 0.0f))); //CEILING
     Ref = horizontalPlaneLowpoly(Ref, ceiling);
+    //Ref = horizontalPlane(Ref, ceiling);
 
     Roots.push_back(Instanciated);
     Tiles.push_back(Instanciated);
@@ -154,6 +163,7 @@ void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
     Instanciated = new nNode();
     Ref = Instanciated->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); //SOUTH
     Ref = verticalPlaneNSLowpoly(Ref, 0.0f, (float)width, 0.0f, (float)height, DoorS);
+    //Ref = verticalPlaneNS(Ref, DoorS, false);
     nNode* InstanciatedBeam = new nNode();
     RefBeam = InstanciatedBeam->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); //SOUTH
     RefBeam = verticalPlaneNS(RefBeam, DoorS, true);
@@ -163,6 +173,7 @@ void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); 
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.0f, (float) length))); //NORTH
     Ref = verticalPlaneNSLowpoly(Ref, 0.0f, (float)width, 0.0f, (float)height, DoorN);
+    //Ref = verticalPlaneNS(Ref, DoorN, false);
     RefBeam = InstanciatedBeam;
     RefBeam = RefBeam->AddChildrenRecursive(new nRotate(glm::radians(180.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(0.0f, 0.5f, -0.5f))); 
@@ -173,6 +184,7 @@ void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
     Ref = Instanciated->AddChildrenRecursive(new nRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f))); //EAST
     Ref = verticalPlaneEWLowpoly(Ref, 0.0f, (float)length, 0.0f, (float)height, DoorE);
+    //Ref = verticalPlaneEW(Ref, DoorE, false);
     RefBeam = InstanciatedBeam->AddChildrenRecursive(new nRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f))); //EAST
     RefBeam = verticalPlaneEW(RefBeam, DoorE, true);
@@ -182,6 +194,7 @@ void Room::makeRoom() //MAKES SCENE GRAPH, AND INSTANTIATES ROOM'S GEOMETRY
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f)));
     Ref = Ref->AddChildrenRecursive(new nTranslate(glm::vec3((float) width, 0.0f, 0.0f))); //WEST
     Ref = verticalPlaneEWLowpoly(Ref, 0.0f, (float)length, 0.0f, (float)height, DoorW);
+    //Ref = verticalPlaneEW(Ref, DoorW, false);
     RefBeam = InstanciatedBeam;
     RefBeam = RefBeam->AddChildrenRecursive(new nRotate(glm::radians(270.0f), glm::vec3(0.0f, 1.0f, 0.0f), true));
     RefBeam = RefBeam->AddChildrenRecursive(new nTranslate(glm::vec3(-0.5f, 0.5f, 0.0f)));
@@ -1343,7 +1356,16 @@ void Room::getLights(Renderer renderer)
 
 void Room::addLayoutLayer(AbstractLayer* layer)
 {
-    //Submit layout under strict conditions -- fustrum culling        
+    layer->Add(g_layout);
+}
+
+void Room::addLayoutLayerCull(AbstractLayer* layer)
+{
+        //Submit layout under strict conditions -- fustrum culling   
+    if(layer->IsCulled(bounding_box))
+    {
+        return;
+    }
     layer->Add(g_layout);
 }
 
@@ -1359,7 +1381,17 @@ void Room::addTilesLayer(InstancedLayer* instanced_layer)
 
 void Room::addLightsLayer(SceneLayer* scene, bool renderable)
 {
+    scene->AddLight(g_light, renderable);
+}
+
+void Room::addLightsLayerCull(SceneLayer* scene, bool renderable)
+{
     //Always submit light, or under lax conditions -- room and distance from player?
+    if(scene->IsCulled(bounding_box))
+    {
+        return;
+    }
+
     scene->AddLight(g_light, renderable);
 }
 

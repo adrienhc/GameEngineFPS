@@ -23,8 +23,8 @@ public:
         lightRadius = {15.0f, 15.0f};
         lightAmbient = glm::vec3(0.7f);
     	lightConstant = 1.0f;
-    	lightLinear = 0.045f;
-        lightQuadratic = 0.0075f;
+    	lightLinear = 0.045f; //0.14f;//0.045f;
+        lightQuadratic = 0.0075f;//0.07f;//0.0075f;
 
         // CRATES
         vertical = {asset(2,5, glm::vec3(width-2.5f, 0.0f, 3.0f)), 

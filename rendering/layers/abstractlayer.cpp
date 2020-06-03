@@ -33,17 +33,28 @@ BatchAbstract* AbstractLayer::GetRenderer()
 	return m_Renderer;
 }
 
-void AbstractLayer::Render()
+void AbstractLayer::Render(bool cull)
 {
 	m_Shader->use();
 	m_Shader->setCamera(m_Camera);
 	
 	m_Renderer->Begin();
-	for(int i = 0; i < m_Groups.size(); i++)
+	if(cull)
 	{
-		//std::cout << "Submit Group" << std::endl;
-		m_Groups[i]->Submit(m_Renderer);
+		for(int i = 0; i < m_Groups.size(); i++)
+		{
+			//std::cout << "Submit Group" << std::endl;
+			m_Groups[i]->Submit(m_Renderer, m_Camera);
+		}	
 	}
+	else
+	{
+		for(int i = 0; i < m_Groups.size(); i++)
+		{
+			m_Groups[i]->Submit(m_Renderer);
+		}	
+	}
+	
 	m_Renderer->End();
 	m_Renderer->Flush();
 
@@ -59,7 +70,7 @@ void AbstractLayer::RenderKeep()
 		for(int i = 0; i < m_Groups.size(); i++)
 		{
 			//std::cout << "Submit Group" << std::endl;
-			m_Groups[i]->Submit(m_Renderer);
+			m_Groups[i]->Submit(m_Renderer, m_Camera);
 		}
 		m_Renderer->End();	
 		m_Groups.clear(); //OK since only need upload Data Once
@@ -73,4 +84,10 @@ void AbstractLayer::Clear()
 {
 	m_Groups.clear();
 	m_Renderer->Clear();
+}
+
+
+bool AbstractLayer::IsCulled(BB &bounding_box)
+{
+	return m_Camera->IsCulled(bounding_box);
 }

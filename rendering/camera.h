@@ -4,6 +4,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "../geometry/bounding_box.h"
+#include "frustum.h"
 
 #include <vector>
 
@@ -43,6 +45,9 @@ public:
 	float FarPlane;
 	float ViewRatio;
 
+	//Frustum
+	Frustum* frustum = NULL;
+
 	Camera(glm::vec3 position = glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f), float yaw = YAW, float pitch =PITCH)
 	: Front(glm::vec3(0.0f, 0.0f, -1.0f)),/* MovementSpeed(SPEED),*/ MouseSensitivity(SENSITIVITY), Zoom(ZOOM)
 	{
@@ -55,32 +60,17 @@ public:
 	Camera(float posX, float posY, float posZ, float upX, float upY, float upZ, float yaw, float pitch);
 	void SetView(float near, float far, float ratio);
 	glm::mat4 GetViewMatrix();
+	glm::mat4 GetProjectionMatrix();
 	void ProcessKeyboard(CameraMovements direction, float deltaTime);
-	void ProcessMouseMovements(float xoffset, float yoffset, GLboolean constraiPitch = true)
-	{
-		xoffset *= MouseSensitivity;
-		yoffset *= MouseSensitivity;
-
-		Yaw += xoffset;
-		Pitch += yoffset;
-
-		float Pitch_Limit = 80.0f; // [0,89]
-		if (constraiPitch)
-		{
-			if(Pitch > Pitch_Limit)
-				Pitch = Pitch_Limit;
-			if(Pitch < -Pitch_Limit)
-				Pitch = -Pitch_Limit;
-		}
-
-		UpdateCameraVectors();
-	}
+	void ProcessMouseMovements(float xoffset, float yoffset, GLboolean constraiPitch = true);
 	void ProcessMouseScroll(float yoffset);
 
 	void Gravity(float deltaTime);
 	glm::vec3 GetMinBB();
 	glm::vec3 GetMaxBB();
 	void PosFromBB(glm::vec3 min_bb, glm::vec3 max_bb);
+
+	bool IsCulled(BB &bounding_box);
 
 
 private:

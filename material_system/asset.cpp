@@ -34,4 +34,44 @@ Material* Asset::getMaterial()
 	}
 }
 
+BB Asset::getBoundingBox(glm::mat4 &model_transform)
+{
+	glm::vec4 min;
+	glm::vec4 max;
 
+	switch(geometry)
+	{
+		//Fall throughs on Purpose
+		case eTriangle:
+		case eSquare:
+			min = glm::vec4(-0.5f, -0.5f, 0.0f, 1.0f);
+			max = glm::vec4(0.5f, 0.5f, 0.0f, 1.0f);
+		break;
+
+		//Fall throughs on Purpose
+		case eCube:
+		case eInvertedCube:
+			min = glm::vec4(-0.5f, -0.5f, -0.5f, 1.0f);
+			max = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
+		break;
+
+		default:
+		break;
+	}
+
+
+	min = model_transform * min;
+	max = model_transform * max;
+
+	//Perspective Division bring back to World Space
+	glm::vec3 tr_min = glm::vec3(min.x, min.y, min.z) / min.w;
+	glm::vec3 tr_max = glm::vec3(max.x, max.y, max.z) / max.w;
+
+	//std::cout << "TR " << "(" << glm::to_string(tr_min) << ", " << glm::to_string(tr_max) << ")" << std::endl;
+	BB BoundingBox;
+	BoundingBox.InitFromMinMax(tr_min, tr_max);
+
+	//std::cout << "BB " << "(" << glm::to_string(BoundingBox.min) << ", " << glm::to_string(BoundingBox.max) << ")" << std::endl;
+
+	return BoundingBox;
+}

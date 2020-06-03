@@ -5,6 +5,7 @@
 #include <string>
 #include "material.h"
 #include "../geometry/geometry.h"
+#include "../geometry/bounding_box.h"
 
 class Asset //Geometry type, Material, Color/Texture
 {
@@ -16,6 +17,7 @@ class Asset //Geometry type, Material, Color/Texture
 		eShape getGeometry();
 		std::string getName();
 		Material* getMaterial();
+		BB getBoundingBox(glm::mat4 &model_transform);
 		//Geometry* getGeometry();
 
 	private:

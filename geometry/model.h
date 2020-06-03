@@ -18,7 +18,11 @@
 #include "../lib/stb_image.h"
 
 #include "mesh.h"
+#include "bounding_box.h"
+
 #include "../rendering/shader.h"
+
+
 
 class Model
 {
@@ -32,6 +36,10 @@ class Model
 		Model(char* path, bool gamma = false);
 		~Model();
 		void Draw(Shader shader);
+		void cullingON();
+		void cullingOFF();
+		bool getCullingStatus();
+		BB getBoundingBox(glm::mat4 &model_transform);
 
 	private:
 		void loadModel(std::string path);
@@ -39,6 +47,11 @@ class Model
 		Mesh processMesh(aiMesh* mesh, const aiScene* scene);
 		std::vector<mTexture> loadMaterialTextures(aiMaterial *mat, aiTextureType type, std::string typeName);
 		unsigned int loadTextureFromFile(const char* path, const std::string &directory, bool gamma = false);
+
+		glm::vec4 min_bb;
+		glm::vec4 max_bb;
+
+		bool culling;
 
 };
 

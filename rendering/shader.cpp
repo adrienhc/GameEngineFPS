@@ -285,7 +285,7 @@ void Shader::setCamera(Camera* camera)
 	setVec3("cameraPos", camera->Position);
 	glm::mat4 view = camera->GetViewMatrix();  
     setMat4("viewing", view);
-    glm::mat4 proj = glm::perspective(glm::radians(camera->Zoom), camera->ViewRatio, camera->NearPlane, camera->FarPlane);
+    glm::mat4 proj = camera->GetProjectionMatrix();
     setMat4("projection", proj);
 }
 

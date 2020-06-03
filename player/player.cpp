@@ -4,6 +4,8 @@ Player::Player(Camera* camera, Weapon* weapon)
 {
 	this->camera = camera;
 	this->weapon = weapon;
+	this->weapon->GetModel()->cullingOFF();
+	std::cout << weapon->GetModel()->getCullingStatus() << std::endl;
 }
 
 void Player::Update(float deltaTime)

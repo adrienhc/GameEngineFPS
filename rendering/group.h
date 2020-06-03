@@ -7,6 +7,8 @@
 #include "../material_system/asset.h"
 #include "../geometry/model.h"
 #include "../particle_system/particle_system.h"
+#include "../geometry/bounding_box.h"
+#include "camera.h"
 
 #include <stack>
 #include <vector>
@@ -20,6 +22,7 @@ class Group
 		Group(std::vector<nNode*> Roots);
 		~Group();
 		void Submit(BatchAbstract* renderer);
+		void Submit(BatchAbstract* renderer, Camera* camera); //Does Frustum Culling on Assets 
 		void Submit(ParticleSystem* particle_system, pShape type);
 		std::vector<PointLight*>& GetLights();
 		std::vector<int>& GetLightsRoomIndex();
@@ -35,10 +38,12 @@ class Group
 		std::vector<Asset*> m_Assets;
 		std::vector<glm::mat4> m_AssetTransforms;
 		std::vector<glm::vec2> m_AssetTextureScalings;
+		std::vector<BB> m_AssetBoundingBoxes;
 
 		void Add(Model* model, glm::mat4& model_transform);
 		std::vector<Model*> m_Models;
 		std::vector<glm::mat4> m_ModelTransforms;
+		std::vector<BB> m_ModelBoundingBoxes;
 
 		//LIGHT
 		std::vector<PointLight*> m_PointLights;

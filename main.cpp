@@ -48,6 +48,7 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
     glStencilMask(0x00);  
 
     glClearColor(0.423f, 0.701f, 0.756f, 1.0f);
@@ -56,6 +57,7 @@ int main()
     glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
     glEnable(GL_PROGRAM_POINT_SIZE);
     glEnable(GL_LINE_SMOOTH);
+    // glEnable(GL_FRAMEBUFFER_SRGB); 
 
     //ASSETS   
     Asset* REF = new Asset(eCube, "ref", glm::vec3(1.0f), glm::vec3(1.0f), glm::vec3(1.0f), 32.0f, glm::vec4(0.0f, 1.0f, 0.0f, 0.5f), false, "");
@@ -73,23 +75,11 @@ int main()
 
     std::vector<Room*> World;
 
-    
-    /* //OLD BIG SMG
-    struct sWeapon1
-    {
-        char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
-        glm::vec3 hip_offset = glm::vec3(0.3f, 0.3f, 0.2f); //FRONT, RIGHT, DOWN
-        glm::vec3 ads_offset = glm::vec3(0.1f, -0.002f, 0.135f);
-        float scale_factor = 0.1f;
-        float zoom_min = 75.0f;
-        float zoom_max = 35.0f;
-    } smg;*/
-
     struct sWeapon1
     {
         char* path = (char*) "3DModels/SMG_Upload/SMG.dae";
         glm::vec3 hip_offset = glm::vec3(0.03f, 0.03f, 0.02f); //FRONT, RIGHT, DOWN
-        glm::vec3 ads_offset = glm::vec3(0.02f, -0.0002f, 0.0135f);
+        glm::vec3 ads_offset = glm::vec3(0.01f, -0.0002f, 0.0135f);
         float scale_factor = 0.01f;
         float zoom_min = 75.0f;
         float zoom_max = 35.0f;
@@ -127,7 +117,7 @@ int main()
     lastX = WINDOW_WIDTH / 2.0f;
     lastY = WINDOW_HEIGHT / 2.0f;
     float ratio = (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT;
-    camera.SetView(0.01f, 50.0f, ratio);
+    camera.SetView(0.005f, 50.0f, ratio);
 
     Player Player(&camera, &SMG);
 
@@ -178,7 +168,6 @@ int main()
     srand (static_cast <unsigned> (glfwGetTime()));
     //Fragment Shader supports 32 textures!
     float deltaTimeAcc = 0.0f;
-    // float shadowCooldown = 0.0f;
     int Frames;
 
     //RENDER LOOP
@@ -216,9 +205,6 @@ int main()
             build_world(World, floor, wall, door, beam, ceiling, crate);
 
             //DEPTHMAP, TARGETS AND OUTLINE
-            glStencilMask(0xFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
             depthmap.Clear();
             for(int i = 0; i < World.size(); i++)
             {
@@ -265,9 +251,6 @@ int main()
             std::cout << "Update " << deltaTime << std::endl;
             printNext = true;
             //DEPTHMAP, TARGETS AND OUTLINE
-            glStencilMask(0xFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-
             depthmap.Clear();
             for(int i = 0; i < World.size(); i++)
             {
@@ -280,27 +263,13 @@ int main()
         }
         
         //PLAYER LAYER
-        //Do Stencil Shennenigans so that Gun Not Overwritten
-        
-        //glStencilMask(0xFF);
-        //glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        //glStencilFunc(GL_GEQUAL, 2, 0xFF);
         weapon.Clear();
         for(int i = 0; i < World.size(); i++)
         {
             World[i]->addLightsLayer(&weapon);
         }
-        //Player.addLayer(&weapon); //NO MUZZLE FLASH
-        //glEnable(GL_CULL_FACE); 
-        //glCullFace(GL_BACK);
-        //weapon.Render();
-        //glDisable(GL_CULL_FACE); 
         
-
         //OUTLINED OBJECTS LAYER 
-        //Target //if shared outline ok
-        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
-        glStencilFunc(GL_GEQUAL, 1, 0XFF);
         targets.Clear();
         outline.Clear();
         for(int i = 0; i < World.size(); i++)
@@ -308,22 +277,28 @@ int main()
             World[i]->addLightsLayer(&targets);
             World[i]->addTargetsLayer(&targets, &outline, NULL, NULL);
         }
+        //Target //if shared outline ok
+        glEnable(GL_STENCIL_TEST);
+        glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+        glStencilFunc(GL_ALWAYS, 1, 0xFF);
+        glStencilMask(0xFF);
         targets.Render();
         //Outline //if shared outline ok 
-        glStencilFunc(GL_GREATER, 1, 0xFF);
+        glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
+        glStencilMask(0x00);
         outline.Render();
+        glStencilMask(0xFF);
+        glDisable(GL_STENCIL_TEST);
 
         //ROOM LAYER
-        glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-        glStencilFunc(GL_GREATER, 2, 0XFF); //From here on, do not overwrite Gun
         //STATIC GEOMETRY
         //SCENE
         scene.Clear();
         Player.addLayer(&scene); //WORKS MODEL THEN ASSETS
         for(int i = 0; i < World.size(); i++)
         {
-            World[i]->addLightsLayer(&scene, true);
-            World[i]->addLayoutLayer(&scene);   
+            World[i]->addLightsLayerCull(&scene, true);
+            World[i]->addLayoutLayerCull(&scene);   
         }
         //Player.addLayer(&scene); //NOT WORK ASSET THEN MODELS
         scene.Render();

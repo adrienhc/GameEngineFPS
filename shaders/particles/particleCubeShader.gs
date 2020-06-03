@@ -48,7 +48,7 @@ struct PointLight
 uniform int numLights;
 uniform PointLight pointLight[NUM_POINT_LIGHTS];
 
-#define LIGHTING 1
+#define LIGHTING 0
 
 /// FUNCTIONS ///
 mat4 RotationMatrix(vec3 axis, float angle)
