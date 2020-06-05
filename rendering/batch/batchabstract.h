@@ -3,13 +3,13 @@
 
 #include "../../pch.h"
 #define GLM_FORCE_SWIZZLE 
-
 #include "VertexData.h"
+
+#include "../../config.h"
 #include "../../geometry/geometry.h"
 #include "../../geometry/model.h"
 #include "../../material_system/asset.h"
 
-#define MAX_TEXTURE_SLOTS 20 //32
 
 class BatchAbstract
 {

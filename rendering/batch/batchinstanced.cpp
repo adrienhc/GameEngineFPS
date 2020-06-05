@@ -204,7 +204,7 @@ void BatchInstanced::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>&
 
 			if(!found)
 			{
-				if(m_TextureID.size() >= MAX_TEXTURE_SLOTS)
+				if(m_TextureID.size() >= MAX_RENDERER_TEXTURE_SLOTS)
 				{
 					//Also do when reached Max Buffer size? 
 					End();
@@ -356,7 +356,7 @@ void BatchInstanced::Submit(std::vector<Model*>& models, std::vector<glm::mat4>&
 
 			if((vTexDiffID > 0 && !foundDiff) || (vTexSpecID > 0 && !foundSpec)) //if missing at least one that was needed
 			{
-				if(m_TextureID.size() >= (MAX_TEXTURE_SLOTS - textureCount)) //check if space for all needed
+				if(m_TextureID.size() >= (MAX_RENDERER_TEXTURE_SLOTS - textureCount)) //check if space for all needed
 				{
 					//Also do when reached Max Buffer size? 
 					End();

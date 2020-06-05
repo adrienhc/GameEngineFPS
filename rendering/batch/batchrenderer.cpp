@@ -149,7 +149,7 @@ void BatchRenderer::Submit(std::vector<Asset*>& assets, std::vector<glm::mat4>& 
 
 			if(!found)
 			{
-				if(m_TextureID.size() >= MAX_TEXTURE_SLOTS)
+				if(m_TextureID.size() >= MAX_RENDERER_TEXTURE_SLOTS)
 				{
 					//std::cout << "Asset Texture Limit" << std::endl;
 					//Also do when reached Max Buffer size? 
@@ -357,7 +357,7 @@ void BatchRenderer::Submit(std::vector<Model*>& models, std::vector<glm::mat4>& 
 						vTexSpecSlot = (float)(m_TextureID.size() -1);
 					}	
 				}
-				else if(m_TextureID.size() >= (MAX_TEXTURE_SLOTS - textureCount)) //check if space for all needed
+				else if(m_TextureID.size() >= (MAX_RENDERER_TEXTURE_SLOTS - textureCount)) //check if space for all needed
 				{
 					//std::cout << "Model Texture Limit" << std::endl;
 					//Also do when reached Max Buffer size? 

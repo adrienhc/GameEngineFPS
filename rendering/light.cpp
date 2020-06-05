@@ -251,9 +251,9 @@ void PointLight::bindShadowMapBatch(Shader* shader, int room_index, int shader_i
 	if(shader_index == 0) //only need set it once 
 		shader->setFloat("far_plane", far);
 	
-	shader->setInt("depthMaps[" + std::to_string(shader_index) + "]", RENDERER_TEXTURE_OFFSET + shader_index);
+	shader->setInt("depthMaps[" + std::to_string(shader_index) + "]", LIGHT_TEXTURE_OFFSET + shader_index);
 
-	glActiveTexture(GL_TEXTURE0 + RENDERER_TEXTURE_OFFSET + shader_index);
+	glActiveTexture(GL_TEXTURE0 + LIGHT_TEXTURE_OFFSET + shader_index);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, vsmCubemap[room_index]); //tempBlurCubemap);//  
 
 }

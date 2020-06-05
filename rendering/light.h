@@ -7,7 +7,7 @@
 #include "shader.h"
 #include "../config.h"
 
-#define RENDERER_TEXTURE_OFFSET 20
+// #define RENDERER_TEXTURE_OFFSET 20
 
 // extern const unsigned int WINDOW_WIDTH; //defined in config.h 
 // extern const unsigned int WINDOW_HEIGHT; //used to reset viewport after shadow pass

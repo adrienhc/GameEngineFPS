@@ -2,11 +2,10 @@
 #define SCENE_LAYER_H
 
 #include "abstractlayer.h"
+#include "../../config.h"
 #include "../batch/batchrenderer.h"
 #include "../light.h"
 
-#define SHADER_MAX_LIGHTS 5
-#define SHADER_MAX_BULLET_HOLES 5
 
 class SceneLayer: public AbstractLayer
 {

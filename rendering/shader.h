@@ -2,12 +2,12 @@
 #define SHADER_H
 
 #include "../pch.h"
-
+#include "../config.h"
 #include "camera.h"
 #include "light.h"
 #include "../material_system/material.h"
 
-#define TEXTURE_SLOTS 32
+// #define TEXTURE_SLOTS 32
 
 class PointLight; //as PointLight also includes Shader
 
