@@ -1,25 +1,10 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
-#include <vector>
-
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-
+#include "../pch.h"
 #include "../lib/stb_image.h"
-
 #include "mesh.h"
 #include "bounding_box.h"
-
 #include "../rendering/shader.h"
 
 

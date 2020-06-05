@@ -17,6 +17,7 @@ FILES += particle_system/particle_system.cpp particle_system/particle.cpp
 # The flags to use for compilation                                    
 FLAGS = -L/usr/local/lib -lglfw3 -lrt -lm -ldl -lXrandr -lXinerama -lXxf86vm -lXext -lXcursor -lXrender -lXfixes -lX11 -lpthread -lxcb -lXau -lXdmcp -lGLU -lGL -lglut -lassimp 
 FLAGS += -L/home/adrienhc/Game/dynamic_class/ -lRoom0 -lRoom1 -lRoom2
+# FLAGS += -include pch.h
 # FLAGS += -march=broadwell -pipe
 #FLAGS += -g #FOR DEBUG 
 #FLAGS += -Wall
@@ -27,16 +28,20 @@ CC = g++
 
 # Perform action on all object files (May or may not exist)           
 all: $(OBJECTS)                                                       
-	$(CC) -o $(EXEC) $(OPTI) $(FILES) $(FLAGS)
+	time $(CC) -o $(EXEC) $(OPTI) $(FILES) -include pch.h $(FLAGS)
+
+header:
+	$(CC) $(OPTI) $(FLAGS) -x c++-header -o pch.h.gch -c pch.h
+	#g++ -c -std=c++11 pch.h -o pch.h.gch
 
 rooms: room0 room1 room2
 
 room0: 
-	g++ -shared -fPIC geometry/cluster.cpp dynamic_class/Room0.cpp -o dynamic_class/libRoom0.so
+	$(CC) -shared -fPIC geometry/cluster.cpp dynamic_class/Room0.cpp -o dynamic_class/libRoom0.so
 room1:
-	g++ -shared -fPIC geometry/cluster.cpp dynamic_class/Room1.cpp -o dynamic_class/libRoom1.so
+	$(CC) -shared -fPIC geometry/cluster.cpp dynamic_class/Room1.cpp -o dynamic_class/libRoom1.so
 room2:
-	g++ -shared -fPIC geometry/cluster.cpp dynamic_class/Room2.cpp -o dynamic_class/libRoom2.so
+	$(CC) -shared -fPIC geometry/cluster.cpp dynamic_class/Room2.cpp -o dynamic_class/libRoom2.so
 
 clean:
 	rm *.o  main

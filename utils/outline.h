@@ -1,7 +1,7 @@
 #ifndef OUTLINE_H
 #define OUTLINE_H
 
-#include <glm/glm.hpp>
+#include "../pch.h"
 
 class Outline 
 {

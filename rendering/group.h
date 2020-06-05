@@ -1,6 +1,7 @@
 #ifndef GROUP_H
 #define GROUP_H
 
+#include "../pch.h"
 #include "../scene/scenegraph.h"
 #include "batch/batchabstract.h"
 #include "light.h"
@@ -10,9 +11,6 @@
 #include "../geometry/bounding_box.h"
 #include "camera.h"
 
-#include <stack>
-#include <vector>
-#include <glm/glm.hpp>
 
 class Group
 {

@@ -8,7 +8,7 @@
 #include "light.h"
 #include "group.h"
 #include "../scene/scenegraph.h"
-#include <vector>
+#include "abstractlayer.h"
 
 class WeaponLayer: public Layer
 {

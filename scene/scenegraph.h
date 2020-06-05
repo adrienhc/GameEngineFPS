@@ -1,15 +1,7 @@
 #ifndef SCENE_GRAPH
 #define SCENE_GRAPH
 
-#include <iostream>
-#include <list>
-#include <cmath>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../pch.h"
 
 #include "../utils/outline.h"
 #include "../material_system/asset.h"

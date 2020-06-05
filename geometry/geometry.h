@@ -1,16 +1,7 @@
 #ifndef GEOMETRY
 #define GEOMETRY
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <glm/gtx/string_cast.hpp> //debug, visualize matrix
-
-#include <vector>
-#include <iostream>
+#include "../pch.h"
 
 enum eShape {eTriangle, eSquare, eCube, eInvertedCube}; 
 

@@ -1109,6 +1109,22 @@ bool Room::cameraCollide(Camera &camera)
                 }
             }
 
+            glm::vec3 prev_cam_min_bb = cam_min_bb;
+            glm::vec3 prev_cam_max_bb = cam_max_bb;
+            if ( boxCollide(cam_min_bb, cam_max_bb, room_min_bb, room_max_bb) ) //CHECK FLOOR -- ONLY UPDATE Y
+            {
+                ret = true;
+                cam_min_bb.x = prev_cam_min_bb.x;
+                cam_min_bb.z = prev_cam_min_bb.z;
+
+                cam_max_bb.x = prev_cam_max_bb.x;
+                cam_max_bb.z = prev_cam_max_bb.z;
+
+                camera.PosFromBB(cam_min_bb, cam_max_bb);
+                cam_min_bb = camera.GetMinBB();
+                cam_max_bb = camera.GetMaxBB();
+            }
+
 
             //CHECK STAIRS AS A WHOLE
             for(int i = 0; i < stairs.size(); i++)
@@ -1143,10 +1159,12 @@ bool Room::cameraCollide(Camera &camera)
             if ( boxCollide(cam_min_bb, cam_max_bb, room_min_bb, room_max_bb) ) //CHECK WALLS
             {
                 ret = true;
+
                 camera.PosFromBB(cam_min_bb, cam_max_bb);
                 cam_min_bb = camera.GetMinBB();
                 cam_max_bb = camera.GetMaxBB();
             }
+            
 
         }
         else if (active) //take ticket if no one does

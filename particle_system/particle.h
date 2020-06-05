@@ -1,14 +1,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <cstdlib> //for rand()
-
+#include "../pch.h"
 #include "../rendering/batch/batchparticle.h"
 
 class BatchParticle;

@@ -3,15 +3,8 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <string>
-#include <cstdlib>
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "pch.h"
 
 #include "lib/stb_image.h"
 
@@ -54,8 +47,7 @@
 
 #include "dynamic_class/dlclass.hpp"
 #include "dynamic_class/BaseRoom.hpp"
-#include <memory>
-#include <unistd.h>
+
 
 //Framebuffer and Input 
 void framebuffer_size_callback( GLFWwindow* window, int width, int height);

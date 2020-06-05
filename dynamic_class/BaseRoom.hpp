@@ -1,10 +1,7 @@
 #ifndef BASE_ROOM_H
 #define BASE_ROOM_H
 
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../pch.h"
 #include "../geometry/cluster.h"
 
 class BaseRoom {

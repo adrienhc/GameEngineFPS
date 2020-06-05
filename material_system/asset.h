@@ -1,8 +1,7 @@
 #ifndef ASSET
 #define ASSET
 
-#include <iostream>
-#include <string>
+#include "../pch.h"
 #include "material.h"
 #include "../geometry/geometry.h"
 #include "../geometry/bounding_box.h"

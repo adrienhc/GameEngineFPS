@@ -1,10 +1,10 @@
 #ifndef PARTICLE_SYSTEM
 #define PARTICLE_SYSTEM
 
+#include "../pch.h"
 #include "particle.h"
 #include "../rendering/batch/batchparticle.h"
 #include "../geometry/geometry.h"
-#include <vector>
 
 enum pShape {pLine, pPoint, pCube, pNone};
 

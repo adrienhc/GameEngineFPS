@@ -1,13 +1,9 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "../pch.h"
 #include "../geometry/bounding_box.h"
 #include "frustum.h"
-
-#include <vector>
 
 enum CameraMovements {FORWARD, BACKWARDS, LEFT, RIGHT, UP};
 

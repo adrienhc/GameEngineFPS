@@ -1,17 +1,7 @@
 #ifndef RENDER
 #define RENDER
 
-#include <iostream>
-#include <stack>
-#include <vector>
-#include <cmath>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp> //rotate vector to align weapon with camera 
-
-#include <glm/gtx/string_cast.hpp> // ES: std::cout<<glm::to_string(model_transform)<<std::endl;
+#include "../pch.h"
 
 #include "light.h"
 #include "camera.h"

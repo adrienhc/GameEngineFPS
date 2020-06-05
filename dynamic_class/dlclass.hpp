@@ -1,10 +1,7 @@
 #ifndef DLCLASS_H
 #define DLCLASS_H
 
-#include <memory>
-#include <string>
-#include <dlfcn.h>
-#include <iostream>
+#include "../pch.h"
 
 template <class T>
 class DLClass {

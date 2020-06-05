@@ -1,11 +1,7 @@
 #ifndef WEAPON_H
 #define WEAPON_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
+#include "../pch.h"
 
 #include "model.h"
 #include "../material_system/asset.h"

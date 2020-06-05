@@ -1,10 +1,7 @@
 #ifndef SKYBOX_H
 #define SKYBOX_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <string>
+#include "../pch.h"
 
 //#include "../rendering/shader.h"
 

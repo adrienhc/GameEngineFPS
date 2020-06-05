@@ -1,13 +1,7 @@
 #ifndef ROOM_H
 #define ROOM_H
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-#include <string>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "../pch.h"
 
 #include "../geometry/cluster.h"
 #include "../geometry/target.h"
@@ -186,12 +180,13 @@ private:
 	std::string handleBoxObject(std::string update, glm::vec3 &player_min_bb, glm::vec3 &player_max_bb, glm::vec3 min_bb, glm::vec3 max_bb);
 
 	//MATH UTILS
+	//In what order we sort the Doors
 	static bool Vec4ComparisonFunction(const glm::vec4 &vecA, const glm::vec4 &vecB)
 	{
-	 return vecA[0]<vecB[0]
-	        || vecA[1]>vecB[1]
-	        || vecA[2]<vecB[2]
-	        || vecA[3]>vecB[3];
+	 return vecA[0]<vecB[0] //closer x 
+	        || vecA[1]>vecB[1] //wider x
+	        || vecA[2]<vecB[2] //lower y
+	        || vecA[3]>vecB[3]; //higher y
 	}
 
 };

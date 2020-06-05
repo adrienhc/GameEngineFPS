@@ -1,7 +1,7 @@
 #ifndef VERTEX_DATA_H
 #define VERTEX_DATA_H
 
-#include <glm/glm.hpp>
+#include "../../pch.h"
 
 struct VertexData
 {

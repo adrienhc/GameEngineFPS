@@ -1,19 +1,10 @@
 #ifndef LIGHT
 #define LIGHT
 
-#include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <vector>
-#include <string>
+#include "../pch.h"
 
 #include "../geometry/geometry.h" //FOR CUBEMAP BLURRING
-
 #include "shader.h"
-#include <glm/gtx/string_cast.hpp>
-
 #include "../config.h"
 
 #define RENDERER_TEXTURE_OFFSET 20

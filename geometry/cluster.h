@@ -1,19 +1,11 @@
 #ifndef CLUSTER_H
 #define CLUSTER_H
 
-#include <iostream>
-#include <string>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#include "../pch.h"
 
 #include "../scene/scenegraph.h"
 #include "../material_system/asset.h"
-
 #include "bounding_box.h"
-
-#include <glm/gtx/rotate_vector.hpp> //rotate vector to place BB correctly, For BB 
 
 struct asset
 {

@@ -181,9 +181,6 @@ bool Stairs::SetHeight(glm::vec3 player_position, glm::vec3 &player_min_bb, glm:
     float player_dist;
     float new_height;
 
-
-    //std::cout << "POS " << glm::to_string(player_position) << std::endl;
-
 	switch (orientation)
 	{
 		case 'E':
@@ -206,10 +203,9 @@ bool Stairs::SetHeight(glm::vec3 player_position, glm::vec3 &player_min_bb, glm:
 	
 	if(player_dist > 0.2f && new_height - player_min_bb.y > 0.3f)
         return false;
-    //std::cout << "NEW HEIGHT " << new_height << std::endl;
+
     if(player_min_bb.y < new_height)
     {
-    	// new_height += 0.1f;
     	player_min_bb = glm::vec3(player_min_bb.x, new_height, player_min_bb.z);
     	player_max_bb = glm::vec3(player_min_bb.x, new_height + player_height, player_max_bb.z);
     }

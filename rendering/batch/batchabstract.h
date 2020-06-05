@@ -1,14 +1,8 @@
 #ifndef BATCH_ABSTRACT_H
 #define BATCH_ABSTRACT_H
 
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <iostream>
-#include <cmath>
-#include <vector>
+#include "../../pch.h"
 #define GLM_FORCE_SWIZZLE 
-#include <glm/glm.hpp>
-#include <glm/gtx/string_cast.hpp>
 
 #include "VertexData.h"
 #include "../../geometry/geometry.h"

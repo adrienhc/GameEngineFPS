@@ -1,19 +1,12 @@
 #ifndef TARGET_H
 #define TARGET_H
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp> //rotate vector to place targets correctly
-
-#include <iostream>
-
+#include "../pch.h"
 #include "model.h"
 #include "cluster.h" //for BB class
 
 #include "../utils/collision.h"
 #include "../utils/outline.h"
-
 #include "../scene/scenegraph.h"
 
 class Target

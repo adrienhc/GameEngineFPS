@@ -1,11 +1,7 @@
 #ifndef TEXTURE
 #define TEXTURE
 
-#include <string>
-#include <iostream>
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <stdlib.h>
+#include "../pch.h"
 
 
 class Texture //Load a texture from an image myself!

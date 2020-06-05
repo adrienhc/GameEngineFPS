@@ -1,11 +1,11 @@
 #ifndef ABSTRACT_LAYER_H
 #define ABSTRACT_LAYER_H
 
+#include "../../pch.h"
 #include "../batch/batchabstract.h"
 #include "../shader.h"
 #include "../camera.h"
 #include "../group.h"
-#include <vector>
 #include "../../geometry/bounding_box.h"
 
 class AbstractLayer

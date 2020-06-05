@@ -1,13 +1,7 @@
 #ifndef MATERIAL
 #define MATERIAL
 
-#include<iostream>
-#include <string>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-
+#include "../pch.h"
 #include "texture.h"
 
 class Material

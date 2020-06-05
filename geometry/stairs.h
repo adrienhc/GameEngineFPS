@@ -1,13 +1,7 @@
 #ifndef STAIRS_H
 #define STAIRS_H
 
-#include <iostream>
-#include <cmath>
-#include <vector>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/rotate_vector.hpp> //rotate vector to place targets correctly
+#include "../pch.h"
 #include "../scene/scenegraph.h"
 #include "../material_system/asset.h"
 #include "cluster.h" //for BB class
